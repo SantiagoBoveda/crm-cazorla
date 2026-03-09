@@ -227,6 +227,15 @@ body.warm .table-wrap tr.total-row td{background:rgba(217,119,6,.07)}
 .tt-textarea:focus{border-color:var(--accent)}
 .tt-textarea::placeholder{color:var(--text3);font-style:italic}
 .tt-accion{color:var(--yellow)!important}
+
+/* ══ PREVISION EDITABLE CELLS ══ */
+.proy-input{width:52px;background:transparent;border:none;border-bottom:1px dashed transparent;color:var(--purple);font-size:12px;font-family:var(--mono);text-align:center;outline:none;padding:2px 0;transition:border-color .15s,background .15s;border-radius:4px 4px 0 0;cursor:pointer}
+.proy-input:hover{border-bottom-color:var(--border2);background:rgba(155,126,255,.06)}
+.proy-input:focus{border-bottom-color:var(--accent);background:rgba(79,110,247,.08);color:var(--text)}
+.proy-input::placeholder{color:var(--text3);font-size:10px}
+.proy-cell-wrap{display:flex;align-items:center;justify-content:center}
+.proy-saved-flash{animation:flashCell .4s ease}
+@keyframes flashCell{0%{background:rgba(16,185,129,.25)}100%{background:transparent}}
 .tt-save-hint{font-size:9px;color:var(--text3);font-family:var(--mono);text-align:right;margin-top:2px;opacity:0;transition:opacity .2s}
 .tt-save-hint.show{opacity:1}
 
@@ -595,7 +604,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
     </div>
     <div class="cards-grid" id="ventas-stats"></div>
     <div class="table-container">
-      <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Valor USD</th><th>Etapa</th><th></th></tr></thead>
+      <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Valor USD</th><th>Etapa</th><th>Previsión</th></tr></thead>
       <tbody id="ventas-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
     </div>
   </div>
@@ -785,7 +794,7 @@ function toggleTheme() {
 ═══════════════════════════════════════ */
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[]};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[]};
 let currentCRMModal=null;
 
 function getClientId(){ return document.getElementById('client-id-input').value.trim(); }
@@ -823,7 +832,8 @@ const HEADERS={
   Ventas:['ID','Fecha','Cliente','Producto','CantidadTon','ValorUSD','Etapa','Responsable','Notas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
   Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','Notas'],
-  Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones']
+  Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
+  Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11']
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
@@ -837,12 +847,14 @@ async function findOrCreateSpreadsheet(){
       const cd=await cr.json();spreadsheetId=cd.spreadsheetId;
       for(const[sheet,cols]of Object.entries(HEADERS)){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A1:append?valueInputOption=RAW`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[cols]})});}
     }
-    await loadAllData();renderDashboard();
+    await loadAllData();
+    loadPrevisionFromDB(); // ← populate PRODUCTS[*].data from Sheets
+    renderDashboard();
   }catch(e){console.error(e);renderDashboard();}
 }
 async function loadAllData(){
   if(!spreadsheetId||!token)return;
-  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
+  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad',Prevision:'prevision'};
   for(const[sheet,key]of Object.entries(map)){
     try{
       const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
@@ -914,7 +926,7 @@ function renderInventario(){
 }
 function renderVentas(){
   const tb=document.getElementById('ventas-tbody');if(!tb)return;
-  tb.innerHTML=DB.ventas.map(v=>`<tr><td>${v.Fecha||'—'}</td><td>${v.Cliente||'—'}</td><td>${v.Producto||'—'}</td><td>${v.CantidadTon||'—'}</td><td>$${(parseFloat(v.ValorUSD)||0).toLocaleString()}</td><td><span class="badge badge-blue">${v.Etapa||'—'}</span></td></tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';
+  tb.innerHTML=DB.ventas.map(v=>`<tr><td>${v.Fecha||'—'}</td><td>${v.Cliente||'—'}</td><td>${v.Producto||'—'}</td><td>${v.CantidadTon||'—'}</td><td>$${(parseFloat(v.ValorUSD)||0).toLocaleString()}</td><td><span class="badge badge-blue">${v.Etapa||'—'}</span></td><td><span class="badge badge-green" title="Incluido en Previsión">↗ Prev.</span></td></tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';
 }
 function filterTable(id,q){
   const rows=document.querySelectorAll('#'+id+' tbody tr');
@@ -950,12 +962,148 @@ async function saveModal(){
   const row={ID:genId()};
   HEADERS[sheet].forEach(h=>{const el=document.getElementById('f-'+h);if(el)row[h]=el.value;});
   if(spreadsheetId){await appendRow(sheet,row);await loadAllData();}
+  else {
+    // offline: push to DB directly
+    const keyMap={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
+    if(keyMap[sheet]) DB[keyMap[sheet]].push(row);
+  }
+  // ── POST-SAVE HOOKS ──
+  if(currentCRMModal==='cliente') onClienteSaved(row);
+  if(currentCRMModal==='venta')   onVentaSaved(row);
   closeCRMModal();renderDashboard();
+}
+
+/* ─── Hook: cliente nuevo → agregar a Previsión en todos los productos ─── */
+function onClienteSaved(row){
+  const empresa = (row.Empresa||'').trim();
+  const pais    = (row.Pais||'Argentina').trim();
+  if(!empresa) return;
+  PRODUCTS.forEach(prod=>{
+    if(!prod.data[pais]) prod.data[pais]=[];
+    const exists = prod.data[pais].find(c=>c.nombre===empresa);
+    if(!exists){
+      const entry={nombre:empresa,comercial:row.Contacto||'',fecha:row.UltimaInteraccion||new Date().toISOString().slice(0,10),proy:Array(12).fill(0),real:Array(12).fill(0)};
+      prod.data[pais].push(entry);
+    }
+  });
+  // persist prevision row for "aceitunas" (primary product) if sheets connected
+  syncPrevisionRow('aceitunas', pais, empresa);
+  // refresh prevision if visible
+  if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
+}
+
+/* ─── Hook: venta nueva → actualizar "real" en Previsión ─── */
+function onVentaSaved(row){
+  const cliente  = (row.Cliente||'').trim();
+  const producto = (row.Producto||'').trim();
+  const fecha    = row.Fecha||'';
+  const ton      = parseFloat(row.CantidadTon)||0;
+  if(!cliente||!fecha||!ton) return;
+
+  // Map product name → product id (fuzzy: lowercase contains)
+  const prod = PRODUCTS.find(p=>{
+    const lbl=p.label.toLowerCase();
+    const prd=producto.toLowerCase();
+    return prd&&(lbl.includes(prd)||prd.includes(lbl.split(' ')[0]));
+  }) || PRODUCTS[0];
+
+  // Map fecha → mes index (Dic=0 … Nov=11)
+  const mesIdx = fechaToMesIdx(fecha);
+  if(mesIdx<0) return;
+
+  // Find client across all paises
+  let found=false;
+  for(const [pais, clientes] of Object.entries(prod.data)){
+    const entry=clientes.find(c=>c.nombre.toLowerCase()===cliente.toLowerCase());
+    if(entry){
+      entry.real[mesIdx]=(entry.real[mesIdx]||0)+ton;
+      found=true;
+      break;
+    }
+  }
+  // If client not found in prevision, create it in 'Sin país asignado'
+  if(!found){
+    const pais='Sin país asignado';
+    if(!prod.data[pais]) prod.data[pais]=[];
+    prod.data[pais].push({nombre:cliente,comercial:'',fecha:fecha,proy:Array(12).fill(0),real:Array(12).fill(0).map((_,i)=>i===mesIdx?ton:0)});
+  }
+  if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
+}
+
+/* Fecha YYYY-MM-DD → índice de mes (Dic 2025=0, Ene 2026=1 ... Nov 2026=11) */
+function fechaToMesIdx(fecha){
+  if(!fecha) return -1;
+  const d=new Date(fecha+'T00:00:00');
+  const y=d.getFullYear(), m=d.getMonth(); // 0=Jan
+  if(y===2025&&m===11) return 0;  // Dic 2025
+  if(y===2026&&m>=0&&m<=10) return m+1; // Ene=1 … Nov=11
+  return -1;
+}
+
+/* Persistir fila en Google Sheets Prevision (proyecciones en 0 al crear) */
+async function syncPrevisionRow(productoId, pais, cliente){
+  if(!spreadsheetId||!token) return;
+  const row={ID:genId(),ProductoId:productoId,Pais:pais,Cliente:cliente,Comercial:'',FechaContacto:new Date().toISOString().slice(0,10)};
+  for(let i=0;i<12;i++) row['Proy'+i]=0;
+  await appendRow('Prevision',row);
+}
+
+/* Guardar proyección editada en Google Sheets */
+async function savePrevisionProySheet(productoId, pais, nombre, mesIdx, valor){
+  if(!spreadsheetId||!token) return;
+  // Find row in DB.prevision and update Proy{mesIdx}
+  const rec=DB.prevision.find(r=>r.ProductoId===productoId&&r.Pais===pais&&r.Cliente===nombre);
+  if(!rec) return;
+  const rowNum=DB.prevision.indexOf(rec)+2; // +1 header +1 1-indexed
+  const col=String.fromCharCode(65+HEADERS.Prevision.indexOf('Proy'+mesIdx));
+  try{
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Prevision!${col}${rowNum}?valueInputOption=RAW`,
+      {method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[[valor]]})});
+  }catch(e){console.warn('Sheet sync error',e);}
 }
 
 /* ═══════════════════════════════════════
    PREVISION DATA
 ═══════════════════════════════════════ */
+/* ─── Poblar PRODUCTS[*].data desde DB.prevision (cargado de Sheets) ─── */
+function loadPrevisionFromDB(){
+  if(!DB.prevision||!DB.prevision.length) return;
+  DB.prevision.forEach(row=>{
+    const prodId=row.ProductoId;
+    const pais=row.Pais||'Sin país asignado';
+    const nombre=row.Cliente;
+    if(!prodId||!nombre) return;
+    const prod=PRODUCTS.find(p=>p.id===prodId);
+    if(!prod) return;
+    if(!prod.data[pais]) prod.data[pais]=[];
+    const existing=prod.data[pais].find(c=>c.nombre===nombre);
+    const proy=Array.from({length:12},(_,i)=>parseFloat(row['Proy'+i])||0);
+    if(existing){
+      // merge: Sheets projection overrides hardcoded if non-zero
+      proy.forEach((v,i)=>{if(v>0) existing.proy[i]=v;});
+    } else {
+      prod.data[pais].push({nombre,comercial:row.Comercial||'',fecha:row.FechaContacto||'',proy,real:Array(12).fill(0)});
+    }
+  });
+  // Also populate real[] from DB.ventas
+  DB.ventas.forEach(v=>{
+    const ton=parseFloat(v.CantidadTon)||0;
+    if(!ton||!v.Cliente||!v.Fecha) return;
+    const mesIdx=fechaToMesIdx(v.Fecha);
+    if(mesIdx<0) return;
+    // apply to matching product
+    const prod=PRODUCTS.find(p=>{
+      const lbl=p.label.toLowerCase();
+      const prd=(v.Producto||'').toLowerCase();
+      return prd&&(lbl.includes(prd)||prd.includes(lbl.split(' ')[0]));
+    })||PRODUCTS[0];
+    for(const [pais,clientes] of Object.entries(prod.data)){
+      const entry=clientes.find(c=>c.nombre.toLowerCase()===v.Cliente.toLowerCase());
+      if(entry){entry.real[mesIdx]=(entry.real[mesIdx]||0)+ton;break;}
+    }
+  });
+}
+
 const MESES=['Dic','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'];
 const MES_ACT_IDX=2;
 const EXCEL_DATA={"Argentina":[{"nombre":"Alvarez","comercial":"Santiago","fecha":"2026-01-09","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Bordi","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Castell","comercial":"Santiago","fecha":"2025-12-21","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Don Salim","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"El Matucho","comercial":"Santiago","fecha":"2026-01-15","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,19.5,0,0,0,0,0,0,0,0,0,0]},{"nombre":"G&B","comercial":"Santiago","fecha":"2026-01-17","proy":[0,0,0,0,18,0,0,18,0,0,18,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"La Esquina De Las Aceitunas","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,1.8,0,0,1.8,0,0,1.8,0,0],"real":[0,1.08,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Laur","comercial":"Santiago","fecha":"2025-12-23","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Libanti","comercial":"Santiago","fecha":"2026-01-09","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Rossi","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Olifaza","comercial":"Santiago","fecha":"2026-01-28","proy":[0,0,0,25,25,25,25,25,25,25,25,25],"real":[0,18,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Sabores Pampeanos","comercial":"Santiago","fecha":"2026-01-26","proy":[0,0,0,2.7,0,2.7,0,2.7,0,2.7,0,2.7],"real":[0,2.7,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Vanoli","comercial":"Santiago","fecha":"2025-12-21","proy":[0,0,0,0,36,36,36,36,36,36,36,36],"real":[0,0,0,18,0,0,0,0,0,0,0,0]}],"Australia":[{"nombre":"Ausfresh","comercial":"Santiago","fecha":"2026-01-28","proy":[0,0,0,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2],"real":[28.8,0,0,54,0,0,0,0,0,0,0,0]}],"Brasil":[{"nombre":"Agro Aceitunera Do Brasil","comercial":"Santiago","fecha":"2026-01-24","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[18,18,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Diza","comercial":"Alfonso","fecha":"2026-03-03","proy":[0,0,0,360,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Horta Vitae","comercial":"Santiago","fecha":"2026-02-12","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,18,25,0,0,0,0,0,0,0,0,0]},{"nombre":"La Violetera","comercial":"Santiago","fecha":"2026-01-30","proy":[0,0,90,126,0,0,0,0,0,0,0,0],"real":[0,0,72,18,0,0,0,0,0,0,0,0]},{"nombre":"JBS","comercial":"Santiago","fecha":"2025-12-10","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Mezzani","comercial":"Santiago","fecha":"2025-11-26","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Predilecta","comercial":"Santiago","fecha":"2025-11-14","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Heinz","comercial":"Alfonso","fecha":"2026-03-03","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]}],"Paraguay":[{"nombre":"Downes","comercial":"Santiago","fecha":"2026-01-26","proy":[0,0,36,36,36,36,36,36,36,36,36,36],"real":[0,72,0,0,0,0,0,0,0,0,0,0]}],"Uruguay":[{"nombre":"Pontevedra","comercial":"Santiago","fecha":"2026-01-27","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Pontyn","comercial":"Santiago","fecha":"2025-10-09","proy":[0,0,0,0,18,18,18,18,18,18,18,18],"real":[0,0,0,0,0,0,0,0,0,0,0,0]}]};
@@ -1105,7 +1253,9 @@ function renderTable(){
         const pv=c.proy[m],rv=c.real[m],fut=m>MES_ACT_IDX;
         gP[m]+=pv;gtP[m]+=pv;gR[m]+=rv;gtR[m]+=rv;
         const pvS=fmt(pv),rvS=fmt(rv);
-        html+=`<td class="c-proy${pvS?' has-val':''}">${pvS||'<span class="dash">—</span>'}</td>`;
+        // EDITABLE projection cell
+        const inputId=`pi_${currentProductId}_${pais.replace(/\s/g,'_')}_${c.nombre.replace(/\s/g,'_').replace(/['"]/g,'')}_${m}`;
+        html+=`<td class="c-proy${pvS?' has-val':''}"><div class="proy-cell-wrap"><input id="${inputId}" class="proy-input" type="number" min="0" step="0.1" value="${pv||''}" placeholder="—" title="Editar proyección ${MESES[m]}" onchange="onProyChange(this,'${safePais}','${safeNombre}',${m})" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()"></div></td>`;
         let rc='c-real';
         if(fut)rc+=' future';else if(!rvS)rc+=' empty';else if(rv>=pv&&pv>0)rc+=' over';else if(rv>=pv*0.85&&pv>0)rc+=' near';else if(pv===0&&rv>0)rc+=' over';else rc+=' under';
         html+=`<td class="${rc}">${fut?'<span class="dash">—</span>':(rvS||'<span class="dash">—</span>')}</td>`;
@@ -1125,6 +1275,56 @@ function renderTable(){
 }
 document.addEventListener('click',e=>{const btn=document.getElementById('emoji-btn'),picker=document.getElementById('emoji-picker');if(btn&&picker&&!btn.contains(e.target)&&!picker.contains(e.target))picker.classList.remove('open');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeProdModal();closeCRMModal();}});
+
+/* ─── Recalcular subtotales sin re-renderizar filas (preserva inputs) ─── */
+function recalcTotals(){
+  const data=currentProduct().data;
+  const cf=document.getElementById('country-filter').value;
+  const com=document.getElementById('comercial-filter').value;
+  let gtP=Array(12).fill(0),gtR=Array(12).fill(0);
+  for(const[pais,clientes] of Object.entries(data)){
+    if(cf!=='all'&&pais!==cf) continue;
+    const filtered=clientes.filter(c=>{if(com!=='all'&&c.comercial!==com)return false;if(hideEmpty&&!c.proy.some(v=>v>0)&&!c.real.some(v=>v>0))return false;return true;});
+    if(!filtered.length) continue;
+    let gP=Array(12).fill(0),gR=Array(12).fill(0);
+    for(const c of filtered){for(let m=0;m<12;m++){gP[m]+=c.proy[m];gR[m]+=c.real[m];gtP[m]+=c.proy[m];gtR[m]+=c.real[m];}}
+    // update subtotal badge in the DOM (subtotal rows have class subtotal-row)
+    const subRows=[...document.querySelectorAll('.subtotal-row')];
+    const subRow=subRows.find(r=>r.querySelector('td')&&r.querySelector('td').textContent.includes(pais));
+    if(subRow){
+      const gTP=gP.reduce((a,b)=>a+b,0),gTR=gR.reduce((a,b)=>a+b,0);
+      const gC=gTP>0?Math.round(gTR/gTP*100):null,gCC=gC===null?'none':gC>=100?'high':gC>=75?'mid':'low';
+      const badge=subRow.querySelector('.cumpl-badge');
+      if(badge){badge.className='cumpl-badge '+gCC;badge.textContent=gC!==null?gC+'%':'—';}
+    }
+  }
+  // update total row
+  const totalRow=document.querySelector('.total-row');
+  if(totalRow){
+    const gtTP=gtP.reduce((a,b)=>a+b,0),gtTR=gtR.reduce((a,b)=>a+b,0);
+    const gtC=gtTP>0?Math.round(gtTR/gtTP*100):null,gtCC=gtC===null?'none':gtC>=100?'high':gtC>=75?'mid':'low';
+    const badge=totalRow.querySelector('.cumpl-badge');
+    if(badge){badge.className='cumpl-badge '+gtCC;badge.textContent=gtC!==null?gtC+'%':'—';}
+  }
+}
+function onProyChange(input, pais, nombre, mesIdx){
+  const val = parseFloat(input.value)||0;
+  const prod = currentProduct();
+  if(!prod.data[pais]) return;
+  const entry = prod.data[pais].find(c=>c.nombre===nombre);
+  if(!entry) return;
+  entry.proy[mesIdx] = val;
+  // visual flash
+  const td = input.closest('td');
+  if(td){td.classList.remove('proy-saved-flash');void td.offsetWidth;td.classList.add('proy-saved-flash');}
+  // update totals row without full re-render (re-render flashes inputs)
+  recalcTotals();
+  // persist to Sheets (debounced)
+  clearTimeout(input._saveTimer);
+  input._saveTimer = setTimeout(()=>{
+    savePrevisionProySheet(currentProductId, pais, nombre, mesIdx, val);
+  }, 800);
+}
 
 /* ═══════════════════════════════════════
    EXPORT EXCEL
