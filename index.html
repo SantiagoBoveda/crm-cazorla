@@ -10,51 +10,59 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
-/* ══ TEMA FRIO (default) ══ */
+/* ══ TEMA CLARO BORRAVINO (default) ══ */
 :root{
+  --bg:#f5f4f2;--surface:#ffffff;--surface2:#f0eeed;--surface3:#ede9e8;
+  --accent:#7b1d3a;--accent2:#9e2a4a;--green:#16a34a;--yellow:#b45309;
+  --red:#dc2626;--text:#1a1014;--muted:#7a6272;--border:#ddd0d5;
+  --border2:#c9b8bf;--text2:#5c4455;--text3:#a0889a;
+  --purple:#7b1d3a;--radius:12px;
+  --mono:'DM Mono',monospace;--sans:'Segoe UI',sans-serif;
+  --sidebar-bg:#2c0d1c;
+  --sidebar-text:#f0e4ea;--sidebar-muted:#b08090;--sidebar-border:#4a1a2e;
+  --sidebar-active-bg:#4a1a2e;--sidebar-active-text:#f8c8d8;
+}
+/* ══ TEMA OSCURO (toggle) ══ */
+body.warm{
   --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--surface3:#1f2435;
-  --accent:#4f6ef7;--accent2:#7c3aed;--green:#10b981;--yellow:#f59e0b;
+  --accent:#c9536e;--accent2:#a8334f;--green:#10b981;--yellow:#f59e0b;
   --red:#ef4444;--text:#e2e8f0;--muted:#64748b;--border:#2d3148;
   --border2:#2e3450;--text2:#8892b0;--text3:#4a5270;
-  --purple:#9b7eff;--radius:12px;
-  --mono:'DM Mono',monospace;--sans:'Segoe UI',sans-serif;
-  --sidebar-bg:var(--surface);
-}
-/* ══ TEMA CÁLIDO ══ */
-body.warm{
-  --bg:#1a1208;--surface:#231a0e;--surface2:#2e2114;--surface3:#261c10;
-  --accent:#d97706;--accent2:#b45309;--green:#65a30d;--yellow:#f59e0b;
-  --red:#dc2626;--text:#fdf4e3;--muted:#92806a;--border:#3d2e1a;
-  --border2:#4a3820;--text2:#c4a882;--text3:#7a6248;
-  --purple:#c084fc;--sidebar-bg:#1e1609;
+  --purple:#c084fc;--sidebar-bg:#1e0a14;
+  --sidebar-text:#f0e4ea;--sidebar-muted:#8a6070;--sidebar-border:#3a1225;
+  --sidebar-active-bg:#3a1225;--sidebar-active-text:#f8c8d8;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;min-height:100vh;transition:background .3s,color .3s}
 
 /* ══ SIDEBAR ══ */
-.sidebar{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:fixed;height:100vh;z-index:100;transition:background .3s,border-color .3s}
-.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
-.logo h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.logo p{font-size:11px;color:var(--muted);margin-top:2px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;font-size:13px;color:var(--muted);border-left:3px solid transparent}
-.nav-item:hover{background:var(--surface2);color:var(--text)}
-.nav-item.active{background:var(--surface2);color:var(--accent);border-left-color:var(--accent)}
+.sidebar{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;padding:20px 0;position:fixed;height:100vh;z-index:100;transition:background .3s,border-color .3s}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--sidebar-border);margin-bottom:16px}
+.logo h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,#f8c8d8,#e88aa8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo p{font-size:11px;color:var(--sidebar-muted);margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;font-size:13px;color:var(--sidebar-muted);border-left:3px solid transparent}
+.nav-item:hover{background:var(--sidebar-active-bg);color:var(--sidebar-text)}
+.nav-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);border-left-color:#e88aa8}
 .nav-item .icon{font-size:16px;width:20px;text-align:center}
-.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--sidebar-border)}
 
 /* ══ THEME TOGGLE ══ */
-.theme-toggle{display:flex;align-items:center;gap:8px;padding:7px 12px;margin:0 12px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:11px;color:var(--text2);transition:all .2s;user-select:none}
-.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
-.theme-track{width:28px;height:15px;border-radius:8px;background:var(--border2);position:relative;transition:background .3s;flex-shrink:0}
+.theme-toggle{display:flex;align-items:center;gap:8px;padding:7px 12px;margin:0 12px 10px;border-radius:8px;border:1px solid var(--sidebar-border);background:var(--sidebar-active-bg);cursor:pointer;font-size:11px;color:var(--sidebar-muted);transition:all .2s;user-select:none}
+.theme-toggle:hover{border-color:#e88aa8;color:#f8c8d8}
+.theme-track{width:28px;height:15px;border-radius:8px;background:var(--sidebar-border);position:relative;transition:background .3s;flex-shrink:0}
 body.warm .theme-track{background:var(--accent)}
 .theme-thumb{width:11px;height:11px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
 body.warm .theme-thumb{left:15px}
+.user-chip{display:flex;align-items:center;gap:8px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+#user-name{color:var(--sidebar-text);font-weight:600}
+#sync-status-text{color:var(--sidebar-muted);font-size:11px}
 
 /* ══ MAIN ══ */
 .main{margin-left:220px;flex:1;padding:28px;min-height:100vh}
 .section{display:none}.section.active{display:block}
 .page-header{margin-bottom:24px}
-.page-header h1{font-size:22px;font-weight:700}
+.page-header h1{font-size:22px;font-weight:700;color:var(--accent)}
 .page-header p{color:var(--muted);font-size:13px;margin-top:4px}
 
 /* ══ AUTH SCREEN ══ */
@@ -72,27 +80,29 @@ body.warm .theme-thumb{left:15px}
 
 /* ══ CARDS / TABLES ══ */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 4px rgba(123,29,58,.06)}
 .stat-card .label{font-size:12px;color:var(--muted);margin-bottom:8px}
-.stat-card .value{font-size:28px;font-weight:700}
+.stat-card .value{font-size:28px;font-weight:700;color:var(--accent)}
 .stat-card .sub{font-size:12px;color:var(--green);margin-top:4px}
-.table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 4px rgba(123,29,58,.06)}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
-.table-header h3{font-size:14px;font-weight:600}
+.table-header h3{font-size:14px;font-weight:600;color:var(--accent)}
 table{width:100%;border-collapse:collapse}
-th{background:var(--surface2);padding:10px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-td{padding:12px 16px;font-size:13px;border-top:1px solid var(--border)}
-tr:hover td{background:var(--surface2)}
+th{background:var(--surface2);padding:10px 16px;text-align:left;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+td{padding:12px 16px;font-size:13px;border-top:1px solid var(--border);color:var(--text)}
+tr:hover td{background:rgba(123,29,58,.04)}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.badge-green{background:rgba(16,185,129,.15);color:var(--green)}
-.badge-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
-.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
-.badge-blue{background:rgba(79,110,247,.15);color:var(--accent)}
-.badge-purple{background:rgba(124,58,237,.15);color:var(--accent2)}
+.badge-green{background:rgba(22,163,74,.12);color:#15803d}
+.badge-yellow{background:rgba(180,83,9,.12);color:#b45309}
+.badge-red{background:rgba(220,38,38,.12);color:#dc2626}
+.badge-blue{background:rgba(123,29,58,.1);color:var(--accent2)}
+.badge-purple{background:rgba(123,29,58,.12);color:var(--accent)}
 .btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
 .btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:var(--accent2)}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 .search-bar{position:relative}
 .search-bar input{padding:8px 12px 8px 34px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;width:220px}
 .search-bar::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px}
@@ -115,16 +125,20 @@ tr:hover td{background:var(--surface2)}
 .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
 
 /* ══ MAIN MODAL (CRM base) ══ */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(44,13,28,.5);z-index:500;display:none;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
-.modal h3{font-size:16px;font-weight:700;margin-bottom:20px}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(44,13,28,.18)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:20px;color:var(--accent)}
 .form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--accent)}
 .form-group textarea{resize:vertical;min-height:80px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+/* Custom select with "add new" option */
+.smart-select-wrap{position:relative}
+.add-new-option{color:var(--accent);font-style:italic;font-weight:600}
 
 /* ══ VENTAS PREVISIÓN ══ */
 .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
@@ -168,9 +182,9 @@ body.warm .tab-btn.active{background:rgba(217,119,6,.12);border-color:var(--acce
 .group-row td{background:var(--surface2);padding:7px 16px;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);border-top:1px solid var(--border);font-family:var(--sans);font-weight:700}
 .table-wrap thead tr:first-child th{background:var(--surface3);padding:11px 8px;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;text-align:center;border-bottom:1px solid var(--border);font-family:var(--sans);position:sticky;top:0;z-index:10}
 .table-wrap thead tr:first-child th:first-child{text-align:left;padding-left:16px;min-width:180px}
-.table-wrap thead tr:nth-child(2) th{background:#161926;padding:5px 6px;font-size:9px;color:var(--text3);text-align:center;border-bottom:2px solid var(--border2);position:sticky;top:33px;z-index:10}
+.table-wrap thead tr:nth-child(2) th{background:#f5eef1;padding:5px 6px;font-size:9px;color:var(--text3);text-align:center;border-bottom:2px solid var(--border2);position:sticky;top:33px;z-index:10}
 body.warm .table-wrap thead tr:nth-child(2) th{background:#1e1508}
-.table-wrap thead tr:nth-child(2) th.proy-h{color:var(--purple)}
+.table-wrap thead tr:nth-child(2) th.proy-h{color:var(--accent)}
 .table-wrap thead tr:nth-child(2) th.real-h{color:var(--green)}
 .table-wrap td{padding:8px 6px;font-size:12px;text-align:center;border-top:1px solid rgba(37,42,61,.7);white-space:nowrap}
 .table-wrap td:first-child{text-align:left;padding-left:16px;font-family:var(--sans);font-size:12px;font-weight:600;min-width:180px;max-width:220px}
@@ -189,9 +203,9 @@ body.warm .table-wrap tr:hover td{background:rgba(217,119,6,.04)}
 .cumpl-badge.mid{background:rgba(245,183,49,.15);color:var(--yellow)}
 .cumpl-badge.low{background:rgba(242,87,87,.15);color:var(--red)}
 .cumpl-badge.none{background:rgba(74,82,112,.2);color:var(--text3)}
-.table-wrap tr.subtotal-row td{background:rgba(30,35,58,.6);font-weight:700;border-top:1px solid var(--border2);font-size:11px;color:var(--text2)}
-.table-wrap tr.subtotal-row td:first-child{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
-.table-wrap tr.total-row td{background:rgba(79,110,247,.07);font-weight:800;border-top:2px solid var(--border2);color:var(--accent2);font-size:12px}
+.table-wrap tr.subtotal-row td{background:rgba(123,29,58,.05);font-weight:700;border-top:1px solid var(--border2);font-size:11px;color:var(--text2)}
+.table-wrap tr.subtotal-row td:first-child{color:var(--accent);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.table-wrap tr.total-row td{background:rgba(123,29,58,.08);font-weight:800;border-top:2px solid var(--border2);color:var(--accent);font-size:12px}
 body.warm .table-wrap tr.total-row td{background:rgba(217,119,6,.07)}
 .table-wrap tr.total-row td:first-child{color:var(--accent);font-family:var(--sans)}
 .btn-export{padding:8px 18px;background:rgba(0,201,141,.12);border:1px solid rgba(0,201,141,.35);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:7px}
@@ -204,29 +218,29 @@ body.warm .table-wrap tr.total-row td{background:rgba(217,119,6,.07)}
 
 /* ══ TOOLTIP ══ */
 .client-cell{position:relative}
-.client-name-text{display:inline-block;border-bottom:1px dashed var(--border2);cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.client-name-text{display:inline-block;border-bottom:1px dashed var(--border2);cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);font-weight:600}
 .client-cell:hover .tooltip{opacity:1;visibility:visible;transform:translateY(0);pointer-events:all}
-.tooltip{position:absolute;left:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px;width:320px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .18s ease;z-index:200;box-shadow:0 16px 48px rgba(0,0,0,.6);pointer-events:none;font-family:var(--sans)}
+.tooltip{position:absolute;left:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:20px;width:400px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .18s ease;z-index:200;box-shadow:0 16px 48px rgba(44,13,28,.18);pointer-events:none;font-family:var(--sans)}
 .tooltip::before{content:'';position:absolute;top:-5px;left:18px;width:9px;height:9px;background:var(--surface);border-left:1px solid var(--border2);border-top:1px solid var(--border2);transform:rotate(45deg)}
 .tt-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.tt-avatar{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
-.tt-name{font-size:13px;font-weight:700;color:var(--text)}
-.tt-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.tt-avatar{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.tt-name{font-size:13px;font-weight:700;color:var(--accent)}
+.tt-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .tt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tt-item{display:flex;flex-direction:column;gap:3px}
 .tt-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)}
 .tt-val{font-size:12px;color:var(--text);font-family:var(--mono)}
 .tt-val.green{color:var(--green);font-weight:700}
-.tt-val.purple{color:var(--purple)}
+.tt-val.purple{color:var(--accent)}
 .tt-divider{border:none;border-top:1px solid var(--border);margin:12px 0 10px}
-.tt-edit-section{display:flex;flex-direction:column;gap:8px}
-.tt-edit-item{display:flex;flex-direction:column;gap:4px}
-.tt-edit-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);display:flex;align-items:center;gap:5px}
-.tt-edit-label span.icon{font-size:10px}
-.tt-textarea{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:11px;font-family:var(--mono);padding:7px 10px;resize:none;outline:none;line-height:1.5;transition:border-color .15s;min-height:44px;pointer-events:all!important}
+.tt-edit-section{display:flex;flex-direction:column;gap:10px}
+.tt-edit-item{display:flex;flex-direction:column;gap:5px}
+.tt-edit-label{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);display:flex;align-items:center;gap:5px;font-weight:700}
+.tt-edit-label span.icon{font-size:11px}
+.tt-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono);padding:9px 12px;resize:vertical;outline:none;line-height:1.6;transition:border-color .15s;min-height:60px;pointer-events:all!important}
 .tt-textarea:focus{border-color:var(--accent)}
 .tt-textarea::placeholder{color:var(--text3);font-style:italic}
-.tt-accion{color:var(--yellow)!important}
+.tt-accion{color:var(--yellow)!important;border-color:rgba(180,83,9,.3)!important}
 
 /* ══ PREVISION EDITABLE CELLS ══ */
 .proy-input{width:52px;background:transparent;border:none;border-bottom:1px dashed transparent;color:var(--purple);font-size:12px;font-family:var(--mono);text-align:center;outline:none;padding:2px 0;transition:border-color .15s,background .15s;border-radius:4px 4px 0 0;cursor:pointer}
@@ -502,7 +516,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
   <div class="nav-item" onclick="showSection('inventario',this)"><span class="icon">📦</span><span>Inventario</span></div>
   <div class="nav-item" onclick="showSection('ventas',this)"><span class="icon">💰</span><span>Ventas</span></div>
-  <div class="nav-item" onclick="showSection('prevision',this)"><span class="icon">📈</span><span>Previsión 2026</span></div>
+  <div class="nav-item" onclick="showSection('prevision',this)"><span class="icon">📈</span><span>Previsión</span></div>
   <div class="nav-item" onclick="showSection('proveedores',this)"><span class="icon">🚢</span><span>Proveedores</span></div>
   <div class="nav-item" onclick="showSection('reclamos',this)"><span class="icon">🚨</span><span>Reclamos</span></div>
   <div class="nav-item" onclick="showSection('facturacion',this)"><span class="icon">🧾</span><span>Facturación</span></div>
@@ -511,7 +525,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   <!-- THEME TOGGLE -->
   <div class="theme-toggle" onclick="toggleTheme()" title="Cambiar entre tema frío y cálido">
     <div class="theme-track"><div class="theme-thumb"></div></div>
-    <span id="theme-label">Tema frío</span>
+    <span id="theme-label">Modo oscuro</span>
   </div>
 
   <div class="sidebar-footer">
@@ -609,17 +623,26 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
     </div>
   </div>
 
-  <!-- PREVISIÓN 2026 -->
+  <!-- PREVISIÓN -->
   <div class="section" id="section-prevision">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
-      <div>
-        <h1 id="page-title">🫒 Previsión de Ventas 2026</h1>
-        <p id="subtitle" style="color:var(--muted);font-size:13px;margin-top:4px;font-family:var(--mono)">Aceitunas en granel · Dic 2025 → Nov 2026 · Toneladas</p>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div>
+          <h1 id="page-title">🫒 Previsión de Ventas</h1>
+          <p id="subtitle" style="color:var(--muted);font-size:13px;margin-top:4px;font-family:var(--mono)">Aceitunas en granel · Dic 2025 → Nov 2026 · Toneladas</p>
+        </div>
+        <select class="filter-select" id="year-filter" onchange="onYearChange(this.value)" style="font-weight:700;color:var(--accent);border-color:var(--accent);font-size:14px;padding:6px 14px">
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="addPrevisionYear()" title="Agregar nuevo año" style="border-color:var(--accent);color:var(--accent)">＋ Año</button>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:#b3a7e8"></div>Proyectado</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#00c98d"></div>Realizado</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Proyectado</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#16a34a"></div>Realizado</div>
         </div>
         <button class="btn-export" id="btn-export" onclick="exportExcel()">
           <span class="export-icon">📥</span>
@@ -726,7 +749,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
     </div>
     <div class="table-container">
       <table id="facturacion-table">
-        <thead><tr><th>Nº Factura</th><th>Cliente</th><th>País</th><th>Ref. OC</th><th>Producto</th><th>Cantidad</th><th>Monto</th><th>Cond. pago</th><th>Estado</th><th>Emisión</th><th>Vencimiento</th><th></th></tr></thead>
+        <thead><tr><th>Nº Factura</th><th>Cliente</th><th>País</th><th>Ref. OC</th><th>Producto</th><th>Cantidad</th><th>Monto</th><th>Cond. pago</th><th>Estado</th><th>Emisión</th><th>Vencimiento</th><th>Nota Crédito</th><th>Nota Débito</th><th></th></tr></thead>
         <tbody id="facturacion-tbody"></tbody>
       </table>
     </div>
@@ -777,7 +800,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 ═══════════════════════════════════════ */
 function toggleTheme() {
   const isWarm = document.body.classList.toggle('warm');
-  document.getElementById('theme-label').textContent = isWarm ? 'Tema cálido' : 'Tema frío';
+  document.getElementById('theme-label').textContent = isWarm ? 'Modo claro' : 'Modo oscuro';
   localStorage.setItem('crm-theme', isWarm ? 'warm' : 'cool');
 }
 // Restore saved theme
@@ -829,9 +852,9 @@ const HEADERS={
   Proyectos:['ID','Nombre','Cliente','Producto','ValorUSD','Etapa','Responsable','FechaInicio','FechaEstimada','Notas'],
   Tareas:['ID','Titulo','Descripcion','Asignado','Prioridad','Estado','FechaVenc'],
   Inventario:['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],
-  Ventas:['ID','Fecha','Cliente','Producto','CantidadTon','ValorUSD','Etapa','Responsable','Notas'],
+  Ventas:['ID','Fecha','FechaCarga','NroOrden','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','Etapa','Responsable','Notas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
-  Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','Notas'],
+  Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'],
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11']
 };
@@ -937,23 +960,25 @@ function filterTable(id,q){
    CRM BASE MODAL (renamed to avoid conflict)
 ═══════════════════════════════════════ */
 const FORMS={
-  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa</label><input id="f-Empresa"></div><div class="form-group"><label>Contacto</label><input id="f-Contacto"></div></div><div class="form-row"><div class="form-group"><label>Email</label><input id="f-Email" type="email"></div><div class="form-group"><label>Teléfono</label><input id="f-Telefono"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Rubro</label><input id="f-Rubro"></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><input id="f-Asignado"></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
-  producto:{title:'Nuevo producto',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Categoría</label><input id="f-Categoria"></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
-  venta:{title:'Nueva venta',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-CantidadTon" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa</label><input id="f-Empresa"></div><div class="form-group"><label>Contacto</label><input id="f-Contacto"></div></div><div class="form-row"><div class="form-group"><label>Email</label><input id="f-Email" type="email"></div><div class="form-group"><label>Teléfono</label><input id="f-Telefono"></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" onchange="handleAddNew(this,\"País\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Rubro</label><input id="f-Rubro"></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" onchange="handleAddNew(this,\"Cliente\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" onchange="handleAddNew(this,\"Producto\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" onchange="handleAddNew(this,\"Responsable\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" onchange="handleAddNew(this,\"Persona\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
+  producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" onchange="handleAddNew(this,\"Producto\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" onchange="handleAddNew(this,\"Categoría\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
+  venta:{title:'Nueva venta',fields:'<div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" onchange="handleAddNew(this,\"Cliente\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" onchange="handleAddNew(this,\"Producto\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-CantidadTon" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago"><option>Anticipado</option><option>30 días</option><option>60 días</option><option>90 días</option><option>120 días</option><option>150 días</option><option>180 días</option><option>Crédito desde España</option></select></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" onchange="handleAddNew(this,\"Responsable\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  factura:{title:'Nueva factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
 };
 const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas',calidad:'Calidad'};
 
 function openCRMModal(type){
   currentCRMModal=type;
+  _editingFacturaId=null;
   const cfg=FORMS[type];
   document.getElementById('modal-title').textContent=cfg.title;
   document.getElementById('modal-body').innerHTML=cfg.fields;
   document.getElementById('main-modal').classList.add('open');
+  populateFormSelects(type);
 }
 function closeCRMModal(){document.getElementById('main-modal').classList.remove('open');currentCRMModal=null;}
 async function saveModal(){
@@ -1063,8 +1088,167 @@ async function savePrevisionProySheet(productoId, pais, nombre, mesIdx, valor){
 }
 
 /* ═══════════════════════════════════════
-   PREVISION DATA
+   SMART SELECT LISTS (listas dinámicas con "Nuevo...")
 ═══════════════════════════════════════ */
+const SMART_LISTS = {
+  País: ['Argentina','Australia','Brasil','Chile','Colombia','España','México','Paraguay','Perú','Uruguay','Francia','Italia','Portugal'],
+  Cliente: [],   // se puebla desde DB.clientes
+  Producto: ['Aceitunas Negras','Aceitunas Verdes','Pasta de Tomate','Aceite de Oliva'],
+  Categoría: ['Aceitunas','Tomate','Aceite','Granos','Frutas','Conservas','Logística','Otro'],
+  Responsable: ['Santiago','Alfonso'],
+  Persona: ['Santiago','Alfonso'],
+};
+
+/* Pobla un <select id> con los items de la lista + opción "Nuevo..." */
+function populateSmartSelect(selectId, listKey, currentVal=''){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  let items = [...(SMART_LISTS[listKey]||[])];
+  // enrich from DB
+  if(listKey==='Cliente') items = [...new Set([...items, ...DB.clientes.map(c=>c.Empresa).filter(Boolean)])];
+  if(listKey==='Producto') items = [...new Set([...items, ...DB.inventario.map(i=>i.Producto).filter(Boolean), ...PRODUCTS.map(p=>p.label)])];
+  sel.innerHTML = `<option value="">— Seleccionar —</option>`
+    + items.map(i=>`<option value="${i}" ${i===currentVal?'selected':''}>${i}</option>`).join('')
+    + `<option value="__new__" class="add-new-option">＋ Agregar nuevo ${listKey}...</option>`;
+}
+
+/* Handler llamado cuando se selecciona "Agregar nuevo..." */
+function handleAddNew(sel, listKey){
+  if(sel.value !== '__new__') return;
+  const nuevo = prompt(`Escribí el nuevo ${listKey}:`);
+  if(nuevo && nuevo.trim()){
+    const val = nuevo.trim();
+    if(!SMART_LISTS[listKey]) SMART_LISTS[listKey]=[];
+    if(!SMART_LISTS[listKey].includes(val)) SMART_LISTS[listKey].push(val);
+    // rebuild options and select the new value
+    populateSmartSelect(sel.id, listKey, val);
+  } else {
+    sel.value='';
+  }
+}
+
+/* Después de inyectar el form HTML, poblar los selects */
+function populateFormSelects(type){
+  if(type==='cliente') populateSmartSelect('f-Pais','País');
+  if(type==='proyecto'){populateSmartSelect('f-Cliente','Cliente');populateSmartSelect('f-Producto','Producto');populateSmartSelect('f-Responsable','Responsable');}
+  if(type==='tarea') populateSmartSelect('f-Asignado','Persona');
+  if(type==='producto'){populateSmartSelect('f-Producto','Producto');populateSmartSelect('f-Categoria','Categoría');}
+  if(type==='venta'){populateSmartSelect('f-Cliente','Cliente');populateSmartSelect('f-Producto','Producto');populateSmartSelect('f-Responsable','Responsable');}
+}
+
+/* ═══════════════════════════════════════
+   PREVISIÓN — GESTIÓN DE AÑOS
+═══════════════════════════════════════ */
+const PREVISION_YEARS = {2026: null}; // year → data snapshot (null = use current PRODUCTS data)
+
+function onYearChange(year){
+  year = parseInt(year);
+  // If year doesn't exist yet, init it
+  if(!PREVISION_YEARS[year]){
+    PREVISION_YEARS[year] = PRODUCTS.map(p=>({...p, data: JSON.parse(JSON.stringify(p.data))}));
+  }
+  // Update header label
+  const first = Object.keys(PREVISION_YEARS).sort()[0];
+  document.getElementById('page-title').textContent = `🫒 Previsión de Ventas ${year}`;
+  renderAll();
+}
+
+function addPrevisionYear(){
+  const sel = document.getElementById('year-filter');
+  const years = Array.from(sel.options).map(o=>parseInt(o.value));
+  const newYear = Math.max(...years)+1;
+  const opt = document.createElement('option');
+  opt.value = newYear; opt.textContent = newYear;
+  sel.appendChild(opt);
+  sel.value = newYear;
+  PREVISION_YEARS[newYear] = null;
+  onYearChange(newYear);
+}
+
+/* ═══════════════════════════════════════
+   FACTURA AUTO-GENERADA DESDE VENTA
+═══════════════════════════════════════ */
+let _editingFacturaId = null;
+
+function autoCreateFactura(ventaRow){
+  const numFactura = 'FAC-' + new Date().getFullYear() + '-' + String(DB.facturas.length+1).padStart(3,'0');
+  const factura = {
+    ID: genId(),
+    NumFactura: numFactura,
+    Cliente: ventaRow.Cliente||'',
+    Pais: (DB.clientes.find(c=>c.Empresa===ventaRow.Cliente)||{}).Pais||'',
+    NroPedido: ventaRow.NroOrden||'',
+    Producto: ventaRow.Producto||'',
+    Cantidad: ventaRow.CantidadTon||'',
+    Monto: ventaRow.ValorUSD||'',
+    Moneda: 'USD',
+    CondPago: ventaRow.FormaPago||'',
+    Estado: 'Emitida',
+    FechaEmision: ventaRow.Fecha||new Date().toISOString().slice(0,10),
+    FechaVencimiento: '',
+    NotaCredito: '',
+    NotaDebito: '',
+    Notas: `Generada automáticamente desde venta ${ventaRow.NroOrden||ventaRow.ID}`
+  };
+  DB.facturas.push(factura);
+  if(spreadsheetId) appendRow('Facturas', factura);
+  return factura;
+}
+
+function openEditFactura(facturaId){
+  const f = DB.facturas.find(x=>x.ID===facturaId);
+  if(!f) return;
+  _editingFacturaId = facturaId;
+  currentCRMModal = 'factura';
+  const cfg = FORMS['factura'];
+  document.getElementById('modal-title').textContent = 'Editar Factura';
+  document.getElementById('modal-body').innerHTML = cfg.fields;
+  // fill values
+  ['NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'].forEach(k=>{
+    const el=document.getElementById('f-'+k);
+    if(el) el.value=f[k]||'';
+  });
+  document.getElementById('main-modal').classList.add('open');
+}
+
+/* Override saveModal to handle edits */
+const _origSaveModal = saveModal;
+async function saveModal(){
+  if(currentCRMModal==='factura' && _editingFacturaId){
+    // UPDATE existing factura
+    const f = DB.facturas.find(x=>x.ID===_editingFacturaId);
+    if(f){
+      HEADERS['Facturas'].forEach(h=>{const el=document.getElementById('f-'+h);if(el)f[h]=el.value;});
+      if(spreadsheetId){
+        // full rewrite of row - find row number
+        const rowNum = DB.facturas.indexOf(f)+2;
+        const values = [HEADERS['Facturas'].map(h=>f[h]||'')];
+        try{await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Facturas!A${rowNum}:Z${rowNum}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})});}catch(e){console.warn(e);}
+      }
+    }
+    _editingFacturaId = null;
+    closeCRMModal();
+    renderFacturacion();
+    return;
+  }
+  _editingFacturaId = null;
+  // original flow
+  if(!currentCRMModal)return;
+  const sheet=MODAL_SHEET[currentCRMModal];
+  const row={ID:genId()};
+  HEADERS[sheet].forEach(h=>{const el=document.getElementById('f-'+h);if(el)row[h]=el.value;});
+  if(spreadsheetId){await appendRow(sheet,row);await loadAllData();}
+  else {
+    const keyMap={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
+    if(keyMap[sheet]) DB[keyMap[sheet]].push(row);
+  }
+  if(currentCRMModal==='cliente') onClienteSaved(row);
+  if(currentCRMModal==='venta'){
+    onVentaSaved(row);
+    autoCreateFactura(row); // ← auto-factura
+  }
+  closeCRMModal();renderDashboard();
+}
 /* ─── Poblar PRODUCTS[*].data desde DB.prevision (cargado de Sheets) ─── */
 function loadPrevisionFromDB(){
   if(!DB.prevision||!DB.prevision.length) return;
@@ -1552,7 +1736,9 @@ function renderFacturacion(){
     const venc_ms=f.FechaVencimiento?new Date(f.FechaVencimiento).getTime():null;
     const isOverdue=venc_ms&&today_ms>venc_ms&&f.Estado!=='Cobrada'&&f.Estado!=='Anulada';
     const montoFmt=f.Monto?`<span class="amount-cell ${f.Estado==='Cobrada'?'positive':isOverdue?'negative':'pending'}">${f.Moneda||'USD'} ${parseFloat(f.Monto).toLocaleString()}</span>`:'—';
-    return`<tr class="${isOverdue?'overdue':''}"><td><span style="font-family:var(--mono);font-weight:600">${f.NumFactura||'—'}</span></td><td><strong>${f.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td><td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td><td>${f.Producto||'—'}</td><td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' ton':'—'}</td><td>${montoFmt}</td><td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}</td><td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td><td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td><td><button class="btn btn-sm btn-outline" onclick="openCRMModal('factura')">Editar</button></td></tr>`;
+    const ncFmt=f.NotaCredito?`<span style="color:var(--green);font-size:11px;font-family:var(--mono)">${f.NotaCredito}</span>`:'<span style="color:var(--muted)">—</span>';
+    const ndFmt=f.NotaDebito?`<span style="color:var(--red);font-size:11px;font-family:var(--mono)">${f.NotaDebito}</span>`:'<span style="color:var(--muted)">—</span>';
+    return`<tr class="${isOverdue?'overdue':''}"><td><span style="font-family:var(--mono);font-weight:600;color:var(--accent)">${f.NumFactura||'—'}</span></td><td><strong>${f.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td><td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td><td>${f.Producto||'—'}</td><td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' ton':'—'}</td><td>${montoFmt}</td><td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}</td><td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td><td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td><td>${ncFmt}</td><td>${ndFmt}</td><td><button class="btn btn-sm btn-outline" onclick="openEditFactura('${f.ID}')">✏️ Editar</button></td></tr>`;
   }).join('');
 }
 function stat(label,value,sub,accent){return`<div class="mod-stat ${accent}"><div class="ms-label">${label}</div><div class="ms-value">${value}</div><div class="ms-sub">${sub}</div></div>`;}
@@ -1607,7 +1793,7 @@ function renderCalidad(){
 
 // Apply saved theme label on load
 document.addEventListener('DOMContentLoaded',()=>{
-  if(document.body.classList.contains('warm'))document.getElementById('theme-label').textContent='Tema cálido';
+  if(document.body.classList.contains('warm'))document.getElementById('theme-label').textContent='Modo claro';
 });
 </script>
 </body>
