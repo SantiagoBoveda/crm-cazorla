@@ -960,11 +960,11 @@ function filterTable(id,q){
    CRM BASE MODAL (renamed to avoid conflict)
 ═══════════════════════════════════════ */
 const FORMS={
-  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa</label><input id="f-Empresa"></div><div class="form-group"><label>Contacto</label><input id="f-Contacto"></div></div><div class="form-row"><div class="form-group"><label>Email</label><input id="f-Email" type="email"></div><div class="form-group"><label>Teléfono</label><input id="f-Telefono"></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" onchange="handleAddNew(this,\"País\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Rubro</label><input id="f-Rubro"></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" onchange="handleAddNew(this,\"Cliente\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" onchange="handleAddNew(this,\"Producto\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" onchange="handleAddNew(this,\"Responsable\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" onchange="handleAddNew(this,\"Persona\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
-  producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" onchange="handleAddNew(this,\"Producto\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" onchange="handleAddNew(this,\"Categoría\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
-  venta:{title:'Nueva venta',fields:'<div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" onchange="handleAddNew(this,\"Cliente\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" onchange="handleAddNew(this,\"Producto\")"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-CantidadTon" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago"><option>Anticipado</option><option>30 días</option><option>60 días</option><option>90 días</option><option>120 días</option><option>150 días</option><option>180 días</option><option>Crédito desde España</option></select></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" onchange="handleAddNew(this,\"Responsable\")"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa</label><input id="f-Empresa"></div><div class="form-group"><label>Contacto</label><input id="f-Contacto"></div></div><div class="form-row"><div class="form-group"><label>Email</label><input id="f-Email" type="email"></div><div class="form-group"><label>Teléfono</label><input id="f-Telefono"></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Rubro</label><input id="f-Rubro"></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
+  producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" data-smartlist="Categoría"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
+  venta:{title:'Nueva venta',fields:'<div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-CantidadTon" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago"><option>Anticipado</option><option>30 días</option><option>60 días</option><option>90 días</option><option>120 días</option><option>150 días</option><option>180 días</option><option>Crédito desde España</option></select></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
@@ -978,7 +978,8 @@ function openCRMModal(type){
   document.getElementById('modal-title').textContent=cfg.title;
   document.getElementById('modal-body').innerHTML=cfg.fields;
   document.getElementById('main-modal').classList.add('open');
-  populateFormSelects(type);
+  // Poblar todos los selects con data-smartlist
+  populateFormSelects();
 }
 function closeCRMModal(){document.getElementById('main-modal').classList.remove('open');currentCRMModal=null;}
 async function saveModal(){
@@ -1099,42 +1100,78 @@ const SMART_LISTS = {
   Persona: ['Santiago','Alfonso'],
 };
 
-/* Pobla un <select id> con los items de la lista + opción "Nuevo..." */
-function populateSmartSelect(selectId, listKey, currentVal=''){
-  const sel = document.getElementById(selectId);
+/* ── Pobla un <select> con items + opción "Agregar nuevo" ── */
+function populateSmartSelect(sel, listKey, currentVal=''){
+  if(typeof sel === 'string') sel = document.getElementById(sel);
   if(!sel) return;
   let items = [...(SMART_LISTS[listKey]||[])];
-  // enrich from DB
   if(listKey==='Cliente') items = [...new Set([...items, ...DB.clientes.map(c=>c.Empresa).filter(Boolean)])];
   if(listKey==='Producto') items = [...new Set([...items, ...DB.inventario.map(i=>i.Producto).filter(Boolean), ...PRODUCTS.map(p=>p.label)])];
-  sel.innerHTML = `<option value="">— Seleccionar —</option>`
-    + items.map(i=>`<option value="${i}" ${i===currentVal?'selected':''}>${i}</option>`).join('')
-    + `<option value="__new__" class="add-new-option">＋ Agregar nuevo ${listKey}...</option>`;
+  sel.innerHTML =
+    `<option value="">— Seleccionar —</option>` +
+    items.map(i=>`<option value="${i}"${i===currentVal?' selected':''}>${i}</option>`).join('') +
+    `<option value="__new__" style="color:var(--accent);font-weight:700">＋ Agregar ${listKey} nuevo...</option>`;
 }
 
-/* Handler llamado cuando se selecciona "Agregar nuevo..." */
-function handleAddNew(sel, listKey){
+/* ── Pobla todos los selects con data-smartlist del form activo ── */
+function populateFormSelects(){
+  document.querySelectorAll('#modal-body [data-smartlist]').forEach(sel=>{
+    populateSmartSelect(sel, sel.dataset.smartlist);
+  });
+}
+
+/* ── Event delegation: escucha cambios en CUALQUIER select del modal ── */
+document.addEventListener('change', function(e){
+  const sel = e.target;
+  if(!sel.matches('#modal-body select[data-smartlist]')) return;
   if(sel.value !== '__new__') return;
-  const nuevo = prompt(`Escribí el nuevo ${listKey}:`);
-  if(nuevo && nuevo.trim()){
-    const val = nuevo.trim();
-    if(!SMART_LISTS[listKey]) SMART_LISTS[listKey]=[];
-    if(!SMART_LISTS[listKey].includes(val)) SMART_LISTS[listKey].push(val);
-    // rebuild options and select the new value
-    populateSmartSelect(sel.id, listKey, val);
-  } else {
-    sel.value='';
-  }
-}
 
-/* Después de inyectar el form HTML, poblar los selects */
-function populateFormSelects(type){
-  if(type==='cliente') populateSmartSelect('f-Pais','País');
-  if(type==='proyecto'){populateSmartSelect('f-Cliente','Cliente');populateSmartSelect('f-Producto','Producto');populateSmartSelect('f-Responsable','Responsable');}
-  if(type==='tarea') populateSmartSelect('f-Asignado','Persona');
-  if(type==='producto'){populateSmartSelect('f-Producto','Producto');populateSmartSelect('f-Categoria','Categoría');}
-  if(type==='venta'){populateSmartSelect('f-Cliente','Cliente');populateSmartSelect('f-Producto','Producto');populateSmartSelect('f-Responsable','Responsable');}
-}
+  const listKey = sel.dataset.smartlist;
+
+  // Mostrar mini-modal de ingreso en lugar de prompt nativo (más confiable)
+  const prev = sel.value;
+  const inputEl = document.createElement('input');
+  inputEl.type = 'text';
+  inputEl.placeholder = `Nuevo ${listKey}...`;
+  inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1px solid var(--accent);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;margin-top:6px;outline:none;box-sizing:border-box';
+
+  // Insertar campo justo debajo del select
+  const wrap = sel.parentNode;
+  if(wrap.querySelector('.smart-input-row')) wrap.querySelector('.smart-input-row').remove();
+  const row = document.createElement('div');
+  row.className = 'smart-input-row';
+  row.style.cssText = 'display:flex;gap:6px;margin-top:6px';
+  const confirmBtn = document.createElement('button');
+  confirmBtn.type = 'button';
+  confirmBtn.textContent = 'Agregar';
+  confirmBtn.style.cssText = 'padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = '✕';
+  cancelBtn.style.cssText = 'padding:7px 10px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer';
+  row.appendChild(inputEl);
+  row.appendChild(confirmBtn);
+  row.appendChild(cancelBtn);
+  wrap.appendChild(row);
+  inputEl.focus();
+
+  function confirm(){
+    const val = inputEl.value.trim();
+    if(val){
+      if(!SMART_LISTS[listKey]) SMART_LISTS[listKey]=[];
+      if(!SMART_LISTS[listKey].includes(val)) SMART_LISTS[listKey].push(val);
+      populateSmartSelect(sel, listKey, val);
+    } else {
+      sel.value = '';
+    }
+    row.remove();
+  }
+  function cancel(){ sel.value=''; row.remove(); }
+
+  confirmBtn.addEventListener('click', confirm);
+  cancelBtn.addEventListener('click', cancel);
+  inputEl.addEventListener('keydown', e=>{ if(e.key==='Enter'){e.preventDefault();confirm();} if(e.key==='Escape') cancel(); });
+});
 
 /* ═══════════════════════════════════════
    PREVISIÓN — GESTIÓN DE AÑOS
