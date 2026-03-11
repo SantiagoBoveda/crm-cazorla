@@ -387,7 +387,15 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .amount-cell.negative{color:var(--red)}
 .amount-cell.pending{color:var(--yellow)}
 
-/* ══ CALIDAD ══ */
+/* ══ ROW ACTION BUTTONS ══ */
+.row-actions{white-space:nowrap;text-align:right;padding-right:12px!important}
+.btn-row-edit,.btn-row-del{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;font-size:13px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.btn-row-edit:hover{background:rgba(123,29,58,.08);border-color:var(--border);color:var(--accent)}
+.btn-row-del:hover{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red)}
+tr:not(:hover) .btn-row-edit, tr:not(:hover) .btn-row-del{opacity:0}
+tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
+.kanban-card .btn-row-edit,.kanban-card .btn-row-del{opacity:.5}
+.kanban-card:hover .btn-row-edit,.kanban-card:hover .btn-row-del{opacity:1}
 .cal-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .cal-toolbar input[type=date]{padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)}
 .cal-toolbar label{font-size:11px;color:var(--muted);margin-right:2px}
@@ -567,7 +575,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
     </div>
     <div class="table-container">
       <table id="clientes-table">
-        <thead><tr><th>Empresa</th><th>Contacto</th><th>País</th><th>Rubro</th><th>Estado</th><th>Última interacción</th><th></th></tr></thead>
+        <thead><tr><th>Empresa</th><th>Contacto</th><th>País</th><th>Rubro</th><th>Estado</th><th>Última interacción</th><th style="width:70px"></th></tr></thead>
         <tbody id="clientes-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody>
       </table>
     </div>
@@ -580,7 +588,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
       <button class="btn btn-primary" onclick="openCRMModal('proyecto')">+ Nuevo proyecto</button>
     </div>
     <div class="table-container">
-      <table><thead><tr><th>Proyecto</th><th>Cliente</th><th>Producto</th><th>Etapa</th><th>Valor USD</th><th>Responsable</th><th></th></tr></thead>
+      <table><thead><tr><th>Proyecto</th><th>Cliente</th><th>Producto</th><th>Etapa</th><th>Valor USD</th><th>Responsable</th><th style="width:70px"></th></tr></thead>
       <tbody id="proyectos-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
     </div>
   </div>
@@ -605,7 +613,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
       <button class="btn btn-primary" onclick="openCRMModal('producto')">+ Nuevo producto</button>
     </div>
     <div class="table-container">
-      <table><thead><tr><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Estado</th><th></th></tr></thead>
+      <table><thead><tr><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Estado</th><th style="width:70px"></th></tr></thead>
       <tbody id="inventario-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
     </div>
   </div>
@@ -618,7 +626,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
     </div>
     <div class="cards-grid" id="ventas-stats"></div>
     <div class="table-container">
-      <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Valor USD</th><th>Etapa</th><th>Previsión</th></tr></thead>
+      <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Valor USD</th><th>Etapa</th><th>Previsión</th><th style="width:70px"></th></tr></thead>
       <tbody id="ventas-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
     </div>
   </div>
@@ -928,28 +936,79 @@ function renderDashboard(){
 }
 function renderClientes(){
   const tb=document.getElementById('clientes-tbody');if(!tb)return;
-  tb.innerHTML=DB.clientes.map(c=>`<tr><td>${c.Empresa||'—'}</td><td>${c.Contacto||'—'}</td><td>${c.Pais||'—'}</td><td>${c.Rubro||'—'}</td><td><span class="badge badge-${c.Estado==='Activo'?'green':c.Estado==='Prospecto'?'yellow':'red'}">${c.Estado||'—'}</span></td><td>${c.UltimaInteraccion||'—'}</td></tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="icon">👥</div><p>Sin clientes</p></div></td></tr>';
+  if(!DB.clientes.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><p>Sin clientes</p></div></td></tr>';return;}
+  tb.innerHTML=DB.clientes.map(c=>`<tr>
+    <td>${c.Empresa||'—'}</td><td>${c.Contacto||'—'}</td><td>${c.Pais||'—'}</td><td>${c.Rubro||'—'}</td>
+    <td><span class="badge badge-${c.Estado==='Activo'?'green':c.Estado==='Prospecto'?'yellow':'red'}">${c.Estado||'—'}</span></td>
+    <td>${c.UltimaInteraccion||'—'}</td>
+    <td class="row-actions">
+      <button class="btn-row-edit" onclick="editRecord('cliente','${c.ID}')">✏️</button>
+      <button class="btn-row-del" onclick="deleteRecord('cliente','${c.ID}')">🗑</button>
+    </td></tr>`).join('');
 }
 function renderProyectos(){
   const tb=document.getElementById('proyectos-tbody');if(!tb)return;
-  tb.innerHTML=DB.proyectos.map(p=>`<tr><td>${p.Nombre||'—'}</td><td>${p.Cliente||'—'}</td><td>${p.Producto||'—'}</td><td><span class="badge badge-blue">${p.Etapa||'—'}</span></td><td>$${(parseFloat(p.ValorUSD)||0).toLocaleString()}</td><td>${p.Responsable||'—'}</td></tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="icon">📁</div><p>Sin proyectos</p></div></td></tr>';
+  if(!DB.proyectos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📁</div><p>Sin proyectos</p></div></td></tr>';return;}
+  tb.innerHTML=DB.proyectos.map(p=>`<tr>
+    <td><strong>${p.Nombre||'—'}</strong></td><td>${p.Cliente||'—'}</td><td>${p.Producto||'—'}</td>
+    <td><span class="badge badge-blue">${p.Etapa||'—'}</span></td>
+    <td style="font-family:var(--mono)">$${(parseFloat(p.ValorUSD)||0).toLocaleString()}</td>
+    <td>${p.Responsable||'—'}</td>
+    <td class="row-actions">
+      <button class="btn-row-edit" onclick="editRecord('proyecto','${p.ID}')">✏️</button>
+      <button class="btn-row-del" onclick="deleteRecord('proyecto','${p.ID}')">🗑</button>
+    </td></tr>`).join('');
 }
 function renderTareas(){
   ['Pendiente','En progreso','Completado'].forEach(estado=>{
-    const colId=estado.toLowerCase().replace(' ','-');
     const cols={'Pendiente':'pendiente','En progreso':'progreso','Completado':'completado'};
     const container=document.getElementById('col-'+cols[estado]);if(!container)return;
     const tasks=DB.tareas.filter(t=>t.Estado===estado);
-    container.innerHTML=tasks.map(t=>`<div class="kanban-card"><div class="task-title">${t.Titulo||'Sin título'}</div><div class="task-meta"><span>${t.Asignado||'—'}</span><span class="badge badge-${t.Prioridad==='Alta'?'red':t.Prioridad==='Media'?'yellow':'green'}">${t.Prioridad||'—'}</span></div></div>`).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin tareas</div>';
+    container.innerHTML=tasks.map(t=>`
+      <div class="kanban-card">
+        <div class="task-title">${t.Titulo||'Sin título'}</div>
+        <div class="task-meta">
+          <span>${t.Asignado||'—'}</span>
+          <span class="badge badge-${t.Prioridad==='Alta'?'red':t.Prioridad==='Media'?'yellow':'green'}">${t.Prioridad||'—'}</span>
+        </div>
+        <div class="task-meta" style="margin-top:8px;justify-content:flex-end;gap:4px">
+          <button class="btn-row-edit" onclick="editRecord('tarea','${t.ID}')">✏️</button>
+          <button class="btn-row-del" onclick="deleteRecord('tarea','${t.ID}')">🗑</button>
+        </div>
+      </div>`).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin tareas</div>';
   });
 }
 function renderInventario(){
   const tb=document.getElementById('inventario-tbody');if(!tb)return;
-  tb.innerHTML=DB.inventario.map(i=>{const s=parseFloat(i.StockActual)||0,m=parseFloat(i.StockMin)||0,p=m>0?Math.min(s/m*100,100):100,c=p<50?'var(--red)':p<80?'var(--yellow)':'var(--green)';return`<tr><td>${i.Producto||'—'}</td><td>${i.Categoria||'—'}</td><td>${s} ${i.Unidad||''}</td><td>${m} ${i.Unidad||''}</td><td><div class="stock-bar"><div class="stock-fill" style="width:${p}%;background:${c}"></div></div></td><td>$${(parseFloat(i.Precio)||0).toLocaleString()}</td></tr>`;}).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="icon">📦</div><p>Sin productos</p></div></td></tr>';
+  if(!DB.inventario.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📦</div><p>Sin productos</p></div></td></tr>';return;}
+  tb.innerHTML=DB.inventario.map(i=>{
+    const s=parseFloat(i.StockActual)||0,m=parseFloat(i.StockMin)||0,p=m>0?Math.min(s/m*100,100):100,c=p<50?'var(--red)':p<80?'var(--yellow)':'var(--green)';
+    return`<tr>
+      <td><strong>${i.Producto||'—'}</strong></td><td>${i.Categoria||'—'}</td>
+      <td style="font-family:var(--mono)">${s} ${i.Unidad||''}</td>
+      <td style="font-family:var(--mono)">${m} ${i.Unidad||''}</td>
+      <td><div class="stock-bar"><div class="stock-fill" style="width:${p}%;background:${c}"></div></div></td>
+      <td style="font-family:var(--mono)">$${(parseFloat(i.Precio)||0).toLocaleString()}</td>
+      <td class="row-actions">
+        <button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button>
+        <button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button>
+      </td></tr>`;
+  }).join('');
 }
 function renderVentas(){
   const tb=document.getElementById('ventas-tbody');if(!tb)return;
-  tb.innerHTML=DB.ventas.map(v=>`<tr><td>${v.Fecha||'—'}</td><td>${v.Cliente||'—'}</td><td>${v.Producto||'—'}</td><td>${v.CantidadTon||'—'}</td><td>$${(parseFloat(v.ValorUSD)||0).toLocaleString()}</td><td><span class="badge badge-blue">${v.Etapa||'—'}</span></td><td><span class="badge badge-green" title="Incluido en Previsión">↗ Prev.</span></td></tr>`).join('')||'<tr><td colspan="7"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';
+  if(!DB.ventas.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';return;}
+  tb.innerHTML=DB.ventas.map(v=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px">${v.Fecha||'—'}</td>
+    <td><strong>${v.Cliente||'—'}</strong></td><td>${v.Producto||'—'}</td>
+    <td style="font-family:var(--mono)">${v.CantidadTon||'—'} ton</td>
+    <td style="font-family:var(--mono)">$${(parseFloat(v.ValorUSD)||0).toLocaleString()}</td>
+    <td><span class="badge badge-blue">${v.Etapa||'—'}</span></td>
+    <td><span class="badge badge-green" title="Incluido en Previsión">↗ Prev.</span></td>
+    <td class="row-actions">
+      <button class="btn-row-edit" onclick="editRecord('venta','${v.ID}')">✏️</button>
+      <button class="btn-row-del" onclick="deleteRecord('venta','${v.ID}')">🗑</button>
+    </td></tr>`).join('');
 }
 function filterTable(id,q){
   const rows=document.querySelectorAll('#'+id+' tbody tr');
@@ -973,30 +1032,120 @@ const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',produc
 
 function openCRMModal(type){
   currentCRMModal=type;
+  _editingId=null;
   _editingFacturaId=null;
   const cfg=FORMS[type];
   document.getElementById('modal-title').textContent=cfg.title;
   document.getElementById('modal-body').innerHTML=cfg.fields;
   document.getElementById('main-modal').classList.add('open');
-  // Poblar todos los selects con data-smartlist
   populateFormSelects();
 }
-function closeCRMModal(){document.getElementById('main-modal').classList.remove('open');currentCRMModal=null;}
+function closeCRMModal(){document.getElementById('main-modal').classList.remove('open');currentCRMModal=null;_editingId=null;}
+
+/* ID del registro que se está editando (null = nuevo) */
+let _editingId = null;
+
+/* Abrir modal en modo edición con datos pre-cargados */
+function editRecord(type, id){
+  const sheetKey = {cliente:'clientes',proyecto:'proyectos',tarea:'tareas',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
+  const dbKey = sheetKey[type];
+  const record = DB[dbKey]?.find(r=>r.ID===id);
+  if(!record) return;
+  openCRMModal(type);
+  _editingId = id;
+  document.getElementById('modal-title').textContent = FORMS[type].title.replace('Nuevo','Editar').replace('Nueva','Editar');
+  // Fill all fields with existing data
+  const sheet = MODAL_SHEET[type];
+  HEADERS[sheet].forEach(h=>{
+    const el = document.getElementById('f-'+h);
+    if(!el) return;
+    if(el.tagName==='SELECT'){
+      // For smart selects, rebuild options with current value selected
+      if(el.dataset.smartlist){
+        populateSmartSelect(el, el.dataset.smartlist, record[h]||'');
+      } else {
+        el.value = record[h]||'';
+      }
+    } else {
+      el.value = record[h]||'';
+    }
+  });
+}
+
+/* Eliminar registro */
+function deleteRecord(type, id){
+  const sheetKey = {cliente:'clientes',proyecto:'proyectos',tarea:'tareas',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
+  const dbKey = sheetKey[type];
+  if(!DB[dbKey]) return;
+  const rec = DB[dbKey].find(r=>r.ID===id);
+  const label = rec?.Empresa||rec?.Nombre||rec?.Titulo||rec?.NumFactura||rec?.Cliente||rec?.Producto||'este registro';
+  if(!confirm(`¿Eliminar "${label}"? Esta acción no se puede deshacer.`)) return;
+  DB[dbKey] = DB[dbKey].filter(r=>r.ID!==id);
+  // Re-render the relevant section
+  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
+  if(renders[type]) renders[type]();
+  renderDashboard();
+  // Note: does not delete from Google Sheets (would need row number lookup)
+}
+
 async function saveModal(){
-  if(!currentCRMModal)return;
-  const sheet=MODAL_SHEET[currentCRMModal];
-  const row={ID:genId()};
-  HEADERS[sheet].forEach(h=>{const el=document.getElementById('f-'+h);if(el)row[h]=el.value;});
-  if(spreadsheetId){await appendRow(sheet,row);await loadAllData();}
-  else {
-    // offline: push to DB directly
-    const keyMap={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
-    if(keyMap[sheet]) DB[keyMap[sheet]].push(row);
+  if(currentCRMModal==='factura' && _editingFacturaId){
+    // legacy path for factura edit via openEditFactura
+    const f = DB.facturas.find(x=>x.ID===_editingFacturaId);
+    if(f){
+      HEADERS['Facturas'].forEach(h=>{const el=document.getElementById('f-'+h);if(el)f[h]=el.value;});
+    }
+    _editingFacturaId=null;
+    closeCRMModal();
+    renderFacturacion();
+    return;
   }
-  // ── POST-SAVE HOOKS ──
-  if(currentCRMModal==='cliente') onClienteSaved(row);
-  if(currentCRMModal==='venta')   onVentaSaved(row);
-  closeCRMModal();renderDashboard();
+
+  if(!currentCRMModal) return;
+  const sheet = MODAL_SHEET[currentCRMModal];
+  const dbKey = {Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'}[sheet];
+
+  // Collect values — skip any select still showing __new__
+  const row = {ID: _editingId || genId()};
+  let invalid = false;
+  HEADERS[sheet].forEach(h=>{
+    const el = document.getElementById('f-'+h);
+    if(!el) return;
+    if(el.tagName==='SELECT' && el.value==='__new__'){
+      // field not resolved — treat as empty
+      row[h]='';
+    } else {
+      row[h] = el.value||'';
+    }
+  });
+
+  if(_editingId){
+    // UPDATE existing record in DB
+    const idx = DB[dbKey]?.findIndex(r=>r.ID===_editingId);
+    if(idx>=0) DB[dbKey][idx] = row;
+    // Sheets update (full row rewrite)
+    if(spreadsheetId && token){
+      const rowNum = idx+2; // +1 header, +1 1-indexed
+      const values = [HEADERS[sheet].map(h=>row[h]||'')];
+      try{
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A${rowNum}:Z${rowNum}?valueInputOption=RAW`,
+          {method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})});
+      }catch(e){console.warn('Sheet update error',e);}
+    }
+  } else {
+    // INSERT new record
+    DB[dbKey]?.push(row);
+    if(spreadsheetId){await appendRow(sheet,row);}
+    // ── POST-SAVE HOOKS ──
+    if(currentCRMModal==='cliente') onClienteSaved(row);
+    if(currentCRMModal==='venta'){ onVentaSaved(row); autoCreateFactura(row); }
+  }
+
+  closeCRMModal();
+  // Re-render relevant section
+  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
+  if(renders[currentCRMModal]) renders[currentCRMModal]();
+  renderDashboard();
 }
 
 /* ─── Hook: cliente nuevo → agregar a Previsión en todos los productos ─── */
@@ -1752,7 +1901,7 @@ function renderReclamos(){
     const monto=r.MontoAfectado?`<span class="amount-cell negative">USD ${parseFloat(r.MontoAfectado).toLocaleString()}</span>`:'<span style="color:var(--muted)">—</span>';
     const overdue=r.Estado==='Abierto'&&r.FechaApertura&&(today-new Date(r.FechaApertura))>7*24*3600*1000;
     const evLink=r.Evidencia?`<a href="${r.Evidencia}" target="_blank" style="color:var(--accent);font-size:11px">🔗 ver</a>`:'';
-    return`<tr class="${overdue?'overdue':''}"><td><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">#${r.ID||'—'}</span></td><td><strong>${r.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${r.Pais||'—'}</td><td><span class="badge badge-blue" style="font-size:10px">${r.TipoReclamo||'—'}</span></td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.Motivo||''}">${r.Motivo||'—'}</td><td>${urgDot}${r.Urgencia||'—'}</td><td><span class="badge ${reclamoBadge(r.Estado)}">${r.Estado||'—'}</span></td><td>${monto}</td><td>${r.Responsable||'—'} ${evLink}</td><td style="font-family:var(--mono);font-size:11px">${r.FechaApertura||'—'}</td><td style="font-family:var(--mono);font-size:11px">${r.FechaResolucion||'—'}</td><td><button class="btn btn-sm btn-outline" onclick="openCRMModal('reclamo')">Editar</button></td></tr>`;
+    return`<tr class="${overdue?'overdue':''}"><td><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">#${r.ID||'—'}</span></td><td><strong>${r.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${r.Pais||'—'}</td><td><span class="badge badge-blue" style="font-size:10px">${r.TipoReclamo||'—'}</span></td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.Motivo||''}">${r.Motivo||'—'}</td><td>${urgDot}${r.Urgencia||'—'}</td><td><span class="badge ${reclamoBadge(r.Estado)}">${r.Estado||'—'}</span></td><td>${monto}</td><td>${r.Responsable||'—'} ${evLink}</td><td style="font-family:var(--mono);font-size:11px">${r.FechaApertura||'—'}</td><td style="font-family:var(--mono);font-size:11px">${r.FechaResolucion||'—'}</td><td class="row-actions"><button class="btn-row-edit" onclick="editRecord('reclamo','${r.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('reclamo','${r.ID}')">🗑</button></td></tr>`;
   }).join('');
 }
 
@@ -1775,7 +1924,7 @@ function renderFacturacion(){
     const montoFmt=f.Monto?`<span class="amount-cell ${f.Estado==='Cobrada'?'positive':isOverdue?'negative':'pending'}">${f.Moneda||'USD'} ${parseFloat(f.Monto).toLocaleString()}</span>`:'—';
     const ncFmt=f.NotaCredito?`<span style="color:var(--green);font-size:11px;font-family:var(--mono)">${f.NotaCredito}</span>`:'<span style="color:var(--muted)">—</span>';
     const ndFmt=f.NotaDebito?`<span style="color:var(--red);font-size:11px;font-family:var(--mono)">${f.NotaDebito}</span>`:'<span style="color:var(--muted)">—</span>';
-    return`<tr class="${isOverdue?'overdue':''}"><td><span style="font-family:var(--mono);font-weight:600;color:var(--accent)">${f.NumFactura||'—'}</span></td><td><strong>${f.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td><td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td><td>${f.Producto||'—'}</td><td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' ton':'—'}</td><td>${montoFmt}</td><td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}</td><td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td><td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td><td>${ncFmt}</td><td>${ndFmt}</td><td><button class="btn btn-sm btn-outline" onclick="openEditFactura('${f.ID}')">✏️ Editar</button></td></tr>`;
+    return`<tr class="${isOverdue?'overdue':''}"><td><span style="font-family:var(--mono);font-weight:600;color:var(--accent)">${f.NumFactura||'—'}</span></td><td><strong>${f.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td><td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td><td>${f.Producto||'—'}</td><td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' ton':'—'}</td><td>${montoFmt}</td><td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}</td><td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td><td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td><td>${ncFmt}</td><td>${ndFmt}</td><td class="row-actions"><button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')">🗑</button></td></tr>`;
   }).join('');
 }
 function stat(label,value,sub,accent){return`<div class="mod-stat ${accent}"><div class="ms-label">${label}</div><div class="ms-value">${value}</div><div class="ms-sub">${sub}</div></div>`;}
@@ -1824,7 +1973,7 @@ function renderCalidad(){
     const brix=parseFloat(r.Brix),bostw=parseFloat(r.Bostwick),color=parseFloat(r.Color),acidez=parseFloat(r.Acidez),tamiz=parseFloat(r.Tamiz);
     const fmtNum=v=>isNaN(v)?'—':v.toFixed(2);
     const sabOk=!r.Sabor||r.Sabor.toLowerCase().includes('caract'),olorOk=!r.Olor||r.Olor.toLowerCase().includes('caract');
-    return`<tr><td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${r.Fecha||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r.Hora||'—'}</td><td style="font-family:var(--mono);font-size:11px">${r.Lote||'—'}</td><td style="font-size:12px">${r.Operador||'—'}</td><td class="${cellClass(brix,lims.brix.min,lims.brix.max)}" style="font-family:var(--mono)">${fmtNum(brix)}</td><td class="${cellClass(tamiz,lims.tamiz.min,lims.tamiz.max)}" style="font-family:var(--mono)">${fmtNum(tamiz)}</td><td class="${cellClass(bostw,lims.bostw.min,lims.bostw.max)}" style="font-family:var(--mono)">${fmtNum(bostw)}</td><td class="${cellClass(color,lims.color.min,lims.color.max)}" style="font-family:var(--mono)">${fmtNum(color)}</td><td class="${cellClass(acidez,lims.acidez.min,lims.acidez.max)}" style="font-family:var(--mono)">${fmtNum(acidez)}</td><td style="font-size:12px;color:${sabOk?'var(--green)':'var(--red)'}">${r.Sabor||'—'}</td><td style="font-size:12px;color:${olorOk?'var(--green)':'var(--red)'}">${r.Olor||'—'}</td><td>${r.FotoCristal?`<a href="${r.FotoCristal}" target="_blank" class="cal-foto-link">🔗 ver</a>`:'—'}</td><td style="font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.Observaciones||''}">${r.Observaciones||'—'}</td></tr>`;
+    return`<tr><td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${r.Fecha||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r.Hora||'—'}</td><td style="font-family:var(--mono);font-size:11px">${r.Lote||'—'}</td><td style="font-size:12px">${r.Operador||'—'}</td><td class="${cellClass(brix,lims.brix.min,lims.brix.max)}" style="font-family:var(--mono)">${fmtNum(brix)}</td><td class="${cellClass(tamiz,lims.tamiz.min,lims.tamiz.max)}" style="font-family:var(--mono)">${fmtNum(tamiz)}</td><td class="${cellClass(bostw,lims.bostw.min,lims.bostw.max)}" style="font-family:var(--mono)">${fmtNum(bostw)}</td><td class="${cellClass(color,lims.color.min,lims.color.max)}" style="font-family:var(--mono)">${fmtNum(color)}</td><td class="${cellClass(acidez,lims.acidez.min,lims.acidez.max)}" style="font-family:var(--mono)">${fmtNum(acidez)}</td><td style="font-size:12px;color:${sabOk?'var(--green)':'var(--red)'}">${r.Sabor||'—'}</td><td style="font-size:12px;color:${olorOk?'var(--green)':'var(--red)'}">${r.Olor||'—'}</td><td>${r.FotoCristal?`<a href="${r.FotoCristal}" target="_blank" class="cal-foto-link">🔗 ver</a>`:'—'}</td><td style="font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.Observaciones||''}">${r.Observaciones||'—'}</td><td class="row-actions"><button class="btn-row-edit" onclick="editRecord('calidad','${r.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('calidad','${r.ID}')">🗑</button></td></tr>`;
   }).join('');
 }
 
