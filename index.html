@@ -61,9 +61,12 @@ body.warm .theme-thumb{left:15px}
 /* ══ MAIN ══ */
 .main{margin-left:220px;padding:28px;min-height:100vh;overflow-x:hidden}
 .section{display:none}.section.active{display:block}
-.page-header{margin-bottom:24px}
+.page-header{margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.page-header-left h1{font-size:22px;font-weight:700;color:var(--accent)}
+.page-header-left p{color:var(--muted);font-size:13px;margin-top:4px}
 .page-header h1{font-size:22px;font-weight:700;color:var(--accent)}
 .page-header p{color:var(--muted);font-size:13px;margin-top:4px}
+.page-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* ══ AUTH SCREEN ══ */
 #auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
@@ -443,13 +446,11 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   /* Main content: sin margen izquierdo, padding top para el hamburger */
   .main{margin-left:0!important;padding:16px;padding-top:66px;width:100%;max-width:100%;overflow-x:hidden}
 
-  /* Page headers: apilados verticalmente */
-  .page-header{flex-direction:column!important;align-items:flex-start!important;gap:10px}
-  .page-header>div{width:100%}
-  .page-header>button{width:100%}
+  /* Page headers */
+  .page-header{flex-direction:column;align-items:flex-start!important;gap:10px}
+  .page-header>*{width:100%}
+  .page-header-right{width:100%}
   .page-header .btn{width:100%;justify-content:center;display:flex}
-
-  /* Search bar ancho completo */
   .search-bar{width:100%}
   .search-bar input{width:100%!important}
 
@@ -745,7 +746,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- CLIENTES -->
   <div class="section" id="section-clientes">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="page-header">
       <div><h1>Clientes</h1><p>Agenda y seguimiento</p></div>
       <div style="display:flex;gap:10px;align-items:center">
         <div class="search-bar"><input type="text" placeholder="Buscar..." oninput="filterTable('clientes-table',this.value)"></div>
@@ -760,11 +761,9 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
   </div>
 
-  </div>
-
   <!-- CONTACTOS -->
   <div class="section" id="section-contactos">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+    <div class="page-header">
       <div><h1>📇 Contactos</h1><p>Agenda de personas · vinculada a clientes</p></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <div class="search-bar"><input type="text" id="contactos-search" placeholder="Buscar contacto..." oninput="filterContactos(this.value)"></div>
@@ -778,7 +777,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- PROYECTOS -->
   <div class="section" id="section-proyectos">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="page-header">
       <div><h1>Proyectos</h1><p>Pipeline comercial</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('proyecto')">+ Nuevo proyecto</button>
     </div>
@@ -790,7 +789,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- TAREAS -->
   <div class="section" id="section-tareas">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="page-header">
       <div><h1>Tareas</h1><p>Tablero Kanban</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('tarea')">+ Nueva tarea</button>
     </div>
@@ -803,7 +802,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- INVENTARIO -->
   <div class="section" id="section-inventario">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="page-header">
       <div><h1>Inventario</h1><p>Stock de productos</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('producto')">+ Nuevo producto</button>
     </div>
@@ -815,7 +814,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- VENTAS -->
   <div class="section" id="section-ventas">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="page-header">
       <div><h1>Ventas</h1><p>Registro y seguimiento</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('venta')">+ Nueva venta</button>
     </div>
@@ -828,7 +827,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- PREVISIÓN -->
   <div class="section" id="section-prevision">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <div>
           <h1 id="page-title">🫒 Previsión de Ventas</h1>
@@ -912,7 +911,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- RECLAMOS -->
   <div class="section" id="section-reclamos">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div class="page-header">
       <div><h1>🚨 Reclamos</h1><p style="color:var(--muted);font-size:13px;margin-top:4px">Seguimiento de reclamos comerciales y logísticos</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('reclamo')">+ Nuevo reclamo</button>
     </div>
@@ -935,7 +934,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- FACTURACIÓN -->
   <div class="section" id="section-facturacion">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div class="page-header">
       <div><h1>🧾 Facturación</h1><p style="color:var(--muted);font-size:13px;margin-top:4px">Seguimiento de facturas emitidas y estado de cobro</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('factura')">+ Nueva factura</button>
     </div>
@@ -960,7 +959,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- CALIDAD -->
   <div class="section" id="section-calidad">
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <div class="page-header">
       <div><h1>🔬 Seguimiento de Calidad</h1><p style="color:var(--muted);font-size:13px;margin-top:4px">Pasta de tomate · Parámetros físico-químicos y organolépticos</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('calidad')">+ Nuevo análisis</button>
     </div>
