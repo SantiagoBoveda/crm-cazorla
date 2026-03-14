@@ -1072,20 +1072,56 @@ function editRecord(type, id){
   });
 }
 
-/* Eliminar registro */
-function deleteRecord(type, id){
+/* Eliminar registro — borra en DB local Y en Google Sheets */
+async function deleteRecord(type, id){
   const sheetKey = {cliente:'clientes',proyecto:'proyectos',tarea:'tareas',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
+  const sheetName = {cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas',calidad:'Calidad'};
   const dbKey = sheetKey[type];
   if(!DB[dbKey]) return;
+
   const rec = DB[dbKey].find(r=>r.ID===id);
   const label = rec?.Empresa||rec?.Nombre||rec?.Titulo||rec?.NumFactura||rec?.Cliente||rec?.Producto||'este registro';
   if(!confirm(`¿Eliminar "${label}"? Esta acción no se puede deshacer.`)) return;
+
+  // Índice de la fila en Sheets (0-indexed dentro de los datos, +1 para saltar el header)
+  const rowIdx = DB[dbKey].indexOf(rec); // 0-based data row
+  const sheetRowIdx = rowIdx + 1;        // 0-based sheet row (row 0 = headers, row 1+ = data)
+
+  // 1. Borrar de memoria local primero
   DB[dbKey] = DB[dbKey].filter(r=>r.ID!==id);
-  // Re-render the relevant section
+
+  // 2. Borrar de Google Sheets si hay conexión
+  if(spreadsheetId && token && rowIdx >= 0){
+    try{
+      // Necesitamos el sheetId numérico de la hoja
+      const metaResp = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
+        {headers:{Authorization:'Bearer '+token}}
+      );
+      const meta = await metaResp.json();
+      const sheet = meta.sheets?.find(s=>s.properties.title===sheetName[type]);
+      if(sheet){
+        const gid = sheet.properties.sheetId;
+        await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
+          {
+            method:'POST',
+            headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+            body: JSON.stringify({requests:[{
+              deleteDimension:{
+                range:{sheetId:gid,dimension:'ROWS',startIndex:sheetRowIdx,endIndex:sheetRowIdx+1}
+              }
+            }]})
+          }
+        );
+      }
+    }catch(e){console.warn('Sheets delete error:',e);}
+  }
+
+  // 3. Re-renderizar
   const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
   if(renders[type]) renders[type]();
   renderDashboard();
-  // Note: does not delete from Google Sheets (would need row number lookup)
 }
 
 async function saveModal(){
@@ -1205,13 +1241,14 @@ function onVentaSaved(row){
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
 }
 
-/* Fecha YYYY-MM-DD → índice de mes (Dic 2025=0, Ene 2026=1 ... Nov 2026=11) */
+/* Fecha YYYY-MM-DD → índice de mes según año activo (Dic año-1 = 0, Ene = 1 ... Nov = 11) */
 function fechaToMesIdx(fecha){
   if(!fecha) return -1;
   const d=new Date(fecha+'T00:00:00');
   const y=d.getFullYear(), m=d.getMonth(); // 0=Jan
-  if(y===2025&&m===11) return 0;  // Dic 2025
-  if(y===2026&&m>=0&&m<=10) return m+1; // Ene=1 … Nov=11
+  const yr = _previsionYear;
+  if(y===yr-1 && m===11) return 0;           // Dic del año anterior
+  if(y===yr && m>=0 && m<=10) return m+1;    // Ene(1)…Nov(11)
   return -1;
 }
 
@@ -1329,13 +1366,19 @@ const PREVISION_YEARS = {2026: null}; // year → data snapshot (null = use curr
 
 function onYearChange(year){
   year = parseInt(year);
-  // If year doesn't exist yet, init it
-  if(!PREVISION_YEARS[year]){
-    PREVISION_YEARS[year] = PRODUCTS.map(p=>({...p, data: JSON.parse(JSON.stringify(p.data))}));
-  }
-  // Update header label
-  const first = Object.keys(PREVISION_YEARS).sort()[0];
+  _previsionYear = year;
+  // Recalcular meses y mes actual para el nuevo año
+  MESES = getMesesForYear(year);
+  MES_ACT_IDX = getMesActIdx(year);
+  // Actualizar títulos
   document.getElementById('page-title').textContent = `🫒 Previsión de Ventas ${year}`;
+  const prod = currentProduct();
+  if(prod){
+    const mesInicio = 'Dic '+(year-1);
+    const mesFin = 'Nov '+year;
+    document.getElementById('subtitle').textContent =
+      `${prod.label} · ${mesInicio} → ${mesFin} · Toneladas`;
+  }
   renderAll();
 }
 
@@ -1343,11 +1386,13 @@ function addPrevisionYear(){
   const sel = document.getElementById('year-filter');
   const years = Array.from(sel.options).map(o=>parseInt(o.value));
   const newYear = Math.max(...years)+1;
-  const opt = document.createElement('option');
-  opt.value = newYear; opt.textContent = newYear;
-  sel.appendChild(opt);
+  // Solo agregar si no existe ya
+  if(!years.includes(newYear)){
+    const opt = document.createElement('option');
+    opt.value = newYear; opt.textContent = newYear;
+    sel.appendChild(opt);
+  }
   sel.value = newYear;
-  PREVISION_YEARS[newYear] = null;
   onYearChange(newYear);
 }
 
@@ -1474,8 +1519,32 @@ function loadPrevisionFromDB(){
   });
 }
 
-const MESES=['Dic','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'];
-const MES_ACT_IDX=2;
+/* ── Meses y mes actual, recalculados según el año seleccionado ── */
+let _previsionYear = 2026;
+
+function getMesesForYear(year){
+  // Ciclo: Dic(año-1) → Ene … Nov(año)
+  return ['Dic','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'];
+}
+
+function getMesActIdx(year){
+  const hoy = new Date();
+  const hoyY = hoy.getFullYear();
+  const hoyM = hoy.getMonth(); // 0=Jan
+  // idx 0 = Dic(year-1), idx 1..11 = Ene..Nov(year)
+  if(hoyY === year - 1 && hoyM === 11) return 0;        // Dic del año anterior
+  if(hoyY === year && hoyM >= 0 && hoyM <= 10) return hoyM + 1; // Ene(1)..Nov(11)
+  if(hoyY > year || (hoyY === year && hoyM === 11)) return 11;  // año ya pasó → último mes
+  return 0; // año futuro → primer mes
+}
+
+function MESES_ACT(){ return getMesesForYear(_previsionYear); }
+function MES_ACT(){ return getMesActIdx(_previsionYear); }
+
+// Alias para compatibilidad con código existente que usa MESES y MES_ACT_IDX directamente
+// Se redirigen a las funciones dinámicas en cada render
+let MESES = getMesesForYear(2026);
+let MES_ACT_IDX = getMesActIdx(2026);
 const EXCEL_DATA={"Argentina":[{"nombre":"Alvarez","comercial":"Santiago","fecha":"2026-01-09","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Bordi","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Castell","comercial":"Santiago","fecha":"2025-12-21","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Don Salim","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"El Matucho","comercial":"Santiago","fecha":"2026-01-15","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,19.5,0,0,0,0,0,0,0,0,0,0]},{"nombre":"G&B","comercial":"Santiago","fecha":"2026-01-17","proy":[0,0,0,0,18,0,0,18,0,0,18,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"La Esquina De Las Aceitunas","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,1.8,0,0,1.8,0,0,1.8,0,0],"real":[0,1.08,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Laur","comercial":"Santiago","fecha":"2025-12-23","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Libanti","comercial":"Santiago","fecha":"2026-01-09","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Rossi","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Olifaza","comercial":"Santiago","fecha":"2026-01-28","proy":[0,0,0,25,25,25,25,25,25,25,25,25],"real":[0,18,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Sabores Pampeanos","comercial":"Santiago","fecha":"2026-01-26","proy":[0,0,0,2.7,0,2.7,0,2.7,0,2.7,0,2.7],"real":[0,2.7,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Vanoli","comercial":"Santiago","fecha":"2025-12-21","proy":[0,0,0,0,36,36,36,36,36,36,36,36],"real":[0,0,0,18,0,0,0,0,0,0,0,0]}],"Australia":[{"nombre":"Ausfresh","comercial":"Santiago","fecha":"2026-01-28","proy":[0,0,0,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2],"real":[28.8,0,0,54,0,0,0,0,0,0,0,0]}],"Brasil":[{"nombre":"Agro Aceitunera Do Brasil","comercial":"Santiago","fecha":"2026-01-24","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[18,18,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Diza","comercial":"Alfonso","fecha":"2026-03-03","proy":[0,0,0,360,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Horta Vitae","comercial":"Santiago","fecha":"2026-02-12","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,18,25,0,0,0,0,0,0,0,0,0]},{"nombre":"La Violetera","comercial":"Santiago","fecha":"2026-01-30","proy":[0,0,90,126,0,0,0,0,0,0,0,0],"real":[0,0,72,18,0,0,0,0,0,0,0,0]},{"nombre":"JBS","comercial":"Santiago","fecha":"2025-12-10","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Mezzani","comercial":"Santiago","fecha":"2025-11-26","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Predilecta","comercial":"Santiago","fecha":"2025-11-14","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Heinz","comercial":"Alfonso","fecha":"2026-03-03","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]}],"Paraguay":[{"nombre":"Downes","comercial":"Santiago","fecha":"2026-01-26","proy":[0,0,36,36,36,36,36,36,36,36,36,36],"real":[0,72,0,0,0,0,0,0,0,0,0,0]}],"Uruguay":[{"nombre":"Pontevedra","comercial":"Santiago","fecha":"2026-01-27","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Pontyn","comercial":"Santiago","fecha":"2025-10-09","proy":[0,0,0,0,18,18,18,18,18,18,18,18],"real":[0,0,0,0,0,0,0,0,0,0,0,0]}]};
 
 function buildEmptyData(){const e={};for(const[p,cs]of Object.entries(EXCEL_DATA))e[p]=cs.map(c=>({...c,proy:Array(12).fill(0),real:Array(12).fill(0)}));return e;}
