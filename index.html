@@ -564,7 +564,19 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   .main{padding:12px;padding-top:62px}
 }
 
-/* ══ STORAGE / BACKUP BUTTONS ══ */
+/* ══ GOOGLE AUTH MODAL ══ */
+.gauth-overlay{position:fixed;inset:0;background:rgba(44,13,28,.6);z-index:700;display:none;align-items:center;justify-content:center;padding:16px}
+.gauth-overlay.open{display:flex}
+.gauth-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(44,13,28,.25)}
+.gauth-modal h3{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:6px}
+.gauth-modal p{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.gauth-input{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:var(--mono);margin-bottom:8px;transition:border-color .15s}
+.gauth-input:focus{outline:none;border-color:var(--accent)}
+.gauth-hint{font-size:11px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+.gauth-hint a{color:var(--accent);text-decoration:none}
+.gauth-hint a:hover{text-decoration:underline}
+.gauth-actions{display:flex;gap:10px}
+.gauth-actions .btn{flex:1}
 .storage-bar{padding:8px 12px;border-top:1px solid var(--sidebar-border);display:flex;flex-direction:column;gap:6px}
 .storage-status{font-size:10px;color:var(--sidebar-muted);font-family:var(--mono);display:flex;align-items:center;gap:5px;padding:4px 0}
 .storage-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--green)}
@@ -1059,10 +1071,13 @@ const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googlea
 const DEFAULT_CLIENT_ID = '678286127164-4mir5gteeapelsv0e8h0vrtgr4jgqt25.apps.googleusercontent.com';
 
 function getActiveClientId(){
-  // Usa el del input si está disponible y completo, sino el default
+  // Prioridad: 1) guardado en localStorage, 2) input del auth-screen, 3) default
+  const saved = localStorage.getItem('crm_client_id');
+  if(saved && saved.includes('.apps.googleusercontent.com')) return saved;
   const inp = document.getElementById('client-id-input');
   const val = inp ? inp.value.trim() : '';
-  return (val && val.includes('.apps.googleusercontent.com')) ? val : DEFAULT_CLIENT_ID;
+  if(val && val.includes('.apps.googleusercontent.com')) return val;
+  return DEFAULT_CLIENT_ID;
 }
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
 let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[]};
@@ -1271,7 +1286,8 @@ function initGoogleAuth(){
   if(!clientId||!clientId.includes('.apps.googleusercontent.com')){
     alert('Ingresá un Client ID válido');return;
   }
-  // Cerrar auth screen y entrar (los datos de localStorage ya están)
+  // Guardar para próximas sesiones
+  localStorage.setItem('crm_client_id', clientId);
   document.getElementById('auth-screen').style.display='none';
   requestGoogleAuth(null);
 }
@@ -2747,6 +2763,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(document.body.classList.contains('warm'))
     document.getElementById('theme-label').textContent='Modo claro';
 
+  // Pre-llenar Client ID guardado en el auth-screen
+  const savedId = localStorage.getItem('crm_client_id');
+  if(savedId){
+    const inp = document.getElementById('client-id-input');
+    if(inp) inp.value = savedId;
+  }
+
   // Si hay datos en localStorage → entrar directo sin pedir login
   const hadData = loadLocal();
   if(hadData){
@@ -2785,7 +2808,42 @@ function showSheetsLink(){
   const btn = document.getElementById('btn-sheets-open');
   if(btn && spreadsheetId) btn.style.display = '';
 }
-/* ── Función única de autenticación Google ── */
+/* ── Mini-modal para ingresar Client ID ── */
+function openGauthModal(){
+  // Pre-llenar con el Client ID guardado si existe
+  const saved = localStorage.getItem('crm_client_id') || DEFAULT_CLIENT_ID;
+  document.getElementById('gauth-client-id').value = saved;
+  document.getElementById('gauth-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('gauth-client-id').select(), 80);
+}
+function closeGauthModal(){
+  document.getElementById('gauth-overlay').classList.remove('open');
+}
+function handleGauthOverlay(e){
+  if(e.target===document.getElementById('gauth-overlay')) closeGauthModal();
+}
+function confirmGoogleAuth(){
+  const id = document.getElementById('gauth-client-id').value.trim();
+  if(!id || !id.includes('.apps.googleusercontent.com')){
+    document.getElementById('gauth-client-id').style.borderColor='var(--red)';
+    setTimeout(()=>document.getElementById('gauth-client-id').style.borderColor='',1500);
+    return;
+  }
+  // Guardar Client ID en localStorage para próximas sesiones
+  localStorage.setItem('crm_client_id', id);
+  closeGauthModal();
+  // Forzar reinicio de tokenClient con el nuevo ID
+  tokenClient = null;
+  requestGoogleAuth(null);
+}
+
+function connectGoogleFromSidebar(){ openGauthModal(); }
+
+/* Ocultar botón conectar cuando ya hay token */
+function hideConnectButton(){
+  const btn = document.getElementById('btn-connect-google');
+  if(btn) btn.style.display = 'none';
+}
 function requestGoogleAuth(onSuccess){
   const clientId = getActiveClientId();
   function doAuth(){
@@ -2880,6 +2938,28 @@ document.querySelectorAll('.nav-item').forEach(n=>{
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeContactModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveContact()">Guardar contacto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GOOGLE AUTH -->
+<div class="gauth-overlay" id="gauth-overlay" onclick="handleGauthOverlay(event)">
+  <div class="gauth-modal">
+    <h3>Conectar con Google</h3>
+    <p>Ingresá tu OAuth Client ID para sincronizar con Google Sheets. Los datos del CRM quedan en tu cuenta.</p>
+    <input class="gauth-input" id="gauth-client-id" type="text"
+      placeholder="xxxxxxxx.apps.googleusercontent.com"
+      onkeydown="if(event.key==='Enter')confirmGoogleAuth()">
+    <div class="gauth-hint">
+      ¿No tenés un Client ID? Crealo en
+      <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a>
+      → Credenciales → Crear ID de cliente OAuth → Aplicación web.<br>
+      En <strong>Orígenes JavaScript autorizados</strong> agregá:
+      <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:11px">https://santiagoboveda.github.io</code>
+    </div>
+    <div class="gauth-actions">
+      <button class="btn btn-outline" onclick="closeGauthModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmGoogleAuth()">Conectar</button>
     </div>
   </div>
 </div>
