@@ -387,6 +387,81 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .amount-cell.negative{color:var(--red)}
 .amount-cell.pending{color:var(--yellow)}
 
+/* ══ CONTACTOS ══ */
+.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:4px}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;transition:box-shadow .2s;box-shadow:0 1px 4px rgba(123,29,58,.06)}
+.contact-card:hover{box-shadow:0 4px 16px rgba(123,29,58,.12);border-color:var(--border2)}
+.contact-card-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.contact-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
+.contact-name{font-size:15px;font-weight:700;color:var(--text)}
+.contact-cargo{font-size:12px;color:var(--muted);margin-top:2px}
+.contact-empresa{font-size:11px;color:var(--accent);font-weight:600;margin-top:3px}
+.contact-fields{display:flex;flex-direction:column;gap:8px}
+.contact-field{display:flex;align-items:center;gap:10px;font-size:13px}
+.contact-field-icon{width:28px;height:28px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.contact-field-val{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact-field-val a{color:var(--accent);text-decoration:none}
+.contact-field-val a:hover{text-decoration:underline}
+.contact-actions{display:flex;gap:6px;position:absolute;top:16px;right:16px;opacity:0;transition:opacity .15s}
+.contact-card:hover .contact-actions{opacity:1}
+.contact-source{font-size:10px;color:var(--muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono)}
+
+/* Modal de contacto */
+.contact-modal-overlay{position:fixed;inset:0;background:rgba(44,13,28,.5);z-index:600;display:none;align-items:center;justify-content:center;padding:16px}
+.contact-modal-overlay.open{display:flex}
+.contact-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(44,13,28,.2)}
+.contact-modal h3{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:20px}
+
+/* ══ MOBILE HAMBURGER ══ */
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:300;width:40px;height:40px;border-radius:10px;background:var(--sidebar-bg);border:1px solid var(--sidebar-border);align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:5px;padding:10px}
+.hamburger span{display:block;width:18px;height:2px;background:#f8c8d8;border-radius:2px;transition:all .25s}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98}
+
+/* ══ MOBILE RESPONSIVE ══ */
+@media(max-width:768px){
+  .hamburger{display:flex}
+  .sidebar-overlay.open{display:block}
+  .sidebar{transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:200}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .main{margin-left:0;padding:16px;padding-top:64px}
+  .page-header{flex-direction:column!important;gap:12px}
+  .page-header>div:last-child{width:100%;flex-wrap:wrap}
+  .search-bar input{width:100%!important}
+  .btn{width:100%;justify-content:center;display:flex;align-items:center}
+  .page-header .btn{width:auto}
+  .form-row{grid-template-columns:1fr!important}
+  .modal{padding:20px;width:95%!important;max-width:none!important}
+  .modal-actions{flex-direction:column-reverse}
+  .modal-actions .btn{width:100%}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .cards-grid{grid-template-columns:1fr 1fr}
+  .chart-grid{grid-template-columns:1fr!important}
+  .kanban{grid-template-columns:1fr!important;overflow-x:auto}
+  .contacts-grid{grid-template-columns:1fr}
+  .contact-actions{opacity:1}
+  .btn-row-edit,.btn-row-del{opacity:1!important}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .filter-bar{flex-wrap:wrap}
+  .mod-toolbar{overflow-x:auto}
+  .state-pills{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}
+  .cal-charts{grid-template-columns:1fr!important}
+  .prov-grid{grid-template-columns:1fr!important}
+  .header{flex-direction:column;gap:12px}
+  .tabs-row{flex-wrap:wrap}
+  .table-wrap{overflow-x:auto}
+  .auth-card{padding:28px 20px}
+  .contact-modal{padding:20px}
+  .mprov{max-width:none;margin:16px}
+  .mprov-grid{grid-template-columns:1fr!important}
+  .mprov-field.full{grid-column:1!important}
+}
+@media(max-width:480px){
+  .cards-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr}
+  .page-header h1{font-size:18px}
+  .form-group input,.form-group select,.form-group textarea{font-size:16px}/* prevent iOS zoom */
+}
+
 /* ══ ROW ACTION BUTTONS ══ */
 .row-actions{white-space:nowrap;text-align:right;padding-right:12px!important}
 .btn-row-edit,.btn-row-del{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;font-size:13px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
@@ -515,11 +590,18 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   </div>
 </div>
 
+<!-- HAMBURGER (mobile) -->
+<div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="main-sidebar">
   <div class="logo"><h2>CRM</h2><p>Grupo Cazorla</p></div>
   <div class="nav-item active" onclick="showSection('dashboard',this)"><span class="icon">📊</span><span>Dashboard</span></div>
   <div class="nav-item" onclick="showSection('clientes',this)"><span class="icon">👥</span><span>Clientes</span></div>
+  <div class="nav-item" onclick="showSection('contactos',this)"><span class="icon">📇</span><span>Contactos</span></div>
   <div class="nav-item" onclick="showSection('proyectos',this)"><span class="icon">📁</span><span>Proyectos</span></div>
   <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
   <div class="nav-item" onclick="showSection('inventario',this)"><span class="icon">📦</span><span>Inventario</span></div>
@@ -578,6 +660,22 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <thead><tr><th>Empresa</th><th>Contacto</th><th>País</th><th>Rubro</th><th>Estado</th><th>Última interacción</th><th style="width:70px"></th></tr></thead>
         <tbody id="clientes-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody>
       </table>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- CONTACTOS -->
+  <div class="section" id="section-contactos">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+      <div><h1>📇 Contactos</h1><p>Agenda de personas · vinculada a clientes</p></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div class="search-bar"><input type="text" id="contactos-search" placeholder="Buscar contacto..." oninput="filterContactos(this.value)"></div>
+        <button class="btn btn-primary" onclick="openContactModal()">+ Nuevo contacto</button>
+      </div>
+    </div>
+    <div class="contacts-grid" id="contacts-grid">
+      <div class="empty-state"><div class="icon">📇</div><p>Sin contactos aún</p></div>
     </div>
   </div>
 
@@ -825,7 +923,7 @@ function toggleTheme() {
 ═══════════════════════════════════════ */
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[]};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[]};
 let currentCRMModal=null;
 
 function getClientId(){ return document.getElementById('client-id-input').value.trim(); }
@@ -856,7 +954,7 @@ function handleTokenResponse(resp){
 }
 
 const HEADERS={
-  Clientes:['ID','Empresa','Contacto','Email','Telefono','Pais','Rubro','Estado','UltimaInteraccion','Notas'],
+  Clientes:['ID','Empresa','Contacto','Cargo','Telefono','Telefono2','Email','Email2','Pais','Rubro','Estado','UltimaInteraccion','Notas'],
   Proyectos:['ID','Nombre','Cliente','Producto','ValorUSD','Etapa','Responsable','FechaInicio','FechaEstimada','Notas'],
   Tareas:['ID','Titulo','Descripcion','Asignado','Prioridad','Estado','FechaVenc'],
   Inventario:['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],
@@ -864,6 +962,7 @@ const HEADERS={
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
   Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'],
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
+  Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11']
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
@@ -885,7 +984,7 @@ async function findOrCreateSpreadsheet(){
 }
 async function loadAllData(){
   if(!spreadsheetId||!token)return;
-  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad',Prevision:'prevision'};
+  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad',Prevision:'prevision',Contactos:'contactos'};
   for(const[sheet,key]of Object.entries(map)){
     try{
       const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
@@ -912,6 +1011,7 @@ function showSection(id,el){
   if(el)el.classList.add('active');
   if(id==='dashboard')renderDashboard();
   else if(id==='clientes')renderClientes();
+  else if(id==='contactos')renderContactos();
   else if(id==='proyectos')renderProyectos();
   else if(id==='tareas')renderTareas();
   else if(id==='inventario')renderInventario();
@@ -1019,7 +1119,7 @@ function filterTable(id,q){
    CRM BASE MODAL (renamed to avoid conflict)
 ═══════════════════════════════════════ */
 const FORMS={
-  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa</label><input id="f-Empresa"></div><div class="form-group"><label>Contacto</label><input id="f-Contacto"></div></div><div class="form-row"><div class="form-group"><label>Email</label><input id="f-Email" type="email"></div><div class="form-group"><label>Teléfono</label><input id="f-Telefono"></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Rubro</label><input id="f-Rubro"></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro</label><input id="f-Rubro" placeholder="Aceitunas, Tomate…"></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
   producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" data-smartlist="Categoría"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
@@ -1184,23 +1284,46 @@ async function saveModal(){
   renderDashboard();
 }
 
-/* ─── Hook: cliente nuevo → agregar a Previsión en todos los productos ─── */
+/* ─── Hook: cliente nuevo → agregar a Previsión + crear contacto ─── */
 function onClienteSaved(row){
   const empresa = (row.Empresa||'').trim();
   const pais    = (row.Pais||'Argentina').trim();
   if(!empresa) return;
+
+  // 1. Agregar a Previsión en todos los productos
   PRODUCTS.forEach(prod=>{
     if(!prod.data[pais]) prod.data[pais]=[];
     const exists = prod.data[pais].find(c=>c.nombre===empresa);
     if(!exists){
-      const entry={nombre:empresa,comercial:row.Contacto||'',fecha:row.UltimaInteraccion||new Date().toISOString().slice(0,10),proy:Array(12).fill(0),real:Array(12).fill(0)};
-      prod.data[pais].push(entry);
+      prod.data[pais].push({nombre:empresa,comercial:row.Contacto||'',fecha:row.UltimaInteraccion||new Date().toISOString().slice(0,10),proy:Array(12).fill(0),real:Array(12).fill(0)});
     }
   });
-  // persist prevision row for "aceitunas" (primary product) if sheets connected
   syncPrevisionRow('aceitunas', pais, empresa);
-  // refresh prevision if visible
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
+
+  // 2. Auto-crear contacto si hay nombre de contacto
+  const nombreContacto = (row.Contacto||'').trim();
+  if(nombreContacto){
+    const contacto = {
+      ID: genId(),
+      Nombre: nombreContacto,
+      Cargo: row.Cargo||'',
+      Empresa: empresa,
+      Tel1: row.Telefono||'',
+      Tel2: row.Telefono2||'',
+      Email1: row.Email||'',
+      Email2: row.Email2||'',
+      Pais: pais,
+      WhatsApp: row.Telefono||'',
+      Notas: `Creado automáticamente desde cliente ${empresa}`
+    };
+    // Evitar duplicados por nombre+empresa
+    const existe = DB.contactos.find(c=>c.Nombre===nombreContacto && c.Empresa===empresa);
+    if(!existe){
+      DB.contactos.push(contacto);
+      if(spreadsheetId) appendRow('Contactos', contacto);
+    }
+  }
 }
 
 /* ─── Hook: venta nueva → actualizar "real" en Previsión ─── */
@@ -1480,6 +1603,141 @@ async function saveModal(){
   }
   closeCRMModal();renderDashboard();
 }
+
+/* ═══════════════════════════════════════
+   CONTACTOS
+═══════════════════════════════════════ */
+let _editingContactId = null;
+
+function renderContactos(filter){
+  const grid = document.getElementById('contacts-grid');
+  if(!grid) return;
+  const q = (filter !== undefined ? filter : (document.getElementById('contactos-search')?.value||'')).toLowerCase();
+  const data = q
+    ? DB.contactos.filter(c=>[c.Nombre,c.Empresa,c.Cargo,c.Email1,c.Tel1,c.Pais].join(' ').toLowerCase().includes(q))
+    : DB.contactos;
+
+  if(!data.length){
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">📇</div><p>'+(q?'Sin resultados para "'+q+'"':'Sin contactos aún. Se crean automáticamente al agregar un cliente con responsable.')+'</p></div>';
+    return;
+  }
+  grid.innerHTML = data.map(c=>{
+    const initials = (c.Nombre||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const tel1Link = c.Tel1?`<a href="tel:${c.Tel1.replace(/\s/g,'')}">${c.Tel1}</a>`:'';
+    const tel2Link = c.Tel2?` · <a href="tel:${c.Tel2.replace(/\s/g,'')}">${c.Tel2}</a>`:'';
+    const mail1Link= c.Email1?`<a href="mailto:${c.Email1}">${c.Email1}</a>`:'';
+    const mail2Link= c.Email2?` · <a href="mailto:${c.Email2}">${c.Email2}</a>`:'';
+    const waLink   = c.WhatsApp?`https://wa.me/${(c.WhatsApp).replace(/[^0-9]/g,'')}`:'';
+    return `<div class="contact-card">
+      <div class="contact-actions">
+        <button class="btn-row-edit" title="Editar" onclick="openContactModal('${c.ID}')">✏️</button>
+        <button class="btn-row-del" title="Eliminar" onclick="deleteContact('${c.ID}')">🗑</button>
+      </div>
+      <div class="contact-card-header">
+        <div class="contact-avatar">${initials}</div>
+        <div>
+          <div class="contact-name">${c.Nombre||'—'}</div>
+          ${c.Cargo?`<div class="contact-cargo">${c.Cargo}</div>`:''}
+          ${c.Empresa?`<div class="contact-empresa">🏢 ${c.Empresa}</div>`:''}
+        </div>
+      </div>
+      <div class="contact-fields">
+        ${(c.Tel1||c.Tel2)?`<div class="contact-field"><div class="contact-field-icon">📞</div><div class="contact-field-val">${tel1Link}${tel2Link}</div></div>`:''}
+        ${waLink?`<div class="contact-field"><div class="contact-field-icon">💬</div><div class="contact-field-val"><a href="${waLink}" target="_blank">${c.WhatsApp}</a></div></div>`:''}
+        ${(c.Email1||c.Email2)?`<div class="contact-field"><div class="contact-field-icon">✉️</div><div class="contact-field-val">${mail1Link}${mail2Link}</div></div>`:''}
+        ${c.Pais?`<div class="contact-field"><div class="contact-field-icon">🌍</div><div class="contact-field-val">${c.Pais}</div></div>`:''}
+        ${c.Notas?`<div class="contact-field"><div class="contact-field-icon">📝</div><div class="contact-field-val" style="white-space:normal;font-size:12px;color:var(--muted)">${c.Notas}</div></div>`:''}
+      </div>
+      ${c.Empresa?`<div class="contact-source">Vinculado a ${c.Empresa}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function filterContactos(q){ renderContactos(q); }
+
+function openContactModal(id){
+  _editingContactId = id||null;
+  const sel = document.getElementById('cm-empresa');
+  const empresas = [...new Set(DB.clientes.map(c=>c.Empresa).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">— Sin empresa —</option>' +
+    empresas.map(e=>`<option value="${e}">${e}</option>`).join('');
+  if(id){
+    const c = DB.contactos.find(x=>x.ID===id); if(!c) return;
+    document.getElementById('contact-modal-title').textContent='Editar contacto';
+    document.getElementById('cm-nombre').value=c.Nombre||'';
+    document.getElementById('cm-cargo').value=c.Cargo||'';
+    document.getElementById('cm-empresa').value=c.Empresa||'';
+    document.getElementById('cm-tel1').value=c.Tel1||'';
+    document.getElementById('cm-tel2').value=c.Tel2||'';
+    document.getElementById('cm-email1').value=c.Email1||'';
+    document.getElementById('cm-email2').value=c.Email2||'';
+    document.getElementById('cm-pais').value=c.Pais||'';
+    document.getElementById('cm-wa').value=c.WhatsApp||'';
+    document.getElementById('cm-notas').value=c.Notas||'';
+  } else {
+    document.getElementById('contact-modal-title').textContent='Nuevo contacto';
+    ['cm-nombre','cm-cargo','cm-tel1','cm-tel2','cm-email1','cm-email2','cm-pais','cm-wa','cm-notas'].forEach(i=>{document.getElementById(i).value='';});
+    sel.value='';
+  }
+  document.getElementById('contact-modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('cm-nombre').focus(),80);
+}
+
+function closeContactModal(){
+  document.getElementById('contact-modal-overlay').classList.remove('open');
+  _editingContactId=null;
+}
+function handleContactOverlay(e){if(e.target===document.getElementById('contact-modal-overlay'))closeContactModal();}
+
+async function saveContact(){
+  const nombre=document.getElementById('cm-nombre').value.trim();
+  if(!nombre){document.getElementById('cm-nombre').focus();return;}
+  const data={
+    Nombre:nombre,
+    Cargo:document.getElementById('cm-cargo').value.trim(),
+    Empresa:document.getElementById('cm-empresa').value,
+    Tel1:document.getElementById('cm-tel1').value.trim(),
+    Tel2:document.getElementById('cm-tel2').value.trim(),
+    Email1:document.getElementById('cm-email1').value.trim(),
+    Email2:document.getElementById('cm-email2').value.trim(),
+    Pais:document.getElementById('cm-pais').value.trim(),
+    WhatsApp:document.getElementById('cm-wa').value.trim(),
+    Notas:document.getElementById('cm-notas').value.trim(),
+  };
+  if(_editingContactId){
+    const idx=DB.contactos.findIndex(c=>c.ID===_editingContactId);
+    if(idx>=0){
+      DB.contactos[idx]={...DB.contactos[idx],...data};
+      if(spreadsheetId&&token){
+        const values=[HEADERS['Contactos'].map(h=>DB.contactos[idx][h]||'')];
+        try{await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Contactos!A${idx+2}:Z${idx+2}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})});}catch(e){console.warn(e);}
+      }
+    }
+  } else {
+    const contacto={ID:genId(),...data};
+    DB.contactos.push(contacto);
+    if(spreadsheetId) await appendRow('Contactos',contacto);
+  }
+  closeContactModal();
+  renderContactos();
+}
+
+async function deleteContact(id){
+  const c=DB.contactos.find(x=>x.ID===id); if(!c) return;
+  if(!confirm(`¿Eliminar contacto "${c.Nombre}"?`)) return;
+  const idx=DB.contactos.indexOf(c);
+  DB.contactos=DB.contactos.filter(x=>x.ID!==id);
+  if(spreadsheetId&&token&&idx>=0){
+    try{
+      const metaR=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,{headers:{Authorization:'Bearer '+token}});
+      const meta=await metaR.json();
+      const sheet=meta.sheets?.find(s=>s.properties.title==='Contactos');
+      if(sheet){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({requests:[{deleteDimension:{range:{sheetId:sheet.properties.sheetId,dimension:'ROWS',startIndex:idx+1,endIndex:idx+2}}}]})});}
+    }catch(e){console.warn(e);}
+  }
+  renderContactos();
+}
+
 /* ─── Poblar PRODUCTS[*].data desde DB.prevision (cargado de Sheets) ─── */
 function loadPrevisionFromDB(){
   if(!DB.prevision||!DB.prevision.length) return;
@@ -2050,6 +2308,54 @@ function renderCalidad(){
 document.addEventListener('DOMContentLoaded',()=>{
   if(document.body.classList.contains('warm'))document.getElementById('theme-label').textContent='Modo claro';
 });
+
+/* ── MOBILE SIDEBAR ── */
+function toggleSidebar(){
+  const sb=document.getElementById('main-sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  const open=sb.classList.toggle('mobile-open');
+  ov.classList.toggle('open',open);
+}
+function closeSidebar(){
+  document.getElementById('main-sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+// Cerrar sidebar al navegar en mobile
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();});
+});
 </script>
+<!-- MODAL CONTACTO -->
+<div class="contact-modal-overlay" id="contact-modal-overlay" onclick="handleContactOverlay(event)">
+  <div class="contact-modal">
+    <h3 id="contact-modal-title">Nuevo contacto</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Nombre completo *</label><input id="cm-nombre" type="text" placeholder="Juan García"></div>
+      <div class="form-group"><label>Cargo / Rol</label><input id="cm-cargo" type="text" placeholder="Gerente de compras"></div>
+    </div>
+    <div class="form-group">
+      <label>Empresa vinculada</label>
+      <select id="cm-empresa"><option value="">— Sin empresa —</option></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Teléfono 1</label><input id="cm-tel1" type="tel" placeholder="+54 9 11 1234-5678"></div>
+      <div class="form-group"><label>Teléfono 2</label><input id="cm-tel2" type="tel" placeholder="+54 9 261 400-0000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Email 1</label><input id="cm-email1" type="email" placeholder="contacto@empresa.com"></div>
+      <div class="form-group"><label>Email 2</label><input id="cm-email2" type="email" placeholder="personal@gmail.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>País</label><input id="cm-pais" type="text" placeholder="Argentina"></div>
+      <div class="form-group"><label>WhatsApp</label><input id="cm-wa" type="tel" placeholder="+54 9 11 1234-5678"></div>
+    </div>
+    <div class="form-group"><label>Notas</label><textarea id="cm-notas" style="min-height:64px" placeholder="Observaciones, preferencias, horarios de contacto…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeContactModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveContact()">Guardar contacto</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
