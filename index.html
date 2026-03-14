@@ -564,7 +564,16 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   .main{padding:12px;padding-top:62px}
 }
 
-/* ══ ROW ACTION BUTTONS ══ */
+/* ══ STORAGE / BACKUP BUTTONS ══ */
+.storage-bar{padding:8px 12px;border-top:1px solid var(--sidebar-border);display:flex;flex-direction:column;gap:6px}
+.storage-status{font-size:10px;color:var(--sidebar-muted);font-family:var(--mono);display:flex;align-items:center;gap:5px;padding:4px 0}
+.storage-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--green)}
+.storage-dot.warn{background:var(--yellow)}
+.backup-btns{display:flex;gap:5px}
+.btn-backup{flex:1;padding:6px 4px;border-radius:7px;border:1px solid var(--sidebar-border);background:var(--sidebar-active-bg);color:var(--sidebar-muted);font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;white-space:nowrap}
+.btn-backup:hover{border-color:#e88aa8;color:#f8c8d8}
+.btn-backup.sheets-btn{border-color:rgba(22,163,74,.3);color:#16a34a}
+.btn-backup.sheets-btn:hover{background:rgba(22,163,74,.1);border-color:#16a34a}
 .row-actions{white-space:nowrap;text-align:right;padding-right:12px!important}
 .btn-row-edit,.btn-row-del{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;font-size:13px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
 .btn-row-edit:hover{background:rgba(123,29,58,.08);border-color:var(--border);color:var(--accent)}
@@ -625,6 +634,9 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <button class="btn-google" onclick="initGoogleAuth()">
       <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       Iniciar sesión con Google
+    </button>
+    <button onclick="continueOffline()" style="margin-top:10px;width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+      Continuar sin Google (solo local)
     </button>
   </div>
 </div>
@@ -720,12 +732,26 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <span id="theme-label">Modo oscuro</span>
   </div>
 
+  <!-- STORAGE STATUS + BACKUP -->
+  <div class="storage-bar">
+    <div class="storage-status">
+      <div class="storage-dot" id="storage-dot"></div>
+      <span id="storage-label">localStorage activo</span>
+    </div>
+    <div class="backup-btns">
+      <button class="btn-backup" onclick="exportBackup()" title="Descargar backup JSON">⬇ Export</button>
+      <button class="btn-backup" onclick="document.getElementById('import-file').click()" title="Importar backup JSON">⬆ Import</button>
+      <button class="btn-backup sheets-btn" id="btn-sheets-sync" onclick="syncToSheets()" title="Sincronizar con Google Sheets (backup)">☁ Sheets</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this)">
+    </div>
+  </div>
+
   <div class="sidebar-footer">
     <div class="user-chip">
       <div class="avatar" id="user-avatar">?</div>
       <div style="font-size:12px;overflow:hidden">
         <div id="user-name" style="font-weight:600">Sin sesión</div>
-        <div style="color:var(--muted);font-size:11px" id="sync-status-text">Desconectado</div>
+        <div style="color:var(--sidebar-muted);font-size:11px" id="sync-status-text">Desconectado</div>
       </div>
     </div>
   </div>
@@ -759,7 +785,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="table-container">
       <table id="clientes-table">
-        <thead><tr><th>Empresa</th><th>Contacto</th><th>País</th><th>Rubro</th><th>Estado</th><th>Última interacción</th><th style="width:70px"></th></tr></thead>
+        <thead><tr><th>Empresa</th><th>Contacto</th><th>País</th><th>Rubro</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Últ. interacción</th><th style="width:70px"></th></tr></thead>
         <tbody id="clientes-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody>
       </table>
     </div>
@@ -1026,6 +1052,197 @@ let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
 let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[]};
 let currentCRMModal=null;
 
+const LS_KEY = 'crm_cazorla_db';
+
+/* ═══════════════════════════════════════
+   LOCAL STORAGE + AUTO-BACKUP A SHEETS
+═══════════════════════════════════════ */
+let _dirty = false;           // hay cambios sin respaldar a Sheets
+let _autoBackupTimer = null;
+const AUTO_BACKUP_MS = 10 * 60 * 1000; // 10 minutos
+
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(DB));
+    _dirty = true;
+    updateStorageStatus();
+    scheduleAutoBackup();
+  }catch(e){ console.warn('localStorage write error', e); }
+}
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      Object.keys(DB).forEach(k=>{ if(parsed[k]) DB[k]=parsed[k]; });
+      migrateDB();
+      return true;
+    }
+  }catch(e){ console.warn('localStorage read error', e); }
+  return false;
+}
+
+/* Migración: corregir registros de versiones anteriores con campos desalineados */
+function migrateDB(){
+  // Clientes viejos: detectar si Email está en columna Rubro (campo mal mapeado)
+  // La versión vieja tenía: ID,Empresa,Contacto,Email,Telefono,Pais,Rubro,Estado,UltimaInteraccion,Notas
+  // La nueva tiene:         ID,Empresa,Contacto,Cargo,Telefono,Telefono2,Email,Email2,Pais,Rubro,Estado,UltimaInteraccion,Notas
+  DB.clientes = DB.clientes.map(c => {
+    // Detectar registro mal mapeado: Rubro contiene un @ (es un email)
+    if(c.Rubro && c.Rubro.includes('@')){
+      // Estructura vieja: Empresa,Contacto,Email(en Rubro),Telefono(en Pais),Pais(en Estado),Estado(en UltimaInteraccion)...
+      // En realidad el objeto JS tiene nombres correctos si se guardó con el nuevo saveModal
+      // pero si vino de Sheets con columnas viejas, puede estar mal
+      // Corregir: mover Email de Rubro a Email, limpiar Rubro
+      return {
+        ...c,
+        Email: c.Email || c.Rubro,
+        Rubro: '',
+        // Si Pais tiene un teléfono (empieza con +), revertir
+        Telefono: c.Telefono || (c.Pais&&c.Pais.startsWith('+') ? c.Pais : ''),
+        Pais: (c.Pais&&c.Pais.startsWith('+')) ? (c.Estado||'') : (c.Pais||''),
+        Estado: (c.Pais&&c.Pais.startsWith('+')) ? (c.UltimaInteraccion||'') : (c.Estado||''),
+        UltimaInteraccion: (c.Pais&&c.Pais.startsWith('+')) ? '' : (c.UltimaInteraccion||''),
+      };
+    }
+    // Detectar registro donde UltimaInteraccion tiene un país (es texto, no fecha)
+    if(c.UltimaInteraccion && !/^\d{4}-\d{2}-\d{2}$/.test(c.UltimaInteraccion) && !c.Pais){
+      return { ...c, Pais: c.UltimaInteraccion, UltimaInteraccion: '' };
+    }
+    return c;
+  });
+}
+
+function updateStorageStatus(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    const size = raw ? (new Blob([raw]).size/1024).toFixed(1) : 0;
+    const total = Object.values(DB).reduce((s,a)=>s+a.length,0);
+    const dot = document.getElementById('storage-dot');
+    const lbl = document.getElementById('storage-label');
+    if(!dot||!lbl) return;
+    if(_dirty && token){
+      dot.className = 'storage-dot warn';
+      lbl.textContent = `Local · ${total} reg · pendiente Sheets`;
+    } else {
+      dot.className = 'storage-dot';
+      lbl.textContent = `Local · ${total} reg · ${size}KB`;
+    }
+  }catch(e){}
+}
+
+/* ── Programa backup automático a Sheets en 10 min ── */
+function scheduleAutoBackup(){
+  if(!token) return;               // sin Google conectado, no tiene sentido
+  clearTimeout(_autoBackupTimer);
+  _autoBackupTimer = setTimeout(()=>{
+    if(_dirty && token) silentSyncToSheets();
+  }, AUTO_BACKUP_MS);
+}
+
+/* ── Backup silencioso (sin alertas, solo indicador) ── */
+async function silentSyncToSheets(){
+  if(!_dirty || !token || !spreadsheetId) return;
+  try{
+    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',tareas:'Tareas',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',calidad:'Calidad',contactos:'Contactos'};
+    for(const [dbKey, sheetName] of Object.entries(sheetMap)){
+      if(!DB[dbKey]?.length) continue;
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:Z:clear`,
+        {method:'POST', headers:{Authorization:'Bearer '+token}});
+      const cols = HEADERS[sheetName];
+      const values = [cols, ...DB[dbKey].map(row=>cols.map(c=>row[c]||''))];
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A1?valueInputOption=RAW`,
+        {method:'PUT', headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+         body:JSON.stringify({values})});
+    }
+    _dirty = false;
+    const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('storage-label').textContent = `Backup Sheets ${now} ✓`;
+    document.getElementById('storage-dot').className = 'storage-dot';
+    document.getElementById('sync-status-text').textContent = `Sheets ${now} ✓`;
+  }catch(e){
+    console.warn('Auto-backup error:', e);
+  }
+}
+
+/* ── Backup manual (con feedback visible) ── */
+async function syncToSheets(){
+  if(!token){ alert('Iniciá sesión con Google primero.'); return; }
+  if(!spreadsheetId){ await findOrCreateSpreadsheet(false); }
+  const btn = document.getElementById('btn-sheets-sync');
+  btn.textContent = '↻'; btn.disabled = true;
+  await silentSyncToSheets();
+  if(!_dirty){
+    btn.textContent = '✅';
+    setTimeout(()=>{ btn.textContent='☁ Sheets'; btn.disabled=false; }, 2000);
+  } else {
+    btn.textContent = '❌';
+    setTimeout(()=>{ btn.textContent='☁ Sheets'; btn.disabled=false; }, 2000);
+  }
+}
+
+/* ── Al cerrar la pestaña: backup inmediato si hay cambios ── */
+window.addEventListener('beforeunload', e => {
+  if(_dirty && token && spreadsheetId){
+    // Intentar backup síncrono (navigator.sendBeacon no aplica aquí)
+    // Lo más confiable: marcar y lanzar fetch (puede no completarse si cierra rápido)
+    silentSyncToSheets();
+    // No bloquear cierre — solo intentamos
+  }
+});
+
+/* ── visibilitychange: backup cuando el usuario sale de la pestaña ── */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'hidden' && _dirty && token && spreadsheetId){
+    silentSyncToSheets();
+  }
+});
+
+/* ── Export backup JSON ── */
+function exportBackup(){
+  const data = {
+    version: 2,
+    exported: new Date().toISOString(),
+    DB
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `CRM_Cazorla_backup_${new Date().toISOString().slice(0,10)}.json`
+  });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ── Import backup JSON ── */
+function importBackup(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      const src = data.DB || data; // support both wrapped and raw
+      let count = 0;
+      Object.keys(DB).forEach(k=>{
+        if(src[k] && Array.isArray(src[k])){ DB[k]=src[k]; count+=src[k].length; }
+      });
+      saveLocal();
+      loadPrevisionFromDB();
+      renderDashboard();
+      // Re-render current section
+      const active = document.querySelector('.section.active');
+      if(active) showSection(active.id.replace('section-',''), null);
+      alert(`✅ Importado correctamente: ${count} registros totales.`);
+    }catch(err){
+      alert('❌ Error al importar: el archivo no es un backup válido.');
+    }
+  };
+  reader.readAsText(file);
+  input.value = ''; // reset so same file can be re-imported
+}
+
 function getClientId(){ return document.getElementById('client-id-input').value.trim(); }
 
 function initGoogleAuth(){
@@ -1034,6 +1251,7 @@ function initGoogleAuth(){
   tokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:SCOPES,callback:handleTokenResponse});
   tokenClient.requestAccessToken();
 }
+
 function handleTokenResponse(resp){
   if(resp.error){alert('Error: '+resp.error);return;}
   token=resp.access_token;
@@ -1042,15 +1260,30 @@ function handleTokenResponse(resp){
     userData={name:info.name||info.email,email:info.email};
     document.getElementById('user-name').textContent=userData.name;
     document.getElementById('user-avatar').textContent=userData.name.charAt(0).toUpperCase();
-    document.getElementById('sync-status-text').textContent='Sincronizado ✓';
+    document.getElementById('sync-status-text').textContent='Google conectado';
     document.getElementById('auth-screen').style.display='none';
-    findOrCreateSpreadsheet();
+    // Con localStorage ya tenemos datos
+    findOrCreateSpreadsheet(false);
+    // Activar auto-backup ahora que tenemos token
+    scheduleAutoBackup();
+    updateStorageStatus();
   }).catch(()=>{
     document.getElementById('auth-screen').style.display='none';
     document.getElementById('user-name').textContent='Usuario';
     document.getElementById('sync-status-text').textContent='Conectado';
-    findOrCreateSpreadsheet();
   });
+}
+
+/* Opción "Continuar sin Google" — usa solo localStorage */
+function continueOffline(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('user-name').textContent='Sin cuenta';
+  document.getElementById('sync-status-text').textContent='Solo local';
+  document.getElementById('user-avatar').textContent='👤';
+  loadLocal();
+  loadPrevisionFromDB();
+  renderDashboard();
+  updateStorageStatus();
 }
 
 const HEADERS={
@@ -1067,7 +1300,7 @@ const HEADERS={
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
-async function findOrCreateSpreadsheet(){
+async function findOrCreateSpreadsheet(skipLoad=false){
   try{
     const r=await fetch("https://www.googleapis.com/drive/v3/files?q=name%3D'CRM_Cazorla_DB'%20and%20mimeType%3D'application/vnd.google-apps.spreadsheet'%20and%20trashed%3Dfalse&fields=files(id,name)",{headers:{Authorization:'Bearer '+token}});
     const d=await r.json();
@@ -1077,10 +1310,12 @@ async function findOrCreateSpreadsheet(){
       const cd=await cr.json();spreadsheetId=cd.spreadsheetId;
       for(const[sheet,cols]of Object.entries(HEADERS)){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A1:append?valueInputOption=RAW`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[cols]})});}
     }
-    await loadAllData();
-    loadPrevisionFromDB(); // ← populate PRODUCTS[*].data from Sheets
-    renderDashboard();
-  }catch(e){console.error(e);renderDashboard();}
+    if(!skipLoad){
+      await loadAllData();
+      loadPrevisionFromDB();
+      renderDashboard();
+    }
+  }catch(e){console.error(e);if(!skipLoad)renderDashboard();}
 }
 async function loadAllData(){
   if(!spreadsheetId||!token)return;
@@ -1136,15 +1371,27 @@ function renderDashboard(){
 }
 function renderClientes(){
   const tb=document.getElementById('clientes-tbody');if(!tb)return;
-  if(!DB.clientes.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><p>Sin clientes</p></div></td></tr>';return;}
-  tb.innerHTML=DB.clientes.map(c=>`<tr>
-    <td>${c.Empresa||'—'}</td><td>${c.Contacto||'—'}</td><td>${c.Pais||'—'}</td><td>${c.Rubro||'—'}</td>
-    <td><span class="badge badge-${c.Estado==='Activo'?'green':c.Estado==='Prospecto'?'yellow':'red'}">${c.Estado||'—'}</span></td>
-    <td>${c.UltimaInteraccion||'—'}</td>
-    <td class="row-actions">
-      <button class="btn-row-edit" onclick="editRecord('cliente','${c.ID}')">✏️</button>
-      <button class="btn-row-del" onclick="deleteRecord('cliente','${c.ID}')">🗑</button>
-    </td></tr>`).join('');
+  if(!DB.clientes.length){tb.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="icon">👥</div><p>Sin clientes</p></div></td></tr>';return;}
+  tb.innerHTML=DB.clientes.map(c=>{
+    const tel = c.Telefono||c.Telefono2||'—';
+    const email = c.Email||c.Email2||'—';
+    const emailHtml = email!=='—' ? `<a href="mailto:${email}" style="color:var(--accent);font-size:12px">${email}</a>` : '—';
+    const telHtml = tel!=='—' ? `<a href="tel:${tel.replace(/\s/g,'')}" style="color:var(--text);font-size:12px">${tel}</a>` : '—';
+    const estadoBadge = c.Estado==='Activo'?'green':c.Estado==='Prospecto'?'yellow':c.Estado==='Inactivo'?'red':'blue';
+    return`<tr>
+      <td><strong>${c.Empresa||'—'}</strong></td>
+      <td>${c.Contacto||'—'}${c.Cargo?`<div style="font-size:11px;color:var(--muted)">${c.Cargo}</div>`:''}</td>
+      <td>${c.Pais||'—'}</td>
+      <td>${c.Rubro||'—'}</td>
+      <td>${telHtml}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${emailHtml}</td>
+      <td><span class="badge badge-${estadoBadge}">${c.Estado||'—'}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${c.UltimaInteraccion||'—'}</td>
+      <td class="row-actions">
+        <button class="btn-row-edit" onclick="editRecord('cliente','${c.ID}')">✏️</button>
+        <button class="btn-row-del" onclick="deleteRecord('cliente','${c.ID}')">🗑</button>
+      </td></tr>`;
+  }).join('');
 }
 function renderProyectos(){
   const tb=document.getElementById('proyectos-tbody');if(!tb)return;
@@ -1287,36 +1534,11 @@ async function deleteRecord(type, id){
   const rowIdx = DB[dbKey].indexOf(rec); // 0-based data row
   const sheetRowIdx = rowIdx + 1;        // 0-based sheet row (row 0 = headers, row 1+ = data)
 
-  // 1. Borrar de memoria local primero
+  // 1. Borrar de memoria local
   DB[dbKey] = DB[dbKey].filter(r=>r.ID!==id);
 
-  // 2. Borrar de Google Sheets si hay conexión
-  if(spreadsheetId && token && rowIdx >= 0){
-    try{
-      // Necesitamos el sheetId numérico de la hoja
-      const metaResp = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
-        {headers:{Authorization:'Bearer '+token}}
-      );
-      const meta = await metaResp.json();
-      const sheet = meta.sheets?.find(s=>s.properties.title===sheetName[type]);
-      if(sheet){
-        const gid = sheet.properties.sheetId;
-        await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
-          {
-            method:'POST',
-            headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-            body: JSON.stringify({requests:[{
-              deleteDimension:{
-                range:{sheetId:gid,dimension:'ROWS',startIndex:sheetRowIdx,endIndex:sheetRowIdx+1}
-              }
-            }]})
-          }
-        );
-      }
-    }catch(e){console.warn('Sheets delete error:',e);}
-  }
+  // 2. Guardar en localStorage (instantáneo)
+  saveLocal();
 
   // 3. Re-renderizar
   const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
@@ -1359,23 +1581,21 @@ async function saveModal(){
     // UPDATE existing record in DB
     const idx = DB[dbKey]?.findIndex(r=>r.ID===_editingId);
     if(idx>=0) DB[dbKey][idx] = row;
-    // Sheets update (full row rewrite)
-    if(spreadsheetId && token){
-      const rowNum = idx+2; // +1 header, +1 1-indexed
-      const values = [HEADERS[sheet].map(h=>row[h]||'')];
-      try{
-        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A${rowNum}:Z${rowNum}?valueInputOption=RAW`,
-          {method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})});
-      }catch(e){console.warn('Sheet update error',e);}
-    }
   } else {
     // INSERT new record
     DB[dbKey]?.push(row);
-    if(spreadsheetId){await appendRow(sheet,row);}
     // ── POST-SAVE HOOKS ──
-    if(currentCRMModal==='cliente') onClienteSaved(row);
+    if(currentCRMModal==='cliente'){
+      onClienteSaved(row);
+      // También refrescar contactos si están visibles
+      if(document.getElementById('section-contactos').classList.contains('active'))
+        renderContactos();
+    }
     if(currentCRMModal==='venta'){ onVentaSaved(row); autoCreateFactura(row); }
   }
+
+  // Guardar en localStorage (instantáneo)
+  saveLocal();
 
   closeCRMModal();
   // Re-render relevant section
@@ -1407,21 +1627,26 @@ function onClienteSaved(row){
     const contacto = {
       ID: genId(),
       Nombre: nombreContacto,
-      Cargo: row.Cargo||'',
+      Cargo:  row.Cargo||'',
       Empresa: empresa,
-      Tel1: row.Telefono||'',
-      Tel2: row.Telefono2||'',
+      Tel1:   row.Telefono||'',
+      Tel2:   row.Telefono2||'',
       Email1: row.Email||'',
       Email2: row.Email2||'',
-      Pais: pais,
+      Pais:   pais,
       WhatsApp: row.Telefono||'',
-      Notas: `Creado automáticamente desde cliente ${empresa}`
+      Notas: `Auto desde cliente ${empresa}`
     };
-    // Evitar duplicados por nombre+empresa
-    const existe = DB.contactos.find(c=>c.Nombre===nombreContacto && c.Empresa===empresa);
+    // Evitar duplicados (comparar ignorando mayúsculas)
+    const existe = DB.contactos.find(c=>
+      c.Nombre.toLowerCase()===nombreContacto.toLowerCase() &&
+      c.Empresa.toLowerCase()===empresa.toLowerCase()
+    );
     if(!existe){
       DB.contactos.push(contacto);
-      if(spreadsheetId) appendRow('Contactos', contacto);
+      // Refrescar contactos si esa sección está activa
+      if(document.getElementById('section-contactos').classList.contains('active'))
+        renderContactos();
     }
   }
 }
@@ -1475,26 +1700,27 @@ function fechaToMesIdx(fecha){
   return -1;
 }
 
-/* Persistir fila en Google Sheets Prevision (proyecciones en 0 al crear) */
+/* Persistir fila en DB.prevision local */
 async function syncPrevisionRow(productoId, pais, cliente){
-  if(!spreadsheetId||!token) return;
   const row={ID:genId(),ProductoId:productoId,Pais:pais,Cliente:cliente,Comercial:'',FechaContacto:new Date().toISOString().slice(0,10)};
   for(let i=0;i<12;i++) row['Proy'+i]=0;
-  await appendRow('Prevision',row);
+  const existe = DB.prevision.find(r=>r.ProductoId===productoId&&r.Pais===pais&&r.Cliente===cliente);
+  if(!existe){
+    DB.prevision.push(row);
+    saveLocal();
+  }
 }
 
-/* Guardar proyección editada en Google Sheets */
+/* Guardar proyección editada en localStorage */
 async function savePrevisionProySheet(productoId, pais, nombre, mesIdx, valor){
-  if(!spreadsheetId||!token) return;
-  // Find row in DB.prevision and update Proy{mesIdx}
   const rec=DB.prevision.find(r=>r.ProductoId===productoId&&r.Pais===pais&&r.Cliente===nombre);
-  if(!rec) return;
-  const rowNum=DB.prevision.indexOf(rec)+2; // +1 header +1 1-indexed
-  const col=String.fromCharCode(65+HEADERS.Prevision.indexOf('Proy'+mesIdx));
-  try{
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Prevision!${col}${rowNum}?valueInputOption=RAW`,
-      {method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[[valor]]})});
-  }catch(e){console.warn('Sheet sync error',e);}
+  if(rec){ rec['Proy'+mesIdx]=valor; }
+  else {
+    const row={ID:genId(),ProductoId:productoId,Pais:pais,Cliente:nombre,Comercial:'',FechaContacto:''};
+    for(let i=0;i<12;i++) row['Proy'+i]=i===mesIdx?valor:0;
+    DB.prevision.push(row);
+  }
+  saveLocal();
 }
 
 /* ═══════════════════════════════════════
@@ -1645,7 +1871,7 @@ function autoCreateFactura(ventaRow){
     Notas: `Generada automáticamente desde venta ${ventaRow.NroOrden||ventaRow.ID}`
   };
   DB.facturas.push(factura);
-  if(spreadsheetId) appendRow('Facturas', factura);
+  saveLocal();
   return factura;
 }
 
@@ -1691,15 +1917,13 @@ async function saveModal(){
   const sheet=MODAL_SHEET[currentCRMModal];
   const row={ID:genId()};
   HEADERS[sheet].forEach(h=>{const el=document.getElementById('f-'+h);if(el)row[h]=el.value;});
-  if(spreadsheetId){await appendRow(sheet,row);await loadAllData();}
-  else {
-    const keyMap={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
-    if(keyMap[sheet]) DB[keyMap[sheet]].push(row);
-  }
+  const keyMap={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
+  if(keyMap[sheet]) DB[keyMap[sheet]].push(row);
+  saveLocal();
   if(currentCRMModal==='cliente') onClienteSaved(row);
   if(currentCRMModal==='venta'){
     onVentaSaved(row);
-    autoCreateFactura(row); // ← auto-factura
+    autoCreateFactura(row);
   }
   closeCRMModal();renderDashboard();
 }
@@ -1806,18 +2030,12 @@ async function saveContact(){
   };
   if(_editingContactId){
     const idx=DB.contactos.findIndex(c=>c.ID===_editingContactId);
-    if(idx>=0){
-      DB.contactos[idx]={...DB.contactos[idx],...data};
-      if(spreadsheetId&&token){
-        const values=[HEADERS['Contactos'].map(h=>DB.contactos[idx][h]||'')];
-        try{await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Contactos!A${idx+2}:Z${idx+2}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})});}catch(e){console.warn(e);}
-      }
-    }
+    if(idx>=0) DB.contactos[idx]={...DB.contactos[idx],...data};
   } else {
     const contacto={ID:genId(),...data};
     DB.contactos.push(contacto);
-    if(spreadsheetId) await appendRow('Contactos',contacto);
   }
+  saveLocal();
   closeContactModal();
   renderContactos();
 }
@@ -1827,14 +2045,7 @@ async function deleteContact(id){
   if(!confirm(`¿Eliminar contacto "${c.Nombre}"?`)) return;
   const idx=DB.contactos.indexOf(c);
   DB.contactos=DB.contactos.filter(x=>x.ID!==id);
-  if(spreadsheetId&&token&&idx>=0){
-    try{
-      const metaR=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,{headers:{Authorization:'Bearer '+token}});
-      const meta=await metaR.json();
-      const sheet=meta.sheets?.find(s=>s.properties.title==='Contactos');
-      if(sheet){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({requests:[{deleteDimension:{range:{sheetId:sheet.properties.sheetId,dimension:'ROWS',startIndex:idx+1,endIndex:idx+2}}}]})});}
-    }catch(e){console.warn(e);}
-  }
+  saveLocal();
   renderContactos();
 }
 
@@ -2406,7 +2617,20 @@ function renderCalidad(){
 
 // Apply saved theme label on load
 document.addEventListener('DOMContentLoaded',()=>{
-  if(document.body.classList.contains('warm'))document.getElementById('theme-label').textContent='Modo claro';
+  // Tema
+  if(document.body.classList.contains('warm'))
+    document.getElementById('theme-label').textContent='Modo claro';
+
+  // Cargar datos desde localStorage al arrancar
+  const hadData = loadLocal();
+  if(hadData){
+    loadPrevisionFromDB();
+    renderDashboard();
+    updateStorageStatus();
+    // Mostrar auth screen igual para que pueda conectar Google si quiere
+    // pero los datos ya están disponibles
+  }
+  updateStorageStatus();
 });
 
 /* ── MOBILE SIDEBAR ── */
