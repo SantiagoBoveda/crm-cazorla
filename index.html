@@ -1901,8 +1901,19 @@ function onClienteUpdated(oldRow, newRow){
     }
   });
 
+  // Actualizar también DB.prevision para que loadPrevisionFromDB no recree el registro viejo
+  if(paisCambio || empresaCambio){
+    DB.prevision.forEach(row=>{
+      if(row.Cliente && row.Cliente.toLowerCase().trim() === oldEmpresa.toLowerCase().trim()){
+        row.Cliente = newEmpresa;
+        row.Pais = newPais;
+      }
+    });
+  }
+
   // Persistir y re-renderizar
   savePrevisionYears();
+  saveLocal();
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
 }
 function onVentaSaved(row){
@@ -2430,10 +2441,20 @@ async function deleteContact(id){
 
 /* ─── Poblar PRODUCTS[*].data desde DB.prevision (cargado de Sheets) ─── */
 function loadPrevisionFromDB(){
-  // Primero reconstruir data desde DB.clientes (fuente de verdad)
+  // Limpiar DB.prevision de registros huérfanos (cliente no existe en DB.clientes)
+  if(DB.prevision && DB.clientes){
+    DB.prevision = DB.prevision.filter(row=>{
+      if(!row.Cliente) return false;
+      return DB.clientes.some(c=>
+        c.Empresa && c.Empresa.toLowerCase().trim() === row.Cliente.toLowerCase().trim()
+      );
+    });
+  }
+
+  // Reconstruir data desde DB.clientes (fuente de verdad absoluta)
   PRODUCTS.forEach(prod=>{
     const fromClientes = buildDataFromClientes();
-    // Preservar datos existentes de PRODUCTS, agregar clientes faltantes
+    // Solo agregar clientes que existen en DB.clientes
     Object.entries(fromClientes).forEach(([pais, cs])=>{
       if(!prod.data[pais]) prod.data[pais]=[];
       cs.forEach(c=>{
@@ -2441,18 +2462,31 @@ function loadPrevisionFromDB(){
           prod.data[pais].push({...c});
         }
       });
-      // Ordenar alfabéticamente
       prod.data[pais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+    });
+    // Eliminar de PRODUCTS cualquier cliente que ya no esté en DB.clientes
+    Object.keys(prod.data).forEach(pais=>{
+      prod.data[pais] = prod.data[pais].filter(entry=>
+        DB.clientes.some(c=>
+          c.Empresa && c.Empresa.toLowerCase().trim() === entry.nombre.toLowerCase().trim()
+        )
+      );
+      if(prod.data[pais].length === 0) delete prod.data[pais];
     });
   });
 
   if(!DB.prevision||!DB.prevision.length) return;
-  // Merge proyecciones guardadas
+  // Merge proyecciones guardadas — solo clientes que existen en DB.clientes
   DB.prevision.forEach(row=>{
     const prodId=row.ProductoId;
     const pais=row.Pais||'Sin país asignado';
     const nombre=row.Cliente;
     if(!prodId||!nombre) return;
+    // Verificar que el cliente existe en DB.clientes
+    const clienteExiste = DB.clientes.some(c=>
+      c.Empresa && c.Empresa.toLowerCase().trim() === nombre.toLowerCase().trim()
+    );
+    if(!clienteExiste) return; // ignorar registros huérfanos
     const prod=PRODUCTS.find(p=>p.id===prodId);
     if(!prod) return;
     if(!prod.data[pais]) prod.data[pais]=[];
