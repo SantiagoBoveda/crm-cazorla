@@ -1595,13 +1595,23 @@ function openCRMModal(type){
   currentCRMModal=type;
   _editingId=null;
   _editingFacturaId=null;
+  const modal = document.getElementById('main-modal');
+  modal.dataset.editingId = '';
+  modal.dataset.editingType = '';
   const cfg=FORMS[type];
   document.getElementById('modal-title').textContent=cfg.title;
   document.getElementById('modal-body').innerHTML=cfg.fields;
-  document.getElementById('main-modal').classList.add('open');
+  modal.classList.add('open');
   populateFormSelects();
 }
-function closeCRMModal(){document.getElementById('main-modal').classList.remove('open');currentCRMModal=null;_editingId=null;}
+function closeCRMModal(){
+  const modal = document.getElementById('main-modal');
+  modal.classList.remove('open');
+  modal.dataset.editingId = '';
+  modal.dataset.editingType = '';
+  currentCRMModal=null;
+  _editingId=null;
+}
 
 /* ID del registro que se está editando (null = nuevo) */
 let _editingId = null;
@@ -1614,6 +1624,9 @@ function editRecord(type, id){
   if(!record) return;
   openCRMModal(type);
   _editingId = id;
+  // Guardar también en el DOM como backup (por si _editingId se resetea antes de guardar)
+  document.getElementById('main-modal').dataset.editingId = id;
+  document.getElementById('main-modal').dataset.editingType = type;
   document.getElementById('modal-title').textContent = FORMS[type].title.replace('Nuevo','Editar').replace('Nueva','Editar');
   // Fill all fields with existing data
   const sheet = MODAL_SHEET[type];
@@ -1621,7 +1634,6 @@ function editRecord(type, id){
     const el = document.getElementById('f-'+h);
     if(!el) return;
     if(el.tagName==='SELECT'){
-      // For smart selects, rebuild options with current value selected
       if(el.dataset.smartlist){
         populateSmartSelect(el, el.dataset.smartlist, record[h]||'');
       } else {
@@ -1661,6 +1673,13 @@ async function deleteRecord(type, id){
 }
 
 async function saveModal(){
+  // Recuperar _editingId desde el DOM si fue reseteado por error
+  const modal = document.getElementById('main-modal');
+  if(!_editingId && modal.dataset.editingId){
+    _editingId = modal.dataset.editingId;
+    currentCRMModal = modal.dataset.editingType || currentCRMModal;
+  }
+
   if(currentCRMModal==='factura' && _editingFacturaId){
     // legacy path for factura edit via openEditFactura
     const f = DB.facturas.find(x=>x.ID===_editingFacturaId);
