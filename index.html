@@ -61,12 +61,15 @@ body.warm .theme-thumb{left:15px}
 /* ══ MAIN ══ */
 .main{margin-left:220px;padding:28px;min-height:100vh;overflow-x:hidden}
 .section{display:none}.section.active{display:block}
-.page-header{margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.page-header-left h1{font-size:22px;font-weight:700;color:var(--accent)}
-.page-header-left p{color:var(--muted);font-size:13px;margin-top:4px}
+/* page-header base: solo margin */
+.page-header{margin-bottom:24px}
 .page-header h1{font-size:22px;font-weight:700;color:var(--accent)}
 .page-header p{color:var(--muted);font-size:13px;margin-top:4px}
-.page-header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* page-header con controles a la derecha */
+.ph-row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.ph-row h1{font-size:22px;font-weight:700;color:var(--accent)}
+.ph-row p{color:var(--muted);font-size:13px;margin-top:4px}
+.ph-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* ══ AUTH SCREEN ══ */
 #auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
@@ -447,10 +450,11 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   .main{margin-left:0!important;padding:16px;padding-top:66px;width:100%;max-width:100%;overflow-x:hidden}
 
   /* Page headers */
-  .page-header{flex-direction:column;align-items:flex-start!important;gap:10px}
-  .page-header>*{width:100%}
-  .page-header-right{width:100%}
-  .page-header .btn{width:100%;justify-content:center;display:flex}
+  .page-header{margin-bottom:16px}
+  .ph-row{flex-direction:column!important;align-items:flex-start!important;gap:10px;margin-bottom:16px}
+  .ph-row>*{width:100%}
+  .ph-right{width:100%;flex-wrap:wrap}
+  .ph-right .btn,.ph-row>button{width:100%;justify-content:center;display:flex}
   .search-bar{width:100%}
   .search-bar input{width:100%!important}
 
@@ -746,9 +750,9 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- CLIENTES -->
   <div class="section" id="section-clientes">
-    <div class="page-header">
+    <div class="ph-row">
       <div><h1>Clientes</h1><p>Agenda y seguimiento</p></div>
-      <div style="display:flex;gap:10px;align-items:center">
+      <div class="ph-right">
         <div class="search-bar"><input type="text" placeholder="Buscar..." oninput="filterTable('clientes-table',this.value)"></div>
         <button class="btn btn-primary" onclick="openCRMModal('cliente')">+ Nuevo cliente</button>
       </div>
@@ -763,9 +767,9 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- CONTACTOS -->
   <div class="section" id="section-contactos">
-    <div class="page-header">
+    <div class="ph-row">
       <div><h1>📇 Contactos</h1><p>Agenda de personas · vinculada a clientes</p></div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div class="ph-right">
         <div class="search-bar"><input type="text" id="contactos-search" placeholder="Buscar contacto..." oninput="filterContactos(this.value)"></div>
         <button class="btn btn-primary" onclick="openContactModal()">+ Nuevo contacto</button>
       </div>
@@ -777,7 +781,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- PROYECTOS -->
   <div class="section" id="section-proyectos">
-    <div class="page-header">
+    <div class="ph-row">
       <div><h1>Proyectos</h1><p>Pipeline comercial</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('proyecto')">+ Nuevo proyecto</button>
     </div>
@@ -789,7 +793,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- TAREAS -->
   <div class="section" id="section-tareas">
-    <div class="page-header">
+    <div class="ph-row">
       <div><h1>Tareas</h1><p>Tablero Kanban</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('tarea')">+ Nueva tarea</button>
     </div>
@@ -802,7 +806,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- INVENTARIO -->
   <div class="section" id="section-inventario">
-    <div class="page-header">
+    <div class="ph-row">
       <div><h1>Inventario</h1><p>Stock de productos</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('producto')">+ Nuevo producto</button>
     </div>
@@ -814,7 +818,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- VENTAS -->
   <div class="section" id="section-ventas">
-    <div class="page-header">
+    <div class="ph-row">
       <div><h1>Ventas</h1><p>Registro y seguimiento</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('venta')">+ Nueva venta</button>
     </div>
@@ -827,8 +831,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- PREVISIÓN -->
   <div class="section" id="section-prevision">
-    <div class="page-header">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="ph-row">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div>
           <h1 id="page-title">🫒 Previsión de Ventas</h1>
           <p id="subtitle" style="color:var(--muted);font-size:13px;margin-top:4px;font-family:var(--mono)">Aceitunas en granel · Dic 2025 → Nov 2026 · Toneladas</p>
@@ -841,7 +845,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         </select>
         <button class="btn btn-outline btn-sm" onclick="addPrevisionYear()" title="Agregar nuevo año" style="border-color:var(--accent);color:var(--accent)">＋ Año</button>
       </div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="ph-right">
         <div class="legend">
           <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Proyectado</div>
           <div class="leg-item"><div class="leg-dot" style="background:#16a34a"></div>Realizado</div>
@@ -911,8 +915,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- RECLAMOS -->
   <div class="section" id="section-reclamos">
-    <div class="page-header">
-      <div><h1>🚨 Reclamos</h1><p style="color:var(--muted);font-size:13px;margin-top:4px">Seguimiento de reclamos comerciales y logísticos</p></div>
+    <div class="ph-row">
+      <div><h1>🚨 Reclamos</h1><p>Seguimiento de reclamos comerciales y logísticos</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('reclamo')">+ Nuevo reclamo</button>
     </div>
     <div class="mod-stats" id="reclamos-stats"></div>
@@ -934,8 +938,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- FACTURACIÓN -->
   <div class="section" id="section-facturacion">
-    <div class="page-header">
-      <div><h1>🧾 Facturación</h1><p style="color:var(--muted);font-size:13px;margin-top:4px">Seguimiento de facturas emitidas y estado de cobro</p></div>
+    <div class="ph-row">
+      <div><h1>🧾 Facturación</h1><p>Seguimiento de facturas emitidas y estado de cobro</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('factura')">+ Nueva factura</button>
     </div>
     <div class="mod-stats" id="facturacion-stats"></div>
@@ -959,8 +963,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- CALIDAD -->
   <div class="section" id="section-calidad">
-    <div class="page-header">
-      <div><h1>🔬 Seguimiento de Calidad</h1><p style="color:var(--muted);font-size:13px;margin-top:4px">Pasta de tomate · Parámetros físico-químicos y organolépticos</p></div>
+    <div class="ph-row">
+      <div><h1>🔬 Seguimiento de Calidad</h1><p>Pasta de tomate · Parámetros físico-químicos y organolépticos</p></div>
       <button class="btn btn-primary" onclick="openCRMModal('calidad')">+ Nuevo análisis</button>
     </div>
     <div class="cal-params" id="cal-params"></div>
