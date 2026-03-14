@@ -741,7 +741,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <div class="backup-btns">
       <button class="btn-backup" onclick="exportBackup()" title="Descargar backup JSON">⬇ Export</button>
       <button class="btn-backup" onclick="document.getElementById('import-file').click()" title="Importar backup JSON">⬆ Import</button>
-      <button class="btn-backup sheets-btn" id="btn-sheets-sync" onclick="syncToSheets()" title="Sincronizar con Google Sheets (backup)">☁ Sheets</button>
+      <button class="btn-backup sheets-btn" id="btn-sheets-sync" onclick="syncToSheets()" title="Sincronizar con Google Sheets">☁ Sync</button>
+      <button class="btn-backup sheets-btn" id="btn-sheets-open" onclick="openInSheets()" title="Abrir Google Sheet" style="display:none">↗ Ver</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this)">
     </div>
   </div>
@@ -1180,6 +1181,7 @@ async function syncToSheets(){
   const btn = document.getElementById('btn-sheets-sync');
   btn.textContent = '↻'; btn.disabled = true;
   await silentSyncToSheets();
+  showSheetsLink();
   if(!_dirty){
     btn.textContent = '✅';
     setTimeout(()=>{ btn.textContent='☁ Sheets'; btn.disabled=false; }, 2000);
@@ -1319,6 +1321,7 @@ async function findOrCreateSpreadsheet(skipLoad=false){
       const cd=await cr.json();spreadsheetId=cd.spreadsheetId;
       for(const[sheet,cols]of Object.entries(HEADERS)){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A1:append?valueInputOption=RAW`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[cols]})});}
     }
+    showSheetsLink();
     if(!skipLoad){
       await loadAllData();
       loadPrevisionFromDB();
@@ -2746,7 +2749,20 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 });
 
-/* Conectar Google desde dentro de la app (sin ir al auth-screen) */
+/* Abrir el Google Sheet en una nueva pestaña */
+function openInSheets(){
+  if(spreadsheetId){
+    window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
+  } else {
+    alert('Sincronizá con Google primero para generar el Sheet.');
+  }
+}
+
+/* Mostrar botón "Ver" cuando ya hay spreadsheetId */
+function showSheetsLink(){
+  const btn = document.getElementById('btn-sheets-open');
+  if(btn && spreadsheetId) btn.style.display = '';
+}
 function connectGoogleFromSidebar(){
   const clientId = '678286127164-4mir5gteeapelsv0e8h0vrtgr4jgqt25.apps.googleusercontent.com';
   try{
