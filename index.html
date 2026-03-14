@@ -2108,11 +2108,12 @@ function addPrevisionYear(){
 /* Persistir todos los snapshots en localStorage */
 function savePrevisionYears(){
   try{
-    // También guardar el año activo
     snapshotCurrentYear();
     localStorage.setItem('crm_cazorla_years', JSON.stringify({
       active: _previsionYear,
-      years: PREVISION_YEARS
+      years: PREVISION_YEARS,
+      // Guardar la lista de productos (sin data, solo metadatos)
+      productList: PRODUCTS.map(p=>({id:p.id, emoji:p.emoji, label:p.label, subtitle:p.subtitle}))
     }));
   }catch(e){ console.warn('savePrevisionYears error', e); }
 }
@@ -2123,6 +2124,28 @@ function loadPrevisionYears(){
     const raw = localStorage.getItem('crm_cazorla_years');
     if(!raw) return;
     const saved = JSON.parse(raw);
+
+    // Restaurar lista de productos (crear/eliminar/renombrar persiste)
+    if(saved.productList && saved.productList.length){
+      // Reconstruir PRODUCTS respetando el orden y eliminaciones guardadas
+      const newProducts = saved.productList.map(meta=>{
+        const existing = PRODUCTS.find(p=>p.id===meta.id);
+        return {
+          id: meta.id,
+          emoji: meta.emoji,
+          label: meta.label,
+          subtitle: meta.subtitle,
+          // Preservar data si ya existe en memoria, sino vacío
+          data: existing ? existing.data : {}
+        };
+      });
+      PRODUCTS.length = 0;
+      newProducts.forEach(p=>PRODUCTS.push(p));
+      // Asegurar currentProductId apunta a un producto válido
+      if(!PRODUCTS.find(p=>p.id===currentProductId)){
+        currentProductId = PRODUCTS[0]?.id || 'aceitunas';
+      }
+    }
     // Restaurar snapshots
     Object.assign(PREVISION_YEARS, saved.years||{});
     // Restaurar el año que estaba activo
