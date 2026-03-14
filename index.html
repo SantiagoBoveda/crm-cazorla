@@ -1056,6 +1056,14 @@ function toggleTheme() {
    GOOGLE AUTH + SHEETS API
 ═══════════════════════════════════════ */
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const DEFAULT_CLIENT_ID = '678286127164-4mir5gteeapelsv0e8h0vrtgr4jgqt25.apps.googleusercontent.com';
+
+function getActiveClientId(){
+  // Usa el del input si está disponible y completo, sino el default
+  const inp = document.getElementById('client-id-input');
+  const val = inp ? inp.value.trim() : '';
+  return (val && val.includes('.apps.googleusercontent.com')) ? val : DEFAULT_CLIENT_ID;
+}
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
 let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[]};
 let currentCRMModal=null;
@@ -1176,7 +1184,11 @@ async function silentSyncToSheets(){
 
 /* ── Backup manual (con feedback visible) ── */
 async function syncToSheets(){
-  if(!token){ alert('Iniciá sesión con Google primero.'); return; }
+  if(!token){
+    // Sin token: conectar Google primero, luego sincronizar automáticamente
+    requestGoogleAuth(()=>{ setTimeout(syncToSheets, 1500); });
+    return;
+  }
   if(!spreadsheetId){ await findOrCreateSpreadsheet(false); }
   const btn = document.getElementById('btn-sheets-sync');
   btn.textContent = '↻'; btn.disabled = true;
@@ -1184,10 +1196,10 @@ async function syncToSheets(){
   showSheetsLink();
   if(!_dirty){
     btn.textContent = '✅';
-    setTimeout(()=>{ btn.textContent='☁ Sheets'; btn.disabled=false; }, 2000);
+    setTimeout(()=>{ btn.textContent='☁ Sync'; btn.disabled=false; }, 2000);
   } else {
     btn.textContent = '❌';
-    setTimeout(()=>{ btn.textContent='☁ Sheets'; btn.disabled=false; }, 2000);
+    setTimeout(()=>{ btn.textContent='☁ Sync'; btn.disabled=false; }, 2000);
   }
 }
 
@@ -1255,10 +1267,13 @@ function importBackup(input){
 function getClientId(){ return document.getElementById('client-id-input').value.trim(); }
 
 function initGoogleAuth(){
-  const clientId=getClientId();
-  if(!clientId||!clientId.includes('.apps.googleusercontent.com')){alert('Ingresá un Client ID válido');return;}
-  tokenClient=google.accounts.oauth2.initTokenClient({client_id:clientId,scope:SCOPES,callback:handleTokenResponse});
-  tokenClient.requestAccessToken();
+  const clientId = getClientId();
+  if(!clientId||!clientId.includes('.apps.googleusercontent.com')){
+    alert('Ingresá un Client ID válido');return;
+  }
+  // Cerrar auth screen y entrar (los datos de localStorage ya están)
+  document.getElementById('auth-screen').style.display='none';
+  requestGoogleAuth(null);
 }
 
 function handleTokenResponse(resp){
@@ -2751,10 +2766,17 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 /* Abrir el Google Sheet en una nueva pestaña */
 function openInSheets(){
+  if(!token){
+    requestGoogleAuth(()=>{ setTimeout(openInSheets, 1500); });
+    return;
+  }
   if(spreadsheetId){
     window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
   } else {
-    alert('Sincronizá con Google primero para generar el Sheet.');
+    // Crear/buscar el sheet y luego abrir
+    findOrCreateSpreadsheet(true).then(()=>{
+      if(spreadsheetId) window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
+    });
   }
 }
 
@@ -2763,38 +2785,52 @@ function showSheetsLink(){
   const btn = document.getElementById('btn-sheets-open');
   if(btn && spreadsheetId) btn.style.display = '';
 }
-function connectGoogleFromSidebar(){
-  const clientId = '678286127164-4mir5gteeapelsv0e8h0vrtgr4jgqt25.apps.googleusercontent.com';
-  try{
-    if(!tokenClient){
+/* ── Función única de autenticación Google ── */
+function requestGoogleAuth(onSuccess){
+  const clientId = getActiveClientId();
+  function doAuth(){
+    try{
+      if(!window.google?.accounts?.oauth2){
+        // La librería aún no cargó — reintentar en 800ms
+        setTimeout(doAuth, 800);
+        return;
+      }
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: SCOPES,
         callback: (resp)=>{
-          if(resp.error){ alert('Error al conectar Google: '+resp.error); return; }
+          if(resp.error){ alert('Error Google: '+resp.error); return; }
           token = resp.access_token;
           fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+token}})
             .then(r=>r.json()).then(info=>{
               userData = {name:info.name||info.email, email:info.email};
               document.getElementById('user-name').textContent = userData.name;
               document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
-              document.getElementById('sync-status-text').textContent = 'Google conectado';
-              document.getElementById('btn-connect-google').style.display = 'none';
+              document.getElementById('sync-status-text').textContent = 'Google conectado ✓';
+              hideConnectButton();
               findOrCreateSpreadsheet(true);
               scheduleAutoBackup();
               updateStorageStatus();
+              if(onSuccess) onSuccess();
             }).catch(()=>{
-              document.getElementById('sync-status-text').textContent = 'Google conectado';
-              document.getElementById('btn-connect-google').style.display = 'none';
+              document.getElementById('sync-status-text').textContent = 'Google conectado ✓';
+              hideConnectButton();
               findOrCreateSpreadsheet(true);
               scheduleAutoBackup();
+              if(onSuccess) onSuccess();
             });
         }
       });
+      tokenClient.requestAccessToken({prompt:''});
+    }catch(e){
+      alert('Error al iniciar Google Auth. Verificá que el Client ID sea correcto y que el dominio esté autorizado en Google Cloud Console.');
+      console.error(e);
     }
-    tokenClient.requestAccessToken();
-  }catch(e){ alert('Error: Google Auth no cargó aún. Intentá en unos segundos.'); }
+  }
+  doAuth();
 }
+
+function connectGoogleFromSidebar(){ requestGoogleAuth(null); }
 
 /* Ocultar botón conectar cuando ya hay token */
 function hideConnectButton(){
