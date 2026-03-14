@@ -1728,7 +1728,12 @@ async function saveModal(){
   if(_editingId){
     // UPDATE existing record in DB
     const idx = DB[dbKey]?.findIndex(r=>r.ID===_editingId);
+    const oldRecord = idx>=0 ? {...DB[dbKey][idx]} : null; // copia del registro anterior
     if(idx>=0) DB[dbKey][idx] = row;
+    // Hook: si es cliente, sincronizar cambios en Previsión
+    if(currentCRMModal==='cliente' && oldRecord){
+      onClienteUpdated(oldRecord, row);
+    }
   } else {
     // INSERT new record
     DB[dbKey]?.push(row);
@@ -1817,7 +1822,89 @@ function onClienteSaved(row){
   }
 }
 
-/* ─── Hook: venta nueva → actualizar "real" en Previsión ─── */
+/* ─── Hook: cliente editado → sincronizar cambios en Previsión ─── */
+function onClienteUpdated(oldRow, newRow){
+  const oldEmpresa = (oldRow.Empresa||'').trim();
+  const newEmpresa = (newRow.Empresa||'').trim();
+  const oldPais    = (oldRow.Pais||'Argentina').trim();
+  const newPais    = (newRow.Pais||'Argentina').trim();
+  const oldRubros  = oldRow.Rubro ? oldRow.Rubro.split(',').map(r=>r.trim()).filter(Boolean) : [];
+  const newRubros  = newRow.Rubro ? newRow.Rubro.split(',').map(r=>r.trim()).filter(Boolean) : [];
+
+  const paisCambio   = oldPais !== newPais;
+  const empresaCambio = oldEmpresa !== newEmpresa;
+  const rubrosCambio  = JSON.stringify(oldRubros.sort()) !== JSON.stringify(newRubros.sort());
+
+  if(!paisCambio && !empresaCambio && !rubrosCambio) return; // nada que sincronizar
+
+  PRODUCTS.forEach(prod=>{
+    // 1. Buscar el registro viejo en el país viejo
+    const oldEntry = prod.data[oldPais]?.find(c=>
+      c.nombre.toLowerCase() === oldEmpresa.toLowerCase()
+    );
+
+    if(oldEntry){
+      // 2. Determinar si este producto corresponde al nuevo rubro
+      const enNuevoRubro = newRubros.length === 0 || newRubros.includes(prod.label);
+      const enViejoRubro = oldRubros.length === 0 || oldRubros.includes(prod.label);
+
+      if(enNuevoRubro){
+        // Mover/renombrar entrada
+        const updatedEntry = {
+          ...oldEntry,
+          nombre: newEmpresa,
+          comercial: newRow.Contacto || oldEntry.comercial,
+          fecha: newRow.UltimaInteraccion || oldEntry.fecha,
+        };
+
+        // Eliminar del país viejo
+        prod.data[oldPais] = prod.data[oldPais].filter(c=>
+          c.nombre.toLowerCase() !== oldEmpresa.toLowerCase()
+        );
+        if(prod.data[oldPais].length === 0) delete prod.data[oldPais];
+
+        // Insertar en país nuevo (evitar duplicado)
+        if(!prod.data[newPais]) prod.data[newPais] = [];
+        const yaExiste = prod.data[newPais].find(c=>
+          c.nombre.toLowerCase() === newEmpresa.toLowerCase()
+        );
+        if(!yaExiste){
+          prod.data[newPais].push(updatedEntry);
+          prod.data[newPais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+        }
+      } else if(!enNuevoRubro && enViejoRubro){
+        // El producto ya no está en el rubro del cliente — eliminar de Previsión
+        prod.data[oldPais] = prod.data[oldPais].filter(c=>
+          c.nombre.toLowerCase() !== oldEmpresa.toLowerCase()
+        );
+        if(prod.data[oldPais].length === 0) delete prod.data[oldPais];
+      }
+    } else {
+      // No existía en el viejo país — si ahora le corresponde, agregar en el nuevo
+      const enNuevoRubro = newRubros.length === 0 || newRubros.includes(prod.label);
+      if(enNuevoRubro && newEmpresa){
+        if(!prod.data[newPais]) prod.data[newPais] = [];
+        const yaExiste = prod.data[newPais].find(c=>
+          c.nombre.toLowerCase() === newEmpresa.toLowerCase()
+        );
+        if(!yaExiste){
+          prod.data[newPais].push({
+            nombre: newEmpresa,
+            comercial: newRow.Contacto||'',
+            fecha: newRow.UltimaInteraccion||new Date().toISOString().slice(0,10),
+            proy: Array(12).fill(0),
+            real: Array(12).fill(0)
+          });
+          prod.data[newPais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+        }
+      }
+    }
+  });
+
+  // Persistir y re-renderizar
+  savePrevisionYears();
+  if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
+}
 function onVentaSaved(row){
   const cliente  = (row.Cliente||'').trim();
   const producto = (row.Producto||'').trim();
