@@ -1350,8 +1350,10 @@ async function findOrCreateSpreadsheet(skipLoad=false){
   try{
     const r=await fetch("https://www.googleapis.com/drive/v3/files?q=name%3D'CRM_Cazorla_DB'%20and%20mimeType%3D'application/vnd.google-apps.spreadsheet'%20and%20trashed%3Dfalse&fields=files(id,name)",{headers:{Authorization:'Bearer '+token}});
     const d=await r.json();
-    if(d.files&&d.files.length>0){spreadsheetId=d.files[0].id;}
-    else{
+    if(d.files&&d.files.length>0){
+      spreadsheetId=d.files[0].id;
+    } else {
+      // Crear spreadsheet nuevo y escribir headers
       const cr=await fetch('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({properties:{title:'CRM_Cazorla_DB'},sheets:Object.keys(HEADERS).map(n=>({properties:{title:n}}))})});
       const cd=await cr.json();spreadsheetId=cd.spreadsheetId;
       for(const[sheet,cols]of Object.entries(HEADERS)){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A1:append?valueInputOption=RAW`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[cols]})});}
@@ -1361,8 +1363,73 @@ async function findOrCreateSpreadsheet(skipLoad=false){
       await loadAllData();
       loadPrevisionFromDB();
       renderDashboard();
+    } else {
+      // skipLoad=true significa que entramos con datos locales.
+      // Cargar Sheets en background y comparar — usar el que tenga más datos
+      await syncFromSheetsIfNewer();
     }
-  }catch(e){console.error(e);if(!skipLoad)renderDashboard();}
+  }catch(e){console.error(e);}
+}
+
+/* Cargar datos de Sheets y usar el origen con más información */
+async function syncFromSheetsIfNewer(){
+  try{
+    document.getElementById('sync-status-text').textContent = 'Verificando Sheets...';
+    const sheetsDB = {};
+    const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad',Prevision:'prevision',Contactos:'contactos'};
+    for(const[sheet,key]of Object.entries(map)){
+      try{
+        const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
+        const d=await r.json();
+        sheetsDB[key] = (d.values&&d.values.length>1)
+          ? d.values.slice(1).map(row=>{const o={};d.values[0].forEach((h,i)=>o[h]=row[i]||'');return o;})
+          : [];
+      }catch(e){ sheetsDB[key]=[]; }
+    }
+
+    // Contar registros en cada origen
+    const localTotal  = Object.values(DB).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0);
+    const sheetsTotal = Object.values(sheetsDB).reduce((s,a)=>s+a.length,0);
+
+    document.getElementById('sync-status-text').textContent = 'Google conectado ✓';
+
+    if(sheetsTotal === 0){
+      // Sheets está vacío — no hacer nada, los datos locales son los buenos
+      return;
+    }
+
+    if(sheetsTotal > localTotal){
+      // Sheets tiene MÁS datos — ofrecer importar
+      const usar = confirm(
+        `Sheets tiene ${sheetsTotal} registros y tu dispositivo tiene ${localTotal}.\n\n` +
+        `¿Cargar los datos de Sheets? (reemplaza los datos locales)\n\n` +
+        `Aceptar = usar Sheets | Cancelar = mantener local`
+      );
+      if(usar){
+        Object.keys(map).forEach(sheet=>{ DB[map[sheet]] = sheetsDB[map[sheet]]; });
+        saveLocal();
+        loadPrevisionFromDB();
+        loadPrevisionYears();
+        renderDashboard();
+        // Re-render sección activa
+        const active = document.querySelector('.section.active');
+        if(active) showSection(active.id.replace('section-',''), null);
+        document.getElementById('storage-label').textContent = `Importado desde Sheets · ${sheetsTotal} reg`;
+      }
+    } else if(localTotal > sheetsTotal){
+      // Local tiene MÁS datos — ofrecer subir a Sheets
+      const subir = confirm(
+        `Tu dispositivo tiene ${localTotal} registros y Sheets tiene ${sheetsTotal}.\n\n` +
+        `¿Subir tus datos locales a Sheets para sincronizar?\n\n` +
+        `Aceptar = subir a Sheets | Cancelar = no hacer nada`
+      );
+      if(subir) silentSyncToSheets();
+    }
+    // Si son iguales: no hacer nada
+  }catch(e){
+    console.warn('syncFromSheetsIfNewer error:', e);
+    document.getElementById('sync-status-text').textContent = 'Google conectado ✓';
+  }
 }
 async function loadAllData(){
   if(!spreadsheetId||!token)return;
