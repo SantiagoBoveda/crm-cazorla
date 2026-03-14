@@ -1724,12 +1724,20 @@ function onClienteSaved(row){
   const pais    = (row.Pais||'Argentina').trim();
   if(!empresa) return;
 
-  // 1. Agregar a Previsión en todos los productos
+  // 1. Agregar a Previsión en todos los productos, en orden alfabético
   PRODUCTS.forEach(prod=>{
     if(!prod.data[pais]) prod.data[pais]=[];
     const exists = prod.data[pais].find(c=>c.nombre===empresa);
     if(!exists){
-      prod.data[pais].push({nombre:empresa,comercial:row.Contacto||'',fecha:row.UltimaInteraccion||new Date().toISOString().slice(0,10),proy:Array(12).fill(0),real:Array(12).fill(0)});
+      prod.data[pais].push({
+        nombre: empresa,
+        comercial: row.Contacto||'',
+        fecha: row.UltimaInteraccion||new Date().toISOString().slice(0,10),
+        proy: Array(12).fill(0),
+        real: Array(12).fill(0)
+      });
+      // Ordenar alfabéticamente
+      prod.data[pais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
     }
   });
   syncPrevisionRow('aceitunas', pais, empresa);
@@ -2106,41 +2114,6 @@ function openEditFactura(facturaId){
 
 /* Override saveModal to handle edits */
 const _origSaveModal = saveModal;
-async function saveModal(){
-  if(currentCRMModal==='factura' && _editingFacturaId){
-    // UPDATE existing factura
-    const f = DB.facturas.find(x=>x.ID===_editingFacturaId);
-    if(f){
-      HEADERS['Facturas'].forEach(h=>{const el=document.getElementById('f-'+h);if(el)f[h]=el.value;});
-      if(spreadsheetId){
-        // full rewrite of row - find row number
-        const rowNum = DB.facturas.indexOf(f)+2;
-        const values = [HEADERS['Facturas'].map(h=>f[h]||'')];
-        try{await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Facturas!A${rowNum}:Z${rowNum}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})});}catch(e){console.warn(e);}
-      }
-    }
-    _editingFacturaId = null;
-    closeCRMModal();
-    renderFacturacion();
-    return;
-  }
-  _editingFacturaId = null;
-  // original flow
-  if(!currentCRMModal)return;
-  const sheet=MODAL_SHEET[currentCRMModal];
-  const row={ID:genId()};
-  HEADERS[sheet].forEach(h=>{const el=document.getElementById('f-'+h);if(el)row[h]=el.value;});
-  const keyMap={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'};
-  if(keyMap[sheet]) DB[keyMap[sheet]].push(row);
-  saveLocal();
-  if(currentCRMModal==='cliente') onClienteSaved(row);
-  if(currentCRMModal==='venta'){
-    onVentaSaved(row);
-    autoCreateFactura(row);
-  }
-  closeCRMModal();renderDashboard();
-}
-
 /* ═══════════════════════════════════════
    CONTACTOS
 ═══════════════════════════════════════ */
@@ -2264,7 +2237,24 @@ async function deleteContact(id){
 
 /* ─── Poblar PRODUCTS[*].data desde DB.prevision (cargado de Sheets) ─── */
 function loadPrevisionFromDB(){
+  // Primero reconstruir data desde DB.clientes (fuente de verdad)
+  PRODUCTS.forEach(prod=>{
+    const fromClientes = buildDataFromClientes();
+    // Preservar datos existentes de PRODUCTS, agregar clientes faltantes
+    Object.entries(fromClientes).forEach(([pais, cs])=>{
+      if(!prod.data[pais]) prod.data[pais]=[];
+      cs.forEach(c=>{
+        if(!prod.data[pais].find(x=>x.nombre===c.nombre)){
+          prod.data[pais].push({...c});
+        }
+      });
+      // Ordenar alfabéticamente
+      prod.data[pais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+    });
+  });
+
   if(!DB.prevision||!DB.prevision.length) return;
+  // Merge proyecciones guardadas
   DB.prevision.forEach(row=>{
     const prodId=row.ProductoId;
     const pais=row.Pais||'Sin país asignado';
@@ -2276,19 +2266,18 @@ function loadPrevisionFromDB(){
     const existing=prod.data[pais].find(c=>c.nombre===nombre);
     const proy=Array.from({length:12},(_,i)=>parseFloat(row['Proy'+i])||0);
     if(existing){
-      // merge: Sheets projection overrides hardcoded if non-zero
       proy.forEach((v,i)=>{if(v>0) existing.proy[i]=v;});
     } else {
       prod.data[pais].push({nombre,comercial:row.Comercial||'',fecha:row.FechaContacto||'',proy,real:Array(12).fill(0)});
+      prod.data[pais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
     }
   });
-  // Also populate real[] from DB.ventas
+  // Poblar real[] desde DB.ventas
   DB.ventas.forEach(v=>{
     const ton=parseFloat(v.CantidadTon)||0;
     if(!ton||!v.Cliente||!v.Fecha) return;
     const mesIdx=fechaToMesIdx(v.Fecha);
     if(mesIdx<0) return;
-    // apply to matching product
     const prod=PRODUCTS.find(p=>{
       const lbl=p.label.toLowerCase();
       const prd=(v.Producto||'').toLowerCase();
@@ -2329,10 +2318,42 @@ let MESES = getMesesForYear(2026);
 let MES_ACT_IDX = getMesActIdx(2026);
 const EXCEL_DATA={"Argentina":[{"nombre":"Alvarez","comercial":"Santiago","fecha":"2026-01-09","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Bordi","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Castell","comercial":"Santiago","fecha":"2025-12-21","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Don Salim","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"El Matucho","comercial":"Santiago","fecha":"2026-01-15","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,19.5,0,0,0,0,0,0,0,0,0,0]},{"nombre":"G&B","comercial":"Santiago","fecha":"2026-01-17","proy":[0,0,0,0,18,0,0,18,0,0,18,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"La Esquina De Las Aceitunas","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,1.8,0,0,1.8,0,0,1.8,0,0],"real":[0,1.08,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Laur","comercial":"Santiago","fecha":"2025-12-23","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Libanti","comercial":"Santiago","fecha":"2026-01-09","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Rossi","comercial":"Santiago","fecha":"2025-12-22","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Olifaza","comercial":"Santiago","fecha":"2026-01-28","proy":[0,0,0,25,25,25,25,25,25,25,25,25],"real":[0,18,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Sabores Pampeanos","comercial":"Santiago","fecha":"2026-01-26","proy":[0,0,0,2.7,0,2.7,0,2.7,0,2.7,0,2.7],"real":[0,2.7,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Vanoli","comercial":"Santiago","fecha":"2025-12-21","proy":[0,0,0,0,36,36,36,36,36,36,36,36],"real":[0,0,0,18,0,0,0,0,0,0,0,0]}],"Australia":[{"nombre":"Ausfresh","comercial":"Santiago","fecha":"2026-01-28","proy":[0,0,0,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2],"real":[28.8,0,0,54,0,0,0,0,0,0,0,0]}],"Brasil":[{"nombre":"Agro Aceitunera Do Brasil","comercial":"Santiago","fecha":"2026-01-24","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[18,18,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Diza","comercial":"Alfonso","fecha":"2026-03-03","proy":[0,0,0,360,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Horta Vitae","comercial":"Santiago","fecha":"2026-02-12","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,18,25,0,0,0,0,0,0,0,0,0]},{"nombre":"La Violetera","comercial":"Santiago","fecha":"2026-01-30","proy":[0,0,90,126,0,0,0,0,0,0,0,0],"real":[0,0,72,18,0,0,0,0,0,0,0,0]},{"nombre":"JBS","comercial":"Santiago","fecha":"2025-12-10","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Mezzani","comercial":"Santiago","fecha":"2025-11-26","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Predilecta","comercial":"Santiago","fecha":"2025-11-14","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Heinz","comercial":"Alfonso","fecha":"2026-03-03","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]}],"Paraguay":[{"nombre":"Downes","comercial":"Santiago","fecha":"2026-01-26","proy":[0,0,36,36,36,36,36,36,36,36,36,36],"real":[0,72,0,0,0,0,0,0,0,0,0,0]}],"Uruguay":[{"nombre":"Pontevedra","comercial":"Santiago","fecha":"2026-01-27","proy":[0,0,0,0,0,0,0,0,0,0,0,0],"real":[0,0,0,0,0,0,0,0,0,0,0,0]},{"nombre":"Pontyn","comercial":"Santiago","fecha":"2025-10-09","proy":[0,0,0,0,18,18,18,18,18,18,18,18],"real":[0,0,0,0,0,0,0,0,0,0,0,0]}]};
 
-function buildEmptyData(){const e={};for(const[p,cs]of Object.entries(EXCEL_DATA))e[p]=cs.map(c=>({...c,proy:Array(12).fill(0),real:Array(12).fill(0)}));return e;}
+/* Construir data de Previsión desde DB.clientes, agrupada por país, ordenada alfabéticamente */
+function buildDataFromClientes(){
+  const data = {};
+  // Primero incluir los clientes de DB.clientes
+  DB.clientes.forEach(c=>{
+    const pais = (c.Pais||'Sin país').trim();
+    const nombre = (c.Empresa||'').trim();
+    if(!nombre) return;
+    if(!data[pais]) data[pais] = [];
+    // Evitar duplicados
+    if(!data[pais].find(x=>x.nombre===nombre)){
+      data[pais].push({
+        nombre,
+        comercial: c.Contacto||'',
+        fecha: c.UltimaInteraccion||c.FechaCreacion||new Date().toISOString().slice(0,10),
+        proy: Array(12).fill(0),
+        real: Array(12).fill(0)
+      });
+    }
+  });
+  // Ordenar cada país alfabéticamente por nombre
+  Object.keys(data).forEach(pais=>{
+    data[pais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  });
+  return data;
+}
+
+/* buildEmptyData: mantener para compatibilidad con productos sin clientes */
+function buildEmptyData(){
+  const d = buildDataFromClientes();
+  // Si no hay clientes aún, devolver objeto vacío
+  return Object.keys(d).length > 0 ? d : {};
+}
 
 let PRODUCTS=[
-  {id:'aceitunas',emoji:'🫒',label:'Aceitunas Negras',subtitle:'Aceitunas en granel · Dic 2025 → Nov 2026 · Toneladas',data:EXCEL_DATA},
+  {id:'aceitunas',emoji:'🫒',label:'Aceitunas Negras',subtitle:'Aceitunas en granel · Dic 2025 → Nov 2026 · Toneladas',data:buildDataFromClientes()},
   {id:'pasta',emoji:'🍅',label:'Pasta de Tomate',subtitle:'Pasta de Tomate · 2026 · Toneladas',data:buildEmptyData()},
   {id:'aceite',emoji:'🫙',label:'Aceite de Oliva',subtitle:'Aceite de Oliva · 2026 · Toneladas',data:buildEmptyData()},
 ];
