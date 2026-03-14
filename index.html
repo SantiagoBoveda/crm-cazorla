@@ -581,6 +581,16 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .gauth-hint a:hover{text-decoration:underline}
 .gauth-actions{display:flex;gap:10px}
 .gauth-actions .btn{flex:1}
+/* ══ RUBRO MULTI-SELECT ══ */
+.rubro-picker{border:1px solid var(--border);border-radius:8px;background:var(--surface2);overflow:hidden;margin-top:0}
+.rubro-picker-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--text);user-select:none}
+.rubro-picker-item:not(:last-child){border-bottom:1px solid var(--border)}
+.rubro-picker-item:hover{background:rgba(123,29,58,.06)}
+.rubro-picker-item.checked{background:rgba(123,29,58,.1)}
+.rubro-picker-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.rubro-picker-item .rubro-emoji{font-size:15px;width:22px;text-align:center;flex-shrink:0}
+.rubro-picker-empty{padding:10px 12px;font-size:12px;color:var(--muted);font-style:italic}
+
 .storage-bar{padding:8px 12px;border-top:1px solid var(--sidebar-border);display:flex;flex-direction:column;gap:6px}
 .storage-status{font-size:10px;color:var(--sidebar-muted);font-family:var(--mono);display:flex;align-items:center;gap:5px;padding:4px 0}
 .storage-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--green)}
@@ -1496,7 +1506,7 @@ function renderClientes(){
       <td><strong>${c.Empresa||'—'}</strong></td>
       <td>${c.Contacto||'—'}${c.Cargo?`<div style="font-size:11px;color:var(--muted)">${c.Cargo}</div>`:''}</td>
       <td>${c.Pais||'—'}</td>
-      <td>${c.Rubro||'—'}</td>
+      <td>${(c.Rubro||'').split(',').filter(Boolean).map(r=>`<span style="display:inline-block;background:rgba(123,29,58,.08);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:11px;margin:1px">${r.trim()}</span>`).join('')||'—'}</td>
       <td>${telHtml}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${emailHtml}</td>
       <td><span class="badge badge-${estadoBadge}">${c.Estado||'—'}</span></td>
@@ -1580,7 +1590,7 @@ function filterTable(id,q){
    CRM BASE MODAL (renamed to avoid conflict)
 ═══════════════════════════════════════ */
 const FORMS={
-  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro / Producto</label><select id="f-Rubro" data-smartlist="Rubro"><option value="">— Seleccionar —</option></select></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro / Productos</label><input type="hidden" id="f-Rubro"><div class="rubro-picker" id="rubro-picker"></div></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
   producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" data-smartlist="Categoría"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
@@ -1633,6 +1643,11 @@ function editRecord(type, id){
   HEADERS[sheet].forEach(h=>{
     const el = document.getElementById('f-'+h);
     if(!el) return;
+    if(h==='Rubro' && document.getElementById('rubro-picker')){
+      // Usar el picker multi-select con valores pre-cargados
+      buildRubroPicker(record[h]||'');
+      return;
+    }
     if(el.tagName==='SELECT'){
       if(el.dataset.smartlist){
         populateSmartSelect(el, el.dataset.smartlist, record[h]||'');
@@ -1743,8 +1758,17 @@ function onClienteSaved(row){
   const pais    = (row.Pais||'Argentina').trim();
   if(!empresa) return;
 
-  // 1. Agregar a Previsión en todos los productos, en orden alfabético
-  PRODUCTS.forEach(prod=>{
+  // 1. Agregar a Previsión — en los productos que figuran en Rubro, o en todos si Rubro está vacío
+  const rubros = row.Rubro
+    ? row.Rubro.split(',').map(r=>r.trim()).filter(Boolean)
+    : [];
+
+  // Si no eligió rubro, agregar a todos los productos
+  const targetProducts = rubros.length
+    ? PRODUCTS.filter(p=>rubros.includes(p.label))
+    : PRODUCTS;
+
+  targetProducts.forEach(prod=>{
     if(!prod.data[pais]) prod.data[pais]=[];
     const exists = prod.data[pais].find(c=>c.nombre===empresa);
     if(!exists){
@@ -1755,11 +1779,12 @@ function onClienteSaved(row){
         proy: Array(12).fill(0),
         real: Array(12).fill(0)
       });
-      // Ordenar alfabéticamente
       prod.data[pais].sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
     }
   });
-  syncPrevisionRow('aceitunas', pais, empresa);
+  // Sync previsión para el primer producto objetivo (o aceitunas por defecto)
+  const firstProd = targetProducts[0] || PRODUCTS[0];
+  if(firstProd) syncPrevisionRow(firstProd.id, pais, empresa);
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
 
   // 2. Auto-crear contacto si hay nombre de contacto
@@ -1885,25 +1910,55 @@ function populateSmartSelect(sel, listKey, currentVal=''){
   let items = [...(SMART_LISTS[listKey]||[])];
   if(listKey==='Cliente') items = [...new Set([...items, ...DB.clientes.map(c=>c.Empresa).filter(Boolean)])];
   if(listKey==='Producto') items = [...new Set([...items, ...DB.inventario.map(i=>i.Producto).filter(Boolean), ...PRODUCTS.map(p=>p.label)])];
-  // Rubro: siempre refleja los productos activos en Previsión, sin opción de agregar nuevo manual
-  if(listKey==='Rubro'){
-    items = PRODUCTS.map(p=>p.label).filter(Boolean);
-    sel.innerHTML =
-      `<option value="">— Seleccionar —</option>` +
-      items.map(i=>`<option value="${i}"${i===currentVal?' selected':''}>${i}</option>`).join('');
-    return;
-  }
+  // Rubro: siempre refleja los productos activos en Previsión — se maneja con picker propio
+  if(listKey==='Rubro') return; // manejado por buildRubroPicker
   sel.innerHTML =
     `<option value="">— Seleccionar —</option>` +
     items.map(i=>`<option value="${i}"${i===currentVal?' selected':''}>${i}</option>`).join('') +
     `<option value="__new__" style="color:var(--accent);font-weight:700">＋ Agregar ${listKey} nuevo...</option>`;
 }
 
-/* ── Pobla todos los selects con data-smartlist del form activo ── */
+/* ── Rubro multi-select: construye checkboxes desde PRODUCTS ── */
+function buildRubroPicker(currentVal=''){
+  const picker = document.getElementById('rubro-picker');
+  if(!picker) return;
+  const selected = currentVal ? currentVal.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
+  if(!PRODUCTS.length){
+    picker.innerHTML = '<div class="rubro-picker-empty">Sin productos en Previsión</div>';
+    return;
+  }
+
+  picker.innerHTML = PRODUCTS.map(p=>`
+    <label class="rubro-picker-item${selected.includes(p.label)?' checked':''}" data-label="${p.label}">
+      <input type="checkbox" value="${p.label}" ${selected.includes(p.label)?'checked':''}>
+      <span class="rubro-emoji">${p.emoji||'📦'}</span>
+      <span>${p.label}</span>
+    </label>`).join('');
+
+  // Listener: actualizar hidden input y estilo al cambiar checkbox
+  picker.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      // Actualizar clase visual
+      cb.closest('.rubro-picker-item').classList.toggle('checked', cb.checked);
+      // Actualizar valor del hidden input
+      const vals = [...picker.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value);
+      document.getElementById('f-Rubro').value = vals.join(', ');
+    });
+  });
+
+  // Setear valor inicial
+  const vals = [...picker.querySelectorAll('input[type=checkbox]:checked')].map(x=>x.value);
+  document.getElementById('f-Rubro').value = vals.join(', ');
+}
+
+/* Pobla todos los selects con data-smartlist + construye el rubro picker */
 function populateFormSelects(){
   document.querySelectorAll('#modal-body [data-smartlist]').forEach(sel=>{
     populateSmartSelect(sel, sel.dataset.smartlist);
   });
+  // Construir rubro picker si existe en el form activo
+  if(document.getElementById('rubro-picker')) buildRubroPicker();
 }
 
 /* ── Event delegation: escucha cambios en CUALQUIER select del modal ── */
