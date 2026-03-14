@@ -36,7 +36,11 @@ body.warm{
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;transition:background .3s,color .3s}
 
 /* ══ SIDEBAR ══ */
-.sidebar{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:background .3s,border-color .3s,transform .28s cubic-bezier(.4,0,.2,1)}
+.sidebar{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:background .3s,border-color .3s,transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--sidebar-border) transparent}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:var(--sidebar-border);border-radius:4px}
+.sidebar::-webkit-scrollbar-thumb:hover{background:#4a1a2e}
 .logo{padding:0 20px 24px;border-bottom:1px solid var(--sidebar-border);margin-bottom:16px}
 .logo h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,#f8c8d8,#e88aa8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo p{font-size:11px;color:var(--sidebar-muted);margin-top:2px}
