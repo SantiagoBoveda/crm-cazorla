@@ -749,11 +749,18 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="sidebar-footer">
     <div class="user-chip">
       <div class="avatar" id="user-avatar">?</div>
-      <div style="font-size:12px;overflow:hidden">
-        <div id="user-name" style="font-weight:600">Sin sesión</div>
-        <div style="color:var(--sidebar-muted);font-size:11px" id="sync-status-text">Desconectado</div>
+      <div style="font-size:12px;overflow:hidden;flex:1">
+        <div id="user-name" style="font-weight:600;color:var(--sidebar-text)">Sin sesión</div>
+        <div style="font-size:11px;color:var(--sidebar-muted)" id="sync-status-text">Desconectado</div>
       </div>
     </div>
+    <button id="btn-connect-google" onclick="connectGoogleFromSidebar()"
+      style="margin-top:10px;width:100%;padding:8px;background:rgba(255,255,255,.06);border:1px solid var(--sidebar-border);border-radius:8px;color:var(--sidebar-muted);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s"
+      onmouseover="this.style.borderColor='#e88aa8';this.style.color='#f8c8d8'"
+      onmouseout="this.style.borderColor='var(--sidebar-border)';this.style.color='var(--sidebar-muted)'">
+      <svg width="13" height="13" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Conectar Google
+    </button>
   </div>
 </div>
 
@@ -1267,6 +1274,7 @@ function handleTokenResponse(resp){
     // Activar auto-backup ahora que tenemos token
     scheduleAutoBackup();
     updateStorageStatus();
+    hideConnectButton();
   }).catch(()=>{
     document.getElementById('auth-screen').style.display='none';
     document.getElementById('user-name').textContent='Usuario';
@@ -1282,6 +1290,7 @@ function continueOffline(){
   document.getElementById('user-avatar').textContent='👤';
   loadLocal();
   loadPrevisionFromDB();
+  loadPrevisionYears();
   renderDashboard();
   updateStorageStatus();
 }
@@ -1721,6 +1730,7 @@ async function savePrevisionProySheet(productoId, pais, nombre, mesIdx, valor){
     DB.prevision.push(row);
   }
   saveLocal();
+  savePrevisionYears(); // ← persistir snapshot del año activo
 }
 
 /* ═══════════════════════════════════════
@@ -1811,31 +1821,85 @@ document.addEventListener('change', function(e){
 /* ═══════════════════════════════════════
    PREVISIÓN — GESTIÓN DE AÑOS
 ═══════════════════════════════════════ */
-const PREVISION_YEARS = {2026: null}; // year → data snapshot (null = use current PRODUCTS data)
+/* ═══════════════════════════════════════
+   PREVISIÓN — GESTIÓN DE AÑOS (datos independientes por año)
+═══════════════════════════════════════ */
+
+/*  PREVISION_YEARS[year] = {
+      products: deep copy de PRODUCTS[*].data,
+      notas:    deep copy de NOTAS
+    }
+    El año 2026 se inicializa con los datos actuales de PRODUCTS.
+*/
+const PREVISION_YEARS = {};
+
+/* Guardar snapshot del año activo antes de cambiar */
+function snapshotCurrentYear(){
+  PREVISION_YEARS[_previsionYear] = {
+    products: PRODUCTS.map(p=>({
+      id: p.id,
+      data: JSON.parse(JSON.stringify(p.data))
+    })),
+    notas: JSON.parse(JSON.stringify(NOTAS))
+  };
+}
+
+/* Restaurar snapshot de un año (o crear vacío si es nuevo) */
+function restoreYear(year){
+  if(PREVISION_YEARS[year]){
+    // Restaurar datos guardados
+    const snap = PREVISION_YEARS[year];
+    snap.products.forEach(sp=>{
+      const prod = PRODUCTS.find(p=>p.id===sp.id);
+      if(prod) prod.data = JSON.parse(JSON.stringify(sp.data));
+    });
+    // Restaurar notas
+    Object.keys(NOTAS).forEach(k=>delete NOTAS[k]);
+    Object.assign(NOTAS, JSON.parse(JSON.stringify(snap.notas)));
+  } else {
+    // Año nuevo: limpiar proyecciones y reales, mantener lista de clientes
+    PRODUCTS.forEach(prod=>{
+      Object.keys(prod.data).forEach(pais=>{
+        prod.data[pais] = prod.data[pais].map(c=>({
+          ...c,
+          proy: Array(12).fill(0),
+          real: Array(12).fill(0)
+        }));
+      });
+    });
+    // Limpiar notas también
+    Object.keys(NOTAS).forEach(k=>delete NOTAS[k]);
+    // Guardar snapshot vacío inmediatamente
+    snapshotCurrentYear();
+  }
+}
 
 function onYearChange(year){
   year = parseInt(year);
+  // 1. Guardar estado del año actual antes de salir
+  snapshotCurrentYear();
+  // 2. Cambiar año activo
   _previsionYear = year;
-  // Recalcular meses y mes actual para el nuevo año
   MESES = getMesesForYear(year);
   MES_ACT_IDX = getMesActIdx(year);
-  // Actualizar títulos
+  // 3. Cargar datos del año destino
+  restoreYear(year);
+  // 4. Actualizar UI
   document.getElementById('page-title').textContent = `🫒 Previsión de Ventas ${year}`;
   const prod = currentProduct();
   if(prod){
-    const mesInicio = 'Dic '+(year-1);
-    const mesFin = 'Nov '+year;
     document.getElementById('subtitle').textContent =
-      `${prod.label} · ${mesInicio} → ${mesFin} · Toneladas`;
+      `${prod.label} · Dic ${year-1} → Nov ${year} · Toneladas`;
   }
   renderAll();
+  // 5. Persistir en localStorage
+  savePrevisionYears();
 }
 
 function addPrevisionYear(){
   const sel = document.getElementById('year-filter');
   const years = Array.from(sel.options).map(o=>parseInt(o.value));
   const newYear = Math.max(...years)+1;
-  // Solo agregar si no existe ya
   if(!years.includes(newYear)){
     const opt = document.createElement('option');
     opt.value = newYear; opt.textContent = newYear;
@@ -1843,6 +1907,50 @@ function addPrevisionYear(){
   }
   sel.value = newYear;
   onYearChange(newYear);
+}
+
+/* Persistir todos los snapshots en localStorage */
+function savePrevisionYears(){
+  try{
+    // También guardar el año activo
+    snapshotCurrentYear();
+    localStorage.setItem('crm_cazorla_years', JSON.stringify({
+      active: _previsionYear,
+      years: PREVISION_YEARS
+    }));
+  }catch(e){ console.warn('savePrevisionYears error', e); }
+}
+
+/* Cargar snapshots desde localStorage */
+function loadPrevisionYears(){
+  try{
+    const raw = localStorage.getItem('crm_cazorla_years');
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    // Restaurar snapshots
+    Object.assign(PREVISION_YEARS, saved.years||{});
+    // Restaurar el año que estaba activo
+    const savedYear = parseInt(saved.active)||2026;
+    // Agregar opciones al selector si hacen falta
+    const sel = document.getElementById('year-filter');
+    if(sel){
+      const existingYears = Array.from(sel.options).map(o=>parseInt(o.value));
+      Object.keys(PREVISION_YEARS).map(Number).sort().forEach(y=>{
+        if(!existingYears.includes(y)){
+          const opt = document.createElement('option');
+          opt.value = y; opt.textContent = y;
+          sel.appendChild(opt);
+        }
+      });
+      sel.value = savedYear;
+    }
+    if(savedYear !== 2026){
+      _previsionYear = savedYear;
+      MESES = getMesesForYear(savedYear);
+      MES_ACT_IDX = getMesActIdx(savedYear);
+      restoreYear(savedYear);
+    }
+  }catch(e){ console.warn('loadPrevisionYears error', e); }
 }
 
 /* ═══════════════════════════════════════
@@ -2621,19 +2729,62 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(document.body.classList.contains('warm'))
     document.getElementById('theme-label').textContent='Modo claro';
 
-  // Cargar datos desde localStorage al arrancar
+  // Si hay datos en localStorage → entrar directo sin pedir login
   const hadData = loadLocal();
   if(hadData){
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('user-name').textContent='Sin cuenta';
+    document.getElementById('sync-status-text').textContent='Datos locales ✓';
+    document.getElementById('user-avatar').textContent='👤';
     loadPrevisionFromDB();
+    loadPrevisionYears(); // ← restaurar snapshots por año
     renderDashboard();
     updateStorageStatus();
-    // Mostrar auth screen igual para que pueda conectar Google si quiere
-    // pero los datos ya están disponibles
+  } else {
+    // Sin datos previos → mostrar auth normalmente
+    updateStorageStatus();
   }
-  updateStorageStatus();
 });
 
-/* ── MOBILE SIDEBAR ── */
+/* Conectar Google desde dentro de la app (sin ir al auth-screen) */
+function connectGoogleFromSidebar(){
+  const clientId = '678286127164-4mir5gteeapelsv0e8h0vrtgr4jgqt25.apps.googleusercontent.com';
+  try{
+    if(!tokenClient){
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: SCOPES,
+        callback: (resp)=>{
+          if(resp.error){ alert('Error al conectar Google: '+resp.error); return; }
+          token = resp.access_token;
+          fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+token}})
+            .then(r=>r.json()).then(info=>{
+              userData = {name:info.name||info.email, email:info.email};
+              document.getElementById('user-name').textContent = userData.name;
+              document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
+              document.getElementById('sync-status-text').textContent = 'Google conectado';
+              document.getElementById('btn-connect-google').style.display = 'none';
+              findOrCreateSpreadsheet(true);
+              scheduleAutoBackup();
+              updateStorageStatus();
+            }).catch(()=>{
+              document.getElementById('sync-status-text').textContent = 'Google conectado';
+              document.getElementById('btn-connect-google').style.display = 'none';
+              findOrCreateSpreadsheet(true);
+              scheduleAutoBackup();
+            });
+        }
+      });
+    }
+    tokenClient.requestAccessToken();
+  }catch(e){ alert('Error: Google Auth no cargó aún. Intentá en unos segundos.'); }
+}
+
+/* Ocultar botón conectar cuando ya hay token */
+function hideConnectButton(){
+  const btn = document.getElementById('btn-connect-google');
+  if(btn) btn.style.display = 'none';
+}
 function toggleSidebar(){
   const sb=document.getElementById('main-sidebar');
   const ov=document.getElementById('sidebar-overlay');
