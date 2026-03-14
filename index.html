@@ -2479,25 +2479,56 @@ function renderEmojiPicker(){
 function toggleEmojiPicker(){document.getElementById('emoji-picker').classList.toggle('open');}
 function pickEmoji(e){selectedEmoji=e;document.getElementById('emoji-btn').textContent=e;document.getElementById('emoji-picker').classList.remove('open');}
 function changeEmoji(id){const e=prompt('Emoji para este producto:');if(!e||!e.trim())return;const p=PRODUCTS.find(x=>x.id===id);if(p){p.emoji=e.trim().slice(0,2);renderModalList();renderTabs();}}
-function renameProduct(id,newName){const name=newName.trim();if(!name)return;const p=PRODUCTS.find(x=>x.id===id);if(p&&p.label!==name){p.label=name;p.subtitle=name+' · 2026 · Toneladas';renderTabs();if(id===currentProductId)document.getElementById('subtitle').textContent=p.subtitle;}}
+function renameProduct(id,newName){
+  const name=newName.trim();if(!name)return;
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(p&&p.label!==name){
+    p.label=name;
+    p.subtitle=name+' · '+_previsionYear+' · Toneladas';
+    renderTabs();
+    if(id===currentProductId)document.getElementById('subtitle').textContent=p.subtitle;
+    savePrevisionYears();saveLocal();
+  }
+}
 function createProduct(){
-  const nameEl=document.getElementById('new-prod-name');const name=nameEl.value.trim();if(!name){nameEl.focus();return;}
-  PRODUCTS.push({id:'prod_'+Date.now(),emoji:selectedEmoji,label:name,subtitle:name+' · 2026 · Toneladas',data:buildEmptyData()});
+  const nameEl=document.getElementById('new-prod-name');
+  const name=nameEl.value.trim();if(!name){nameEl.focus();return;}
+  PRODUCTS.push({id:'prod_'+Date.now(),emoji:selectedEmoji,label:name,subtitle:name+' · '+_previsionYear+' · Toneladas',data:buildEmptyData()});
   nameEl.value='';selectedEmoji='📦';document.getElementById('emoji-btn').textContent='📦';
   renderModalList();renderTabs();
+  savePrevisionYears();saveLocal();
 }
 function askDelete(id){
   const p=PRODUCTS.find(x=>x.id===id);pendingDeleteId=id;
-  document.getElementById('confirm-msg').innerHTML=`¿Eliminar <strong>${p.emoji} ${p.label}</strong>?<br><span style="font-size:11px;color:var(--text2)">Esta acción no se puede deshacer.</span>`;
+  document.getElementById('confirm-msg').innerHTML=
+    `¿Eliminar <strong>${p.emoji} ${p.label}</strong>?<br>
+     <span style="font-size:11px;color:var(--text2)">Todas las proyecciones de este producto se perderán.</span><br>
+     <span style="font-size:11px;color:var(--red);font-weight:700;display:block;margin-top:4px">⚠️ Esta acción no se puede deshacer.</span>`;
   document.getElementById('confirm-overlay').classList.add('open');
 }
 function cancelDelete(){pendingDeleteId=null;document.getElementById('confirm-overlay').classList.remove('open');}
 function confirmDelete(){
   if(!pendingDeleteId)return;
-  PRODUCTS=PRODUCTS.filter(p=>p.id!==pendingDeleteId);
+  const p=PRODUCTS.find(x=>x.id===pendingDeleteId);if(!p)return;
+  // Segunda confirmación: tipear el nombre del producto
+  const typed=window.prompt(
+    `⚠️ Segunda confirmación\n\nEscribí el nombre exacto del producto para confirmar:\n\n"${p.label}"`
+  );
+  if(typed===null)return; // canceló
+  if(typed.trim()!==p.label.trim()){
+    alert('El nombre no coincide. Eliminación cancelada.');
+    return;
+  }
+  // Eliminar
+  PRODUCTS=PRODUCTS.filter(x=>x.id!==pendingDeleteId);
   if(currentProductId===pendingDeleteId){currentProductId=PRODUCTS[0].id;document.getElementById('subtitle').textContent=currentProduct().subtitle;}
+  // Limpiar del snapshot del año activo
+  if(PREVISION_YEARS[_previsionYear]&&PREVISION_YEARS[_previsionYear].products){
+    PREVISION_YEARS[_previsionYear].products=PREVISION_YEARS[_previsionYear].products.filter(sp=>sp.id!==pendingDeleteId);
+  }
   pendingDeleteId=null;document.getElementById('confirm-overlay').classList.remove('open');
   renderModalList();renderTabs();renderAll();
+  savePrevisionYears();saveLocal();
 }
 
 function setProduct(id){currentProductId=id;document.getElementById('subtitle').textContent=currentProduct().subtitle;renderTabs();renderAll();}
