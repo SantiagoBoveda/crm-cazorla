@@ -592,8 +592,8 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .rubro-picker-empty{padding:10px 12px;font-size:12px;color:var(--muted);font-style:italic}
 
 /* ══ CALENDARIO ══ */
-.cal-wrap{display:flex;gap:18px;align-items:flex-start}
-.cal-main{flex:1;min-width:0}
+.cal-wrap{display:flex;gap:18px;align-items:flex-start;width:100%;min-width:0;overflow:hidden}
+.cal-main{flex:1;min-width:0;overflow:hidden}
 .cal-agenda-panel{width:280px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;max-height:calc(100vh - 180px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .cal-agenda-panel h4{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
 .cal-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
@@ -609,7 +609,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .cal-filter-chip[data-type=cliente].active{background:#16a34a;border-color:#16a34a}
 .cal-filter-chip[data-type=reclamo].active{background:#dc2626;border-color:#dc2626}
 .cal-filter-chip[data-type=factura].active{background:#d97706;border-color:#d97706}
-.cal-grid{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.cal-grid{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;width:100%}
 .cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2)}
 .cal-dow{padding:8px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr)}
@@ -1110,6 +1110,48 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       </table>
     </div>
   </div>
+
+<!-- CALENDARIO -->
+<div class="section" id="section-calendario">
+  <div class="ph-row page-header">
+    <div><h1>📅 Calendario</h1><p>Vista integrada de toda la actividad</p></div>
+  </div>
+  <div class="cal-nav">
+    <button onclick="calPrev()">‹</button>
+    <h2 id="cal-title"></h2>
+    <button onclick="calNext()">›</button>
+    <button class="today-btn" onclick="calToday()">Hoy</button>
+  </div>
+  <div class="cal-filters" id="cal-filters">
+    <span class="cal-filter-chip active" data-type="tarea" onclick="toggleCalFilter(this)">✅ Tareas</span>
+    <span class="cal-filter-chip active" data-type="venta" onclick="toggleCalFilter(this)">💰 Ventas</span>
+    <span class="cal-filter-chip active" data-type="cliente" onclick="toggleCalFilter(this)">👥 Clientes</span>
+    <span class="cal-filter-chip active" data-type="reclamo" onclick="toggleCalFilter(this)">⚠️ Reclamos</span>
+    <span class="cal-filter-chip active" data-type="factura" onclick="toggleCalFilter(this)">🧾 Facturas</span>
+  </div>
+  <div class="cal-wrap">
+    <div class="cal-main">
+      <div class="cal-grid">
+        <div class="cal-dow-row">
+          <div class="cal-dow">Dom</div><div class="cal-dow">Lun</div><div class="cal-dow">Mar</div>
+          <div class="cal-dow">Mié</div><div class="cal-dow">Jue</div><div class="cal-dow">Vie</div>
+          <div class="cal-dow">Sáb</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+    </div>
+    <div class="cal-agenda-panel">
+      <h4>Próximos 30 días</h4>
+      <div id="cal-agenda"></div>
+    </div>
+  </div>
+  <div class="cal-popover" id="cal-popover" style="display:none">
+    <button class="close-pop" onclick="closeCalPopover()">✕</button>
+    <h4 id="pop-title"></h4>
+    <div class="meta" id="pop-meta"></div>
+    <button class="go-btn" id="pop-go" onclick="calGoToSection()">Ir a sección →</button>
+  </div>
+</div>
 
 </div><!-- end .main -->
 
@@ -3671,48 +3713,6 @@ document.querySelectorAll('.nav-item').forEach(n=>{
       <button class="btn btn-outline" onclick="closeContactModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveContact()">Guardar contacto</button>
     </div>
-  </div>
-</div>
-
-<!-- CALENDARIO -->
-<div class="section" id="section-calendario">
-  <div class="ph-row page-header">
-    <div><h1>📅 Calendario</h1><p>Vista integrada de toda la actividad</p></div>
-  </div>
-  <div class="cal-nav">
-    <button onclick="calPrev()">‹</button>
-    <h2 id="cal-title"></h2>
-    <button onclick="calNext()">›</button>
-    <button class="today-btn" onclick="calToday()">Hoy</button>
-  </div>
-  <div class="cal-filters" id="cal-filters">
-    <span class="cal-filter-chip active" data-type="tarea" onclick="toggleCalFilter(this)">✅ Tareas</span>
-    <span class="cal-filter-chip active" data-type="venta" onclick="toggleCalFilter(this)">💰 Ventas</span>
-    <span class="cal-filter-chip active" data-type="cliente" onclick="toggleCalFilter(this)">👥 Clientes</span>
-    <span class="cal-filter-chip active" data-type="reclamo" onclick="toggleCalFilter(this)">⚠️ Reclamos</span>
-    <span class="cal-filter-chip active" data-type="factura" onclick="toggleCalFilter(this)">🧾 Facturas</span>
-  </div>
-  <div class="cal-wrap">
-    <div class="cal-main">
-      <div class="cal-grid">
-        <div class="cal-dow-row">
-          <div class="cal-dow">Dom</div><div class="cal-dow">Lun</div><div class="cal-dow">Mar</div>
-          <div class="cal-dow">Mié</div><div class="cal-dow">Jue</div><div class="cal-dow">Vie</div>
-          <div class="cal-dow">Sáb</div>
-        </div>
-        <div class="cal-days" id="cal-days"></div>
-      </div>
-    </div>
-    <div class="cal-agenda-panel">
-      <h4>Próximos 30 días</h4>
-      <div id="cal-agenda"></div>
-    </div>
-  </div>
-  <div class="cal-popover" id="cal-popover" style="display:none">
-    <button class="close-pop" onclick="closeCalPopover()">✕</button>
-    <h4 id="pop-title"></h4>
-    <div class="meta" id="pop-meta"></div>
-    <button class="go-btn" id="pop-go" onclick="calGoToSection()">Ir a sección →</button>
   </div>
 </div>
 
