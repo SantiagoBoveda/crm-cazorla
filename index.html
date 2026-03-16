@@ -568,6 +568,61 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   .main{padding:12px;padding-top:62px}
 }
 
+/* ══ INVENTARIO AVANZADO — TABS ══ */
+.inv-maintabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.inv-mtab{padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.inv-mtab:hover{border-color:var(--border2);color:var(--text)}
+.inv-mtab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.inv-panel{display:none}.inv-panel.active{display:block}
+.inv-subtabs-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.inv-subtabs{display:flex;gap:6px}
+.inv-stab{padding:6px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.inv-stab:hover{border-color:var(--border2);color:var(--text)}
+.inv-stab.active{background:rgba(123,29,58,.1);border-color:var(--accent);color:var(--accent)}
+.inv-subpanel{display:none}.inv-subpanel.active{display:block}
+/* ══ BOMBONAS TABLE ══ */
+.bomb-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+.bomb-table{border-collapse:collapse;font-family:var(--mono);font-size:12px;width:100%}
+.bomb-table th,.bomb-table td{border:1px solid var(--border2)}
+.bomb-fixed{background:var(--surface3)!important;font-family:var(--sans);font-size:10px;font-weight:700;color:var(--text2);padding:8px 10px!important;white-space:nowrap;position:sticky;left:0;z-index:5;text-align:center}
+.bomb-row-label{background:var(--surface2)!important;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--text);padding:5px 12px!important;white-space:nowrap;position:sticky;left:0;z-index:3;min-width:80px}
+.bomb-cell{text-align:center;padding:3px 4px!important;cursor:pointer;min-width:52px;position:relative}
+.bomb-cell:hover{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
+.bomb-val{display:block;text-align:center;font-size:12px;min-height:20px;line-height:20px}
+.bomb-cell-input{width:50px;background:transparent;border:none;border-bottom:2px solid var(--accent);outline:none;font-size:12px;font-family:var(--mono);text-align:center;color:var(--text);padding:1px 0;display:block}
+.bomb-row-total{text-align:right;padding:5px 10px!important;font-weight:700;color:#1a3a6b;background:#dce9f7!important;min-width:64px;position:sticky;right:0;z-index:3;border-left:2px solid var(--border2)!important;white-space:nowrap}
+body.warm .bomb-row-total{color:#90cdf4;background:#0d2a4a!important}
+.bomb-total-row td{background:var(--surface3)!important;font-weight:700;border-top:2px solid var(--border2)!important;padding:5px 6px!important}
+.bomb-col-total{text-align:center;color:var(--text2);font-size:11px}
+.bomb-grand-total{text-align:right;padding:5px 12px!important;font-weight:800;color:#c00000;background:rgba(192,0,0,.08)!important;border-left:2px solid var(--border2)!important;font-size:13px;position:sticky;right:0;z-index:3}
+body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important}
+/* ══ FERMENTADORES ══ */
+.ferm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.ferm-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .18s,transform .18s}
+.ferm-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ferm-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.ferm-name{font-size:14px;font-weight:700;color:var(--accent)}
+.ferm-fields{display:flex;flex-direction:column;gap:7px}
+.ferm-field{display:flex;align-items:flex-start;gap:9px}
+.ferm-icon{font-size:13px;width:20px;flex-shrink:0;margin-top:2px}
+.ferm-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-family:var(--mono)}
+.ferm-val{font-size:12px;color:var(--text);font-family:var(--mono)}
+/* ══ FERMENTADOR MODAL ══ */
+.ferm-modal-overlay{position:fixed;inset:0;background:rgba(44,13,28,.5);z-index:600;display:none;align-items:center;justify-content:center;padding:16px}
+.ferm-modal-overlay.open{display:flex}
+.ferm-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(44,13,28,.2)}
+/* ══ INVENTORY DISCOUNT MODAL ══ */
+.inv-disc-overlay{position:fixed;inset:0;background:rgba(44,13,28,.5);z-index:610;display:none;align-items:center;justify-content:center;padding:16px}
+.inv-disc-overlay.open{display:flex}
+.inv-disc-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(44,13,28,.2)}
+/* ══ BOMBONAS CONFIG MODAL ══ */
+.bomb-cfg-overlay{position:fixed;inset:0;background:rgba(44,13,28,.6);z-index:700;display:none;align-items:center;justify-content:center;padding:16px}
+.bomb-cfg-overlay.open{display:flex}
+.bomb-cfg-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:620px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(44,13,28,.25)}
+@media(max-width:768px){
+  .inv-maintabs{gap:6px}.inv-mtab{padding:7px 14px;font-size:12px}
+  .ferm-grid{grid-template-columns:1fr}.bomb-table-wrap{border-radius:8px}
+}
 /* ══ GOOGLE AUTH MODAL ══ */
 .gauth-overlay{position:fixed;inset:0;background:rgba(44,13,28,.6);z-index:700;display:none;align-items:center;justify-content:center;padding:16px}
 .gauth-overlay.open{display:flex}
@@ -939,12 +994,58 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <!-- INVENTARIO -->
   <div class="section" id="section-inventario">
     <div class="ph-row">
-      <div><h1>Inventario</h1><p>Stock de productos</p></div>
-      <button class="btn btn-primary" onclick="openCRMModal('producto')">+ Nuevo producto</button>
+      <div><h1>📦 Inventario</h1><p>Bombonas · Fermentadores · Tomate · Otros</p></div>
     </div>
-    <div class="table-container">
-      <table><thead><tr><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Estado</th><th style="width:70px"></th></tr></thead>
-      <tbody id="inventario-tbody"><tr><td colspan="7" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
+    <!-- Tabs principales -->
+    <div class="inv-maintabs">
+      <button class="inv-mtab active" onclick="showInvTab('aceitunas',this)">🫒 Aceitunas</button>
+      <button class="inv-mtab" onclick="showInvTab('tomate',this)">🍅 Tomate</button>
+      <button class="inv-mtab" onclick="showInvTab('otros',this)">📦 Otros</button>
+    </div>
+    <!-- ── PANEL ACEITUNAS ── -->
+    <div class="inv-panel active" id="inv-panel-aceitunas">
+      <div class="inv-subtabs-row">
+        <div class="inv-subtabs">
+          <button class="inv-stab active" onclick="showInvSubTab('bombonas',this)">🛢 Bombonas</button>
+          <button class="inv-stab" onclick="showInvSubTab('fermentadores',this)">🏭 Fermentadores</button>
+        </div>
+      </div>
+      <!-- BOMBONAS -->
+      <div class="inv-subpanel active" id="inv-sub-bombonas">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <div style="font-size:13px;font-weight:700;color:var(--accent)">Detalle de Enteras 1ras — Bombonas</div>
+          <button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button>
+          <div style="margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)">▸ click en celda · Tab para avanzar</div>
+        </div>
+        <div id="bombonas-grid-wrap"></div>
+      </div>
+      <!-- FERMENTADORES -->
+      <div class="inv-subpanel" id="inv-sub-fermentadores">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;font-weight:700;color:var(--accent)">Fermentadores</div>
+          <button class="btn btn-primary btn-sm" onclick="openFermentadorModal()">＋ Agregar fermentador</button>
+        </div>
+        <div id="fermentadores-wrap"></div>
+      </div>
+    </div>
+    <!-- ── PANEL TOMATE ── -->
+    <div class="inv-panel" id="inv-panel-tomate">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--accent)">Stock de Pasta de Tomate</div>
+        <button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button>
+      </div>
+      <div id="tomate-wrap"></div>
+    </div>
+    <!-- ── PANEL OTROS ── -->
+    <div class="inv-panel" id="inv-panel-otros">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div></div>
+        <button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Nuevo producto</button>
+      </div>
+      <div class="table-container">
+        <table><thead><tr><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Precio</th><th style="width:70px"></th></tr></thead>
+        <tbody id="inventario-tbody"></tbody></table>
+      </div>
     </div>
   </div>
 
@@ -1208,7 +1309,7 @@ function getActiveClientId(){
   return DEFAULT_CLIENT_ID;
 }
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[]};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null};
 let currentCRMModal=null;
 
 const LS_KEY = 'crm_cazorla_db';
@@ -1672,21 +1773,62 @@ function renderTareas(){
       </div>`;    }).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin tareas</div>';
   });
 }
-function renderInventario(){
-  const tb=document.getElementById('inventario-tbody');if(!tb)return;
-  if(!DB.inventario.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📦</div><p>Sin productos</p></div></td></tr>';return;}
-  tb.innerHTML=DB.inventario.map(i=>{
+/* ── Inventario tab state ── */
+let _invTab='aceitunas', _invSubTab='bombonas';
+function renderInventario(){ showInvTab(_invTab,null,true); }
+function showInvTab(tab,btn,silent){
+  _invTab=tab;
+  document.querySelectorAll('.inv-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.inv-mtab').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('inv-panel-'+tab);
+  if(panel)panel.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else document.querySelectorAll('.inv-mtab').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+tab+"'"))b.classList.add('active');});
+  if(tab==='aceitunas') showInvSubTab(_invSubTab,null,true);
+  else if(tab==='tomate') renderTomateInv();
+  else if(tab==='otros') renderOtrosInv();
+}
+function showInvSubTab(subtab,btn,silent){
+  _invSubTab=subtab;
+  document.querySelectorAll('.inv-subpanel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.inv-stab').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('inv-sub-'+subtab);
+  if(panel)panel.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else document.querySelectorAll('.inv-stab').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+subtab+"'"))b.classList.add('active');});
+  if(subtab==='bombonas') renderBombonasGrid();
+  else if(subtab==='fermentadores') renderFermentadores();
+}
+/* ── TOMATE & OTROS ── */
+function renderTomateInv(){
+  const data=(DB.inventario||[]).filter(i=>(i.Producto||'').toLowerCase().includes('tomate')||(i.Categoria||'').toLowerCase().includes('tomate'));
+  const wrap=document.getElementById('tomate-wrap'); if(!wrap)return;
+  const total=data.reduce((s,i)=>s+(parseFloat(i.StockActual)||0),0);
+  let html=`<div class="mod-stats" style="margin-bottom:16px">
+    <div class="mod-stat accent-blue"><div class="ms-label">Stock total</div><div class="ms-value">${total.toLocaleString('es-AR',{maximumFractionDigits:1})}</div><div class="ms-sub">toneladas</div></div>
+    <div class="mod-stat"><div class="ms-label">Lotes</div><div class="ms-value">${data.length}</div><div class="ms-sub">registros</div></div></div>`;
+  if(!data.length){html+='<div class="empty-state"><div class="icon">🍅</div><p>Sin stock de tomate registrado</p></div>';wrap.innerHTML=html;return;}
+  html+=`<div class="table-container"><table><thead><tr><th>Producto</th><th>Categoría/Lote</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Precio</th><th style="width:70px"></th></tr></thead><tbody>${data.map(i=>{
     const s=parseFloat(i.StockActual)||0,m=parseFloat(i.StockMin)||0,p=m>0?Math.min(s/m*100,100):100,c=p<50?'var(--red)':p<80?'var(--yellow)':'var(--green)';
-    return`<tr>
-      <td><strong>${i.Producto||'—'}</strong></td><td>${i.Categoria||'—'}</td>
-      <td style="font-family:var(--mono)">${s} ${i.Unidad||''}</td>
-      <td style="font-family:var(--mono)">${m} ${i.Unidad||''}</td>
+    return`<tr><td><strong>${i.Producto||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${i.Categoria||'—'}</td>
+      <td style="font-family:var(--mono)">${s} ${i.Unidad||'ton'}</td><td style="font-family:var(--mono)">${m} ${i.Unidad||'ton'}</td>
+      <td><div class="stock-bar" style="width:80px"><div class="stock-fill" style="width:${p}%;background:${c}"></div></div></td>
+      <td style="font-family:var(--mono)">$${(parseFloat(i.Precio)||0).toLocaleString()}</td>
+      <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+  wrap.innerHTML=html;
+}
+function renderOtrosInv(){
+  const data=(DB.inventario||[]).filter(i=>{const p=(i.Producto||'').toLowerCase(),c=(i.Categoria||'').toLowerCase();return !p.includes('tomate')&&!c.includes('tomate')&&!p.includes('aceitun')&&!c.includes('aceitun');});
+  const tb=document.getElementById('inventario-tbody'); if(!tb)return;
+  if(!data.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="icon">📦</div><p>Sin otros productos</p></div></td></tr>';return;}
+  tb.innerHTML=data.map(i=>{
+    const s=parseFloat(i.StockActual)||0,m=parseFloat(i.StockMin)||0,p=m>0?Math.min(s/m*100,100):100,c=p<50?'var(--red)':p<80?'var(--yellow)':'var(--green)';
+    return`<tr><td><strong>${i.Producto||'—'}</strong></td><td>${i.Categoria||'—'}</td>
+      <td style="font-family:var(--mono)">${s} ${i.Unidad||''}</td><td style="font-family:var(--mono)">${m} ${i.Unidad||''}</td>
       <td><div class="stock-bar"><div class="stock-fill" style="width:${p}%;background:${c}"></div></div></td>
       <td style="font-family:var(--mono)">$${(parseFloat(i.Precio)||0).toLocaleString()}</td>
-      <td class="row-actions">
-        <button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button>
-        <button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button>
-      </td></tr>`;
+      <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button></td></tr>`;
   }).join('');
 }
 function renderVentas(){
@@ -1884,6 +2026,10 @@ async function saveModal(){
         renderContactos();
     }
     if(currentCRMModal==='venta'){ onVentaSaved(row); autoCreateFactura(row); }
+    // Auto-crear cliente en DB.clientes si no existe
+    if(row.Cliente && currentCRMModal !== 'cliente'){
+      autoEnsureCliente(row.Cliente, row.Pais||'', currentCRMModal);
+    }
   }
 
   // Guardar en localStorage (instantáneo)
@@ -1894,6 +2040,41 @@ async function saveModal(){
   const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
   if(renders[currentCRMModal]) renders[currentCRMModal]();
   renderDashboard();
+}
+
+/* ─── Auto-crear cliente en DB.clientes si no existe ─── */
+function autoEnsureCliente(empresa, pais, source){
+  const nombre = (empresa||'').trim();
+  if(!nombre) return null;
+  // Verificar si ya existe (comparación case-insensitive)
+  const existe = DB.clientes.find(c =>
+    c.Empresa && c.Empresa.toLowerCase().trim() === nombre.toLowerCase().trim()
+  );
+  if(existe) return null;
+  const sourceLabels = {venta:'Ventas',proyecto:'Proyectos',reclamo:'Reclamos',factura:'Facturación'};
+  const nuevo = {
+    ID: genId(),
+    Empresa: nombre,
+    Contacto: '', Cargo: '',
+    Telefono: '', Telefono2: '',
+    Email: '', Email2: '',
+    Pais: pais||'',
+    Rubro: '',
+    Estado: 'Activo',
+    UltimaInteraccion: new Date().toISOString().slice(0,10),
+    Notas: `Creado automáticamente desde ${sourceLabels[source]||source||'sistema'}`
+  };
+  DB.clientes.push(nuevo);
+  // Agregar a Previsión también (mismo flujo que alta manual)
+  onClienteSaved(nuevo);
+  saveLocal();
+  // Notificación visual discreta
+  const bar = document.getElementById('storage-label');
+  if(bar){ const prev=bar.textContent; bar.textContent=`✓ Cliente "${nombre}" creado en Clientes`; setTimeout(()=>bar.textContent=prev,3000); }
+  // Refrescar si la sección está visible
+  if(document.getElementById('section-clientes').classList.contains('active')) renderClientes();
+  if(document.getElementById('section-contactos').classList.contains('active')) renderContactos();
+  return nuevo;
 }
 
 /* ─── Hook: cliente nuevo → agregar a Previsión + crear contacto ─── */
@@ -2090,6 +2271,8 @@ function onVentaSaved(row){
     prod.data[pais].push({nombre:cliente,comercial:'',fecha:fecha,proy:Array(12).fill(0),real:Array(12).fill(0).map((_,i)=>i===mesIdx?ton:0)});
   }
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
+  // Ofrecer descuento de inventario
+  offerInventoryDiscount(row);
 }
 
 /* Fecha YYYY-MM-DD → índice de mes según año activo (Dic año-1 = 0, Ene = 1 ... Nov = 11) */
@@ -3835,6 +4018,318 @@ function closeSidebar(){
 document.querySelectorAll('.nav-item').forEach(n=>{
   n.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();});
 });
+
+/* ═══════════════════════════════════════
+   BOMBONAS — CONFIG & GRID
+═══════════════════════════════════════ */
+const DEFAULT_BOMBONAS_CONFIG={
+  categorias:[
+    {id:'1ra',      label:'1RA',         color:'#C00000',textColor:'#fff',variedades:['MZ VC']},
+    {id:'1ra_brasil',label:'1RA BRASIL', color:'#70AD47',textColor:'#fff',variedades:['MZ VC','PIC','MZ CRIOLLA','DENET','BARNEA','ALO','HB','ARAUCO']},
+    {id:'1ra_dh',   label:'1RA DH',      color:'#F4B942',textColor:'#333',variedades:['HB VS','NAV','MISS']}
+  ],
+  calibres:['100/120','120/140','160/180','180/200','200/220','240/260','280/300','300/320','340/360','380/400','400/420','440/460','480/500','Perdgón','Entamada']
+};
+const BOMB_TINTS={'1ra':'rgba(192,0,0,.06)','1ra_brasil':'rgba(112,173,71,.08)','1ra_dh':'rgba(244,185,66,.1)'};
+const BOMB_TINTS_FULL={'1ra':'rgba(192,0,0,.18)','1ra_brasil':'rgba(112,173,71,.22)','1ra_dh':'rgba(244,185,66,.3)'};
+
+function getBombonasConfig(){
+  if(!DB.bombonas_config||!DB.bombonas_config.categorias)
+    DB.bombonas_config=JSON.parse(JSON.stringify(DEFAULT_BOMBONAS_CONFIG));
+  return DB.bombonas_config;
+}
+function getBombonasCell(catId,variedad,calibre){
+  const e=(DB.bombonas||[]).find(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre);
+  return e?parseFloat(e.cantidad)||0:0;
+}
+function setBombonasCell(catId,variedad,calibre,cantidad){
+  if(!DB.bombonas)DB.bombonas=[];
+  const idx=DB.bombonas.findIndex(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre);
+  const val=parseFloat(cantidad)||0;
+  if(idx>=0){if(val===0)DB.bombonas.splice(idx,1);else DB.bombonas[idx].cantidad=val;}
+  else if(val>0)DB.bombonas.push({id:genId(),catId,variedad,calibre,cantidad:val});
+  saveLocal();
+}
+function renderBombonasGrid(){
+  const config=getBombonasConfig();
+  const wrap=document.getElementById('bombonas-grid-wrap');if(!wrap)return;
+  const cols=[];
+  config.categorias.forEach(cat=>cat.variedades.forEach(v=>cols.push({catId:cat.id,catLabel:cat.label,catColor:cat.color,catTextColor:cat.textColor,variedad:v})));
+  if(!cols.length){wrap.innerHTML='<div class="empty-state"><p>Configurá la tabla primero (⚙️)</p></div>';return;}
+  let html=`<div class="bomb-table-wrap"><table class="bomb-table" id="bomb-table"><thead><tr>
+    <th class="bomb-fixed" rowspan="2" style="min-width:88px">CALIBRE</th>`;
+  config.categorias.forEach(cat=>{
+    if(!cat.variedades.length)return;
+    html+=`<th colspan="${cat.variedades.length}" style="background:${cat.color};color:${cat.textColor};text-align:center;font-size:11px;font-weight:700;letter-spacing:.5px;padding:6px 8px;white-space:nowrap">${cat.label}</th>`;
+  });
+  html+=`<th class="bomb-row-total" rowspan="2" style="position:sticky;right:0;z-index:6;min-width:72px;text-align:center;font-size:10px;background:#1a3a6b;color:#fff;border-left:2px solid var(--border2)">STOCK<br>PATIO</th></tr><tr>`;
+  cols.forEach(col=>{
+    html+=`<th style="background:${BOMB_TINTS[col.catId]||''};font-size:10px;padding:5px 4px;text-align:center;white-space:nowrap;min-width:52px;font-family:var(--mono)">${col.variedad}</th>`;
+  });
+  html+=`</tr></thead><tbody>`;
+  const colTotals=Array(cols.length).fill(0);let grandTotal=0;
+  config.calibres.forEach(calibre=>{
+    let rowTotal=0;const sc=calibre.replace(/[\/\s\.]/g,'_');
+    html+=`<tr><td class="bomb-row-label">${calibre}</td>`;
+    cols.forEach((col,ci)=>{
+      const val=getBombonasCell(col.catId,col.variedad,calibre);
+      if(val){rowTotal+=val;colTotals[ci]+=val;}
+      const tint=val>0?(BOMB_TINTS_FULL[col.catId]||''):(BOMB_TINTS[col.catId]||'');
+      const sv=col.variedad.replace(/\s/g,'_');
+      html+=`<td class="bomb-cell" id="bc_${col.catId}_${sv}_${sc}" style="background:${tint}"
+        data-catid="${col.catId}" data-var="${col.variedad}" data-calib="${calibre}"
+        onclick="editBombonaCell(this)"><span class="bomb-val">${val||''}</span></td>`;
+    });
+    grandTotal+=rowTotal;
+    html+=`<td class="bomb-row-total" id="bt_${sc}" style="position:sticky;right:0;z-index:3">${rowTotal||''}</td></tr>`;
+  });
+  html+=`<tr class="bomb-total-row"><td class="bomb-row-label" style="font-family:var(--sans);font-size:11px;color:var(--text3)">total</td>`;
+  cols.forEach((col,ci)=>{
+    html+=`<td class="bomb-col-total" id="bct_${col.catId}_${col.variedad.replace(/\s/g,'_')}">${colTotals[ci]||''}</td>`;
+  });
+  html+=`<td class="bomb-grand-total" id="bomb-grand-total">${grandTotal.toLocaleString()}</td></tr>`;
+  html+=`</tbody></table></div>`;
+  wrap.innerHTML=html;
+}
+function editBombonaCell(td){
+  if(td.querySelector('input'))return;
+  const catId=td.dataset.catid,variedad=td.dataset.var,calibre=td.dataset.calib;
+  const cur=getBombonasCell(catId,variedad,calibre);
+  const span=td.querySelector('.bomb-val');span.style.display='none';
+  const input=document.createElement('input');
+  input.type='number';input.min='0';input.step='1';input.value=cur||'';input.className='bomb-cell-input';
+  td.appendChild(input);input.focus();input.select();
+  const save=()=>{
+    const val=parseFloat(input.value)||0;
+    setBombonasCell(catId,variedad,calibre,val);
+    td.innerHTML=`<span class="bomb-val">${val||''}</span>`;
+    td.style.background=val>0?(BOMB_TINTS_FULL[catId]||''):(BOMB_TINTS[catId]||'');
+    updateBombonasTotals();
+  };
+  input.addEventListener('blur',save);
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();input.blur();}
+    if(e.key==='Escape'){td.innerHTML=`<span class="bomb-val">${cur||''}</span>`;}
+    if(e.key==='Tab'){e.preventDefault();input.blur();
+      const cells=[...document.querySelectorAll('.bomb-cell')];
+      const next=cells[cells.indexOf(td)+(e.shiftKey?-1:1)];
+      if(next)setTimeout(()=>editBombonaCell(next),30);
+    }
+  });
+}
+function updateBombonasTotals(){
+  const config=getBombonasConfig();
+  const cols=[];config.categorias.forEach(cat=>cat.variedades.forEach(v=>cols.push({catId:cat.id,variedad:v})));
+  let grand=0;const ct=Array(cols.length).fill(0);
+  config.calibres.forEach(calibre=>{
+    let rt=0;
+    cols.forEach((col,ci)=>{const v=getBombonasCell(col.catId,col.variedad,calibre);rt+=v;ct[ci]+=v;});
+    grand+=rt;
+    const el=document.getElementById('bt_'+calibre.replace(/[\/\s\.]/g,'_'));
+    if(el)el.textContent=rt||'';
+  });
+  cols.forEach((col,ci)=>{
+    const el=document.getElementById('bct_'+col.catId+'_'+col.variedad.replace(/\s/g,'_'));
+    if(el)el.textContent=ct[ci]||'';
+  });
+  const gt=document.getElementById('bomb-grand-total');if(gt)gt.textContent=grand.toLocaleString();
+}
+/* ── Bombonas Config Modal ── */
+function openBombonasConfig(){renderBombonasConfigModal();document.getElementById('bomb-cfg-overlay').classList.add('open');}
+function closeBombonasConfig(){document.getElementById('bomb-cfg-overlay').classList.remove('open');}
+function saveBombonasConfig(){saveLocal();closeBombonasConfig();renderBombonasGrid();}
+function renderBombonasConfigModal(){
+  const config=getBombonasConfig();
+  let html=config.categorias.map((cat,ci)=>`
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:14px;height:14px;border-radius:4px;background:${cat.color};flex-shrink:0"></div>
+        <input value="${cat.label}" onchange="getBombonasConfig().categorias[${ci}].label=this.value;saveLocal()"
+          style="font-weight:700;font-size:13px;background:transparent;border:none;outline:none;border-bottom:1px solid var(--border);color:var(--text);flex:1">
+        <input type="color" value="${cat.color}" onchange="getBombonasConfig().categorias[${ci}].color=this.value;saveLocal()"
+          style="width:30px;height:26px;border:none;cursor:pointer;border-radius:4px;padding:2px">
+        <button onclick="deleteBombCat(${ci})" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:15px">🗑</button>
+      </div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Variedades</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${cat.variedades.map((v,vi)=>`
+          <span style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px">
+            <input value="${v}" onchange="getBombonasConfig().categorias[${ci}].variedades[${vi}]=this.value;saveLocal()"
+              style="background:transparent;border:none;outline:none;color:var(--text);font-size:12px;width:${Math.max(40,v.length*8)}px;font-family:var(--mono)">
+            <button onclick="deleteBombVar(${ci},${vi})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px">✕</button>
+          </span>`).join('')}
+        <button onclick="addBombVar(${ci})" style="padding:3px 10px;background:transparent;border:1px dashed var(--border2);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer">＋ Variedad</button>
+      </div>
+    </div>`).join('');
+  html+=`<button onclick="addBombCat()" style="width:100%;padding:10px;background:transparent;border:1px dashed var(--border2);border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;margin-bottom:16px">＋ Agregar categoría</button>`;
+  html+=`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Calibres (filas)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+    ${config.calibres.map((c,ci)=>`
+      <span style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px">
+        <input value="${c}" onchange="getBombonasConfig().calibres[${ci}]=this.value;saveLocal()"
+          style="background:transparent;border:none;outline:none;color:var(--text);font-size:12px;width:${Math.max(50,c.length*8)}px;font-family:var(--mono)">
+        <button onclick="deleteBombCalib(${ci})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px">✕</button>
+      </span>`).join('')}
+    <button onclick="addBombCalib()" style="padding:3px 12px;background:transparent;border:1px dashed var(--border2);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer">＋ Calibre</button>
+  </div>`;
+  document.getElementById('bomb-cfg-body').innerHTML=html;
+}
+function deleteBombCat(ci){const c=getBombonasConfig();if(c.categorias.length<=1){alert('Debe haber al menos una categoría.');return;}c.categorias.splice(ci,1);saveLocal();renderBombonasConfigModal();}
+function addBombVar(ci){getBombonasConfig().categorias[ci].variedades.push('Nueva');saveLocal();renderBombonasConfigModal();}
+function deleteBombVar(ci,vi){getBombonasConfig().categorias[ci].variedades.splice(vi,1);saveLocal();renderBombonasConfigModal();}
+function addBombCat(){getBombonasConfig().categorias.push({id:'cat_'+Date.now(),label:'Nueva categoría',color:'#aaaaaa',textColor:'#fff',variedades:[]});saveLocal();renderBombonasConfigModal();}
+function addBombCalib(){getBombonasConfig().calibres.push('Nuevo calibre');saveLocal();renderBombonasConfigModal();}
+function deleteBombCalib(ci){getBombonasConfig().calibres.splice(ci,1);saveLocal();renderBombonasConfigModal();}
+
+/* ═══════════════════════════════════════
+   FERMENTADORES
+═══════════════════════════════════════ */
+let _editingFermId=null;
+function renderFermentadores(){
+  const data=DB.fermentadores||[];
+  const wrap=document.getElementById('fermentadores-wrap');if(!wrap)return;
+  if(!data.length){wrap.innerHTML='<div class="empty-state"><div class="icon">🏭</div><p>Sin fermentadores. Agregá el primero con el botón de arriba.</p></div>';return;}
+  wrap.innerHTML=`<div class="ferm-grid">${data.map(f=>`
+    <div class="ferm-card">
+      <div class="ferm-card-head">
+        <div class="ferm-name">🏭 ${f.nombre||'Fermentador'}</div>
+        <div style="display:flex;gap:5px">
+          <button class="btn-row-edit" onclick="openFermentadorModal('${f.id}')">✏️</button>
+          <button class="btn-row-del" onclick="deleteFermentador('${f.id}')">🗑</button>
+        </div>
+      </div>
+      <div class="ferm-fields">
+        ${ff('🫒','Variedad',f.variedad)}
+        ${ff('📏','Calibre',f.calibre)}
+        ${ff('⚖️','Kg estimados',f.kg?parseFloat(f.kg).toLocaleString()+' kg':'—')}
+        ${f.brix?ff('🔬','Brix',f.brix):''}
+        ${ff('📍','Entamada',(f.entamada=='true'||f.entamada===true)
+          ?'<span class="badge badge-green" style="font-size:11px">✓ Sí</span>'
+          :'<span class="badge badge-yellow" style="font-size:11px">✗ No</span>')}
+        ${f.notas?ff('📝','Notas',`<span style="white-space:normal;color:var(--muted);font-size:11px;font-family:var(--sans)">${f.notas}</span>`):''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+function ff(icon,label,value){
+  return`<div class="ferm-field"><span class="ferm-icon">${icon}</span><div style="flex:1"><div class="ferm-lbl">${label}</div><div class="ferm-val">${value||'—'}</div></div></div>`;
+}
+function openFermentadorModal(id){
+  _editingFermId=id||null;
+  const f=id?(DB.fermentadores||[]).find(x=>x.id===id):null;
+  document.getElementById('ferm-modal-title').textContent=f?'Editar fermentador':'Nuevo fermentador';
+  document.getElementById('fm-nombre').value=f?.nombre||'';
+  document.getElementById('fm-variedad').value=f?.variedad||'';
+  document.getElementById('fm-calibre').value=f?.calibre||'';
+  document.getElementById('fm-kg').value=f?.kg||'';
+  document.getElementById('fm-brix').value=f?.brix||'';
+  document.getElementById('fm-entamada').value=(f?.entamada=='true'||f?.entamada===true)?'true':'false';
+  document.getElementById('fm-notas').value=f?.notas||'';
+  document.getElementById('ferm-modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('fm-nombre').focus(),80);
+}
+function closeFermentadorModal(){document.getElementById('ferm-modal-overlay').classList.remove('open');_editingFermId=null;}
+function saveFermentador(){
+  const nombre=document.getElementById('fm-nombre').value.trim();
+  if(!nombre){document.getElementById('fm-nombre').focus();return;}
+  const data={nombre,variedad:document.getElementById('fm-variedad').value.trim(),calibre:document.getElementById('fm-calibre').value.trim(),
+    kg:document.getElementById('fm-kg').value,brix:document.getElementById('fm-brix').value,
+    entamada:document.getElementById('fm-entamada').value==='true',notas:document.getElementById('fm-notas').value.trim()};
+  if(!DB.fermentadores)DB.fermentadores=[];
+  if(_editingFermId){const idx=DB.fermentadores.findIndex(x=>x.id===_editingFermId);if(idx>=0)DB.fermentadores[idx]={...DB.fermentadores[idx],...data};}
+  else DB.fermentadores.push({id:genId(),...data});
+  saveLocal();closeFermentadorModal();renderFermentadores();
+}
+function deleteFermentador(id){
+  const f=(DB.fermentadores||[]).find(x=>x.id===id);if(!f)return;
+  if(!confirm(`¿Eliminar fermentador "${f.nombre}"?`))return;
+  DB.fermentadores=DB.fermentadores.filter(x=>x.id!==id);saveLocal();renderFermentadores();
+}
+
+/* ═══════════════════════════════════════
+   DESCUENTO DE INVENTARIO DESDE VENTAS
+═══════════════════════════════════════ */
+let _invDiscVenta=null;
+function offerInventoryDiscount(ventaRow){
+  const prod=(ventaRow.Producto||'').toLowerCase();
+  const isAceituna=prod.includes('aceitun');
+  const isTomate=prod.includes('tomate');
+  if(!isAceituna&&!isTomate)return;
+  _invDiscVenta=ventaRow;
+  document.getElementById('invd-title').textContent=`Actualizar inventario — ${ventaRow.Producto}`;
+  if(isAceituna){
+    renderInvdAceitunas();
+    document.getElementById('invd-form-aceituna').style.display='';
+    document.getElementById('invd-form-tomate').style.display='none';
+    document.getElementById('invd-cantidad').value=ventaRow.CantidadTon||'';
+  } else {
+    renderInvdTomate();
+    document.getElementById('invd-form-aceituna').style.display='none';
+    document.getElementById('invd-form-tomate').style.display='';
+    document.getElementById('invd-cantidad-tom').value=ventaRow.CantidadTon||'';
+  }
+  document.getElementById('inv-disc-overlay').classList.add('open');
+}
+function renderInvdAceitunas(){
+  const config=getBombonasConfig();
+  const catSel=document.getElementById('invd-cat');
+  catSel.innerHTML=config.categorias.map(c=>`<option value="${c.id}">${c.label}</option>`).join('');
+  onInvdCatChange();
+}
+function onInvdCatChange(){
+  const catId=document.getElementById('invd-cat').value;
+  const cat=getBombonasConfig().categorias.find(c=>c.id===catId);
+  document.getElementById('invd-var').innerHTML=(cat?.variedades||[]).map(v=>`<option value="${v}">${v}</option>`).join('');
+  onInvdVarChange();
+}
+function onInvdVarChange(){
+  const catId=document.getElementById('invd-cat').value;
+  const variedad=document.getElementById('invd-var').value;
+  const calibres=getBombonasConfig().calibres;
+  document.getElementById('invd-calib').innerHTML=calibres.map(c=>{
+    const s=getBombonasCell(catId,variedad,c);
+    return`<option value="${c}">${c} — ${s} bombonas</option>`;
+  }).join('');
+  updateInvdStock();
+}
+function updateInvdStock(){
+  const catId=document.getElementById('invd-cat')?.value;
+  const variedad=document.getElementById('invd-var')?.value;
+  const calibre=document.getElementById('invd-calib')?.value;
+  if(!catId||!variedad||!calibre)return;
+  const s=getBombonasCell(catId,variedad,calibre);
+  const el=document.getElementById('invd-stock-actual');
+  if(el)el.textContent=`Stock actual: ${s} bombonas`;
+}
+function renderInvdTomate(){
+  const data=(DB.inventario||[]).filter(i=>(i.Producto||'').toLowerCase().includes('tomate'));
+  const sel=document.getElementById('invd-tomate-prod');
+  sel.innerHTML=data.length
+    ?data.map(i=>`<option value="${i.ID}">${i.Producto} (${i.StockActual} ${i.Unidad||'ton'})</option>`).join('')
+    :'<option value="">Sin stock de tomate registrado</option>';
+}
+function applyInventoryDiscount(){
+  const v=_invDiscVenta;if(!v)return;
+  const prod=(v.Producto||'').toLowerCase();
+  if(prod.includes('aceitun')){
+    const catId=document.getElementById('invd-cat').value;
+    const variedad=document.getElementById('invd-var').value;
+    const calibre=document.getElementById('invd-calib').value;
+    const cant=parseFloat(document.getElementById('invd-cantidad').value)||0;
+    const accion=document.getElementById('invd-accion').value;
+    const cur=getBombonasCell(catId,variedad,calibre);
+    setBombonasCell(catId,variedad,calibre,accion==='agregar'?cur+cant:Math.max(0,cur-cant));
+    if(_invSubTab==='bombonas')updateBombonasTotals();
+  } else {
+    const prodId=document.getElementById('invd-tomate-prod').value;
+    const cant=parseFloat(document.getElementById('invd-cantidad-tom').value)||0;
+    const accion=document.getElementById('invd-accion-tomate').value;
+    const item=(DB.inventario||[]).find(i=>i.ID===prodId);
+    if(item){const cur=parseFloat(item.StockActual)||0;item.StockActual=accion==='agregar'?cur+cant:Math.max(0,cur-cant);saveLocal();}
+  }
+  closeInvDiscount();
+  if(document.getElementById('section-inventario').classList.contains('active'))renderInventario();
+}
+function closeInvDiscount(){document.getElementById('inv-disc-overlay').classList.remove('open');_invDiscVenta=null;}
 </script>
 <!-- MODAL CONTACTO -->
 <div class="contact-modal-overlay" id="contact-modal-overlay" onclick="handleContactOverlay(event)">
@@ -3886,6 +4381,94 @@ document.querySelectorAll('.nav-item').forEach(n=>{
     <div class="gauth-actions">
       <button class="btn btn-outline" onclick="closeGauthModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="confirmGoogleAuth()">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FERMENTADOR MODAL ══ -->
+<div class="ferm-modal-overlay" id="ferm-modal-overlay" onclick="if(event.target===this)closeFermentadorModal()">
+  <div class="ferm-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 id="ferm-modal-title" style="font-size:15px;font-weight:700;color:var(--accent)">Nuevo fermentador</h3>
+      <button onclick="closeFermentadorModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div class="form-group"><label>Nombre / Nº fermentador *</label><input id="fm-nombre" placeholder="Ej: Fermentador 1 · F-001"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Variedad</label><input id="fm-variedad" placeholder="Ej: MZ VC, ARAUCO…"></div>
+      <div class="form-group"><label>Calibre</label><input id="fm-calibre" placeholder="Ej: 300/320, Perdgón…"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Kg estimados</label><input id="fm-kg" type="number" step="0.1" placeholder="5000"></div>
+      <div class="form-group"><label>Brix</label><input id="fm-brix" type="number" step="0.01" placeholder="—"></div>
+    </div>
+    <div class="form-group"><label>¿Entamada?</label>
+      <select id="fm-entamada"><option value="false">No</option><option value="true">Sí</option></select>
+    </div>
+    <div class="form-group"><label>Notas</label><textarea id="fm-notas" style="min-height:64px" placeholder="Fecha de inicio, estado, observaciones…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeFermentadorModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFermentador()">Guardar fermentador</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INVENTORY DISCOUNT MODAL ══ -->
+<div class="inv-disc-overlay" id="inv-disc-overlay" onclick="if(event.target===this)closeInvDiscount()">
+  <div class="inv-disc-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 id="invd-title" style="font-size:15px;font-weight:700;color:var(--accent)">Actualizar inventario</h3>
+      <button onclick="closeInvDiscount()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">¿Querés descontar o agregar esta cantidad al inventario?</p>
+    <!-- Aceitunas -->
+    <div id="invd-form-aceituna">
+      <div class="form-row">
+        <div class="form-group"><label>Categoría</label><select id="invd-cat" onchange="onInvdCatChange()"></select></div>
+        <div class="form-group"><label>Variedad</label><select id="invd-var" onchange="onInvdVarChange()"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Calibre</label><select id="invd-calib" onchange="updateInvdStock()"></select></div>
+        <div class="form-group"><label>Cantidad (bombonas)</label><input id="invd-cantidad" type="number" step="1" min="0" placeholder="0"></div>
+      </div>
+      <div id="invd-stock-actual" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:12px"></div>
+      <div class="form-group"><label>Acción</label>
+        <select id="invd-accion">
+          <option value="descontar">➖ Descontar del inventario (venta)</option>
+          <option value="agregar">➕ Agregar al inventario (devolución)</option>
+        </select>
+      </div>
+    </div>
+    <!-- Tomate -->
+    <div id="invd-form-tomate" style="display:none">
+      <div class="form-group"><label>Producto</label><select id="invd-tomate-prod"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label>Cantidad (ton)</label><input id="invd-cantidad-tom" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="form-group"><label>Acción</label>
+          <select id="invd-accion-tomate">
+            <option value="descontar">➖ Descontar</option>
+            <option value="agregar">➕ Agregar</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeInvDiscount()">Omitir</button>
+      <button class="btn btn-primary" onclick="applyInventoryDiscount()">Aplicar al inventario</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOMBONAS CONFIG MODAL ══ -->
+<div class="bomb-cfg-overlay" id="bomb-cfg-overlay" onclick="if(event.target===this)closeBombonasConfig()">
+  <div class="bomb-cfg-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <h3 style="font-size:15px;font-weight:700;color:var(--accent)">⚙️ Configurar tabla de bombonas</h3>
+      <button onclick="closeBombonasConfig()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div id="bomb-cfg-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeBombonasConfig()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveBombonasConfig()">Guardar y aplicar</button>
     </div>
   </div>
 </div>
