@@ -643,6 +643,25 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .agenda-item .a-sub{font-size:10px;color:var(--muted)}
 @media(max-width:768px){.cal-wrap{flex-direction:column}.cal-agenda-panel{width:100%}}
 
+/* ══ HISTORIAL DE NOVEDADES ══ */
+.historial-panel{margin-top:20px;border-top:2px solid var(--border);padding-top:16px}
+.historial-panel h4{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.historial-add{display:flex;gap:8px;margin-bottom:14px;align-items:flex-start}
+.historial-add textarea{flex:1;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;resize:none;min-height:60px;transition:border-color .15s}
+.historial-add textarea:focus{outline:none;border-color:var(--accent)}
+.historial-add button{padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end}
+.historial-add button:hover{opacity:.85}
+.historial-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.historial-entry{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative}
+.historial-entry:first-child{border-color:var(--accent);background:rgba(123,29,58,.04)}
+.historial-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.historial-fecha{font-size:10px;font-weight:700;font-family:var(--mono);color:var(--accent)}
+.historial-autor{font-size:10px;color:var(--muted)}
+.historial-texto{font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap}
+.historial-del{position:absolute;top:6px;right:8px;background:none;border:none;font-size:11px;cursor:pointer;color:var(--muted);opacity:0;transition:opacity .15s}
+.historial-entry:hover .historial-del{opacity:1}
+.historial-empty{font-size:12px;color:var(--muted);font-style:italic;text-align:center;padding:12px 0}
+
 .storage-bar{padding:8px 12px;border-top:1px solid var(--sidebar-border);display:flex;flex-direction:column;gap:6px}
 .storage-status{font-size:10px;color:var(--sidebar-muted);font-family:var(--mono);display:flex;align-items:center;gap:5px;padding:4px 0}
 .storage-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--green)}
@@ -1189,7 +1208,7 @@ function getActiveClientId(){
   return DEFAULT_CLIENT_ID;
 }
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[]};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[]};
 let currentCRMModal=null;
 
 const LS_KEY = 'crm_cazorla_db';
@@ -1447,6 +1466,7 @@ const HEADERS={
   Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'],
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
+  Novedades:['ID','Tipo','RefId','Fecha','Texto','Autor'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11']
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
@@ -1616,24 +1636,31 @@ function renderClientes(){
 function renderProyectos(){
   const tb=document.getElementById('proyectos-tbody');if(!tb)return;
   if(!DB.proyectos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📁</div><p>Sin proyectos</p></div></td></tr>';return;}
-  tb.innerHTML=DB.proyectos.map(p=>`<tr>
-    <td><strong>${p.Nombre||'—'}</strong></td><td>${p.Cliente||'—'}</td><td>${p.Producto||'—'}</td>
-    <td><span class="badge badge-blue">${p.Etapa||'—'}</span></td>
-    <td style="font-family:var(--mono)">$${(parseFloat(p.ValorUSD)||0).toLocaleString()}</td>
-    <td>${p.Responsable||'—'}</td>
-    <td class="row-actions">
-      <button class="btn-row-edit" onclick="editRecord('proyecto','${p.ID}')">✏️</button>
-      <button class="btn-row-del" onclick="deleteRecord('proyecto','${p.ID}')">🗑</button>
-    </td></tr>`).join('');
+  tb.innerHTML=DB.proyectos.map(p=>{
+    const novCount=(DB.novedades||[]).filter(n=>n.Tipo==='proyecto'&&n.RefId===p.ID).length;
+    const novBadge=novCount?`<span style="margin-left:6px;background:rgba(123,29,58,.12);color:var(--accent);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${novCount} 📋</span>`:'';
+    return`<tr>
+      <td><strong>${p.Nombre||'—'}</strong>${novBadge}</td><td>${p.Cliente||'—'}</td><td>${p.Producto||'—'}</td>
+      <td><span class="badge badge-blue">${p.Etapa||'—'}</span></td>
+      <td style="font-family:var(--mono)">$${(parseFloat(p.ValorUSD)||0).toLocaleString()}</td>
+      <td>${p.Responsable||'—'}</td>
+      <td class="row-actions">
+        <button class="btn-row-edit" onclick="editRecord('proyecto','${p.ID}')">✏️</button>
+        <button class="btn-row-del" onclick="deleteRecord('proyecto','${p.ID}')">🗑</button>
+      </td></tr>`;
+  }).join('');
 }
 function renderTareas(){
   ['Pendiente','En progreso','Completado'].forEach(estado=>{
     const cols={'Pendiente':'pendiente','En progreso':'progreso','Completado':'completado'};
     const container=document.getElementById('col-'+cols[estado]);if(!container)return;
     const tasks=DB.tareas.filter(t=>t.Estado===estado);
-    container.innerHTML=tasks.map(t=>`
+    container.innerHTML=tasks.map(t=>{
+      const novCount=(DB.novedades||[]).filter(n=>n.Tipo==='tarea'&&n.RefId===t.ID).length;
+      const novBadge=novCount?`<span style="font-size:10px;color:var(--accent);font-weight:700">📋 ${novCount}</span>`:'';
+      return`
       <div class="kanban-card">
-        <div class="task-title">${t.Titulo||'Sin título'}</div>
+        <div class="task-title">${t.Titulo||'Sin título'} ${novBadge}</div>
         <div class="task-meta">
           <span>${t.Asignado||'—'}</span>
           <span class="badge badge-${t.Prioridad==='Alta'?'red':t.Prioridad==='Media'?'yellow':'green'}">${t.Prioridad||'—'}</span>
@@ -1642,7 +1669,7 @@ function renderTareas(){
           <button class="btn-row-edit" onclick="editRecord('tarea','${t.ID}')">✏️</button>
           <button class="btn-row-del" onclick="deleteRecord('tarea','${t.ID}')">🗑</button>
         </div>
-      </div>`).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin tareas</div>';
+      </div>`;    }).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin tareas</div>';
   });
 }
 function renderInventario(){
@@ -1709,6 +1736,18 @@ function openCRMModal(type){
   document.getElementById('modal-body').innerHTML=cfg.fields;
   modal.classList.add('open');
   populateFormSelects();
+  // Para nuevo proyecto/tarea, mostrar historial vacío con aviso de guardar primero
+  if(type==='proyecto' || type==='tarea'){
+    const panel = document.createElement('div');
+    panel.className = 'historial-panel';
+    panel.id = 'historial-panel';
+    panel.dataset.tipo = type;
+    panel.dataset.refId = '';
+    panel.innerHTML = `
+      <h4>📋 Historial de novedades</h4>
+      <div class="historial-empty">Guardá el registro primero para poder agregar novedades.</div>`;
+    document.getElementById('modal-body').appendChild(panel);
+  }
 }
 function closeCRMModal(){
   const modal = document.getElementById('main-modal');
@@ -1754,6 +1793,11 @@ function editRecord(type, id){
       el.value = record[h]||'';
     }
   });
+
+  // Mostrar historial de novedades para proyectos y tareas
+  if(type==='proyecto' || type==='tarea'){
+    renderHistorialPanel(type, id);
+  }
 }
 
 /* Eliminar registro — borra en DB local Y en Google Sheets */
@@ -1836,7 +1880,6 @@ async function saveModal(){
     // ── POST-SAVE HOOKS ──
     if(currentCRMModal==='cliente'){
       onClienteSaved(row);
-      // También refrescar contactos si están visibles
       if(document.getElementById('section-contactos').classList.contains('active'))
         renderContactos();
     }
@@ -3667,6 +3710,115 @@ function toggleCalFilter(chip){
     chip.classList.add('active');
   }
   renderCalendario();
+}
+
+/* ═══════════════════════════════════════
+   HISTORIAL DE NOVEDADES (Proyectos + Tareas)
+═══════════════════════════════════════ */
+
+/* Renderiza el panel de historial en el modal activo */
+function renderHistorialPanel(tipo, refId){
+  const existing = document.getElementById('historial-panel');
+  if(existing) existing.remove();
+
+  const panel = document.createElement('div');
+  panel.className = 'historial-panel';
+  panel.id = 'historial-panel';
+  panel.dataset.tipo = tipo;
+  panel.dataset.refId = refId || '';
+
+  const entradas = getHistorial(tipo, refId);
+  const listaHTML = entradas.length
+    ? entradas.map(e=>`
+      <div class="historial-entry" data-id="${e.ID}">
+        <div class="historial-meta">
+          <span class="historial-fecha">${formatHistorialFecha(e.Fecha)}</span>
+          ${e.Autor?`<span class="historial-autor">· ${e.Autor}</span>`:''}
+        </div>
+        <div class="historial-texto">${escHtml(e.Texto)}</div>
+        <button class="historial-del" onclick="deleteHistorial('${e.ID}')" title="Eliminar">🗑</button>
+      </div>`).join('')
+    : '<div class="historial-empty">Sin novedades registradas</div>';
+
+  panel.innerHTML = `
+    <h4>📋 Historial de novedades</h4>
+    <div class="historial-add">
+      <textarea id="historial-new-texto" placeholder="Escribí una novedad…" rows="2"></textarea>
+      <button onclick="addHistorialEntry()">+ Agregar</button>
+    </div>
+    <div class="historial-list" id="historial-list">${listaHTML}</div>`;
+
+  // Agregar al final del modal-body
+  document.getElementById('modal-body').appendChild(panel);
+}
+
+/* Obtener entradas ordenadas por fecha desc */
+function getHistorial(tipo, refId){
+  if(!DB.novedades) DB.novedades = [];
+  return DB.novedades
+    .filter(e=>e.Tipo===tipo && e.RefId===refId)
+    .sort((a,b)=>b.Fecha.localeCompare(a.Fecha));
+}
+
+/* Agregar nueva entrada */
+function addHistorialEntry(){
+  const panel = document.getElementById('historial-panel');
+  if(!panel) return;
+  const texto = document.getElementById('historial-new-texto').value.trim();
+  if(!texto) return;
+
+  const tipo  = panel.dataset.tipo;
+  const refId = panel.dataset.refId;
+  if(!refId){ alert('Guardá el registro primero antes de agregar novedades.'); return; }
+
+  const entry = {
+    ID: genId(),
+    Tipo: tipo,
+    RefId: refId,
+    Fecha: new Date().toISOString(),
+    Texto: texto,
+    Autor: userData?.name || ''
+  };
+  if(!DB.novedades) DB.novedades = [];
+  DB.novedades.push(entry);
+  saveLocal();
+
+  // Limpiar textarea y re-renderizar lista
+  document.getElementById('historial-new-texto').value = '';
+  const list = document.getElementById('historial-list');
+  const entradas = getHistorial(tipo, refId);
+  list.innerHTML = entradas.map(e=>`
+    <div class="historial-entry" data-id="${e.ID}">
+      <div class="historial-meta">
+        <span class="historial-fecha">${formatHistorialFecha(e.Fecha)}</span>
+        ${e.Autor?`<span class="historial-autor">· ${e.Autor}</span>`:''}
+      </div>
+      <div class="historial-texto">${escHtml(e.Texto)}</div>
+      <button class="historial-del" onclick="deleteHistorial('${e.ID}')" title="Eliminar">🗑</button>
+    </div>`).join('');
+}
+
+/* Eliminar entrada */
+function deleteHistorial(id){
+  DB.novedades = DB.novedades.filter(e=>e.ID!==id);
+  saveLocal();
+  const el = document.querySelector(`.historial-entry[data-id="${id}"]`);
+  if(el) el.remove();
+  const list = document.getElementById('historial-list');
+  if(list && !list.querySelector('.historial-entry'))
+    list.innerHTML = '<div class="historial-empty">Sin novedades registradas</div>';
+}
+
+/* Helpers */
+function formatHistorialFecha(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) +
+      ' ' + d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){ return iso; }
+}
+function escHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function toggleSidebar(){
