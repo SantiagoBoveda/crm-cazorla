@@ -1039,7 +1039,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div style="font-size:13px;font-weight:700;color:var(--accent)">Detalle de Enteras 1ras — Bombonas</div>
           <button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button>
-          <button class="btn btn-outline btn-sm" onclick="exportInventarioExcel()" style="margin-left:auto">📊 Exportar Excel</button>
           <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">▸ click en celda · Tab para avanzar</div>
         </div>
         <div id="bombonas-grid-wrap"></div>
@@ -1109,7 +1108,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
           <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Proyectado</div>
           <div class="leg-item"><div class="leg-dot" style="background:#16a34a"></div>Realizado</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="exportPrevisionExcel()">📊 Exportar Excel</button>
         <button class="btn-export" id="btn-export" onclick="exportExcel()">
           <span class="export-icon">📥</span>
           <span class="spinner"></span>
@@ -3033,11 +3031,12 @@ function buildEmptyData(){
 }
 
 let PRODUCTS=[
-  {id:'aceitunas',emoji:'🫒',label:'Aceitunas Negras',subtitle:'Aceitunas en granel · Dic 2025 → Nov 2026 · Toneladas',data:buildDataFromClientes()},
+  {id:'aceituna_verde',emoji:'🟢',label:'Aceitunas Verdes',subtitle:'Aceitunas Verdes · Dic 2025 → Nov 2026 · Toneladas',data:buildEmptyData()},
+  {id:'aceituna_natural',emoji:'⚫',label:'Aceitunas Negras Naturales',subtitle:'Aceitunas Negras Naturales · Dic 2025 → Nov 2026 · Toneladas',data:buildDataFromClientes()},
+  {id:'aceituna_acetica',emoji:'🟤',label:'Aceitunas Negras Acéticas',subtitle:'Aceitunas Negras Acéticas · Dic 2025 → Nov 2026 · Toneladas',data:buildEmptyData()},
   {id:'pasta',emoji:'🍅',label:'Pasta de Tomate',subtitle:'Pasta de Tomate · 2026 · Toneladas',data:buildEmptyData()},
-  {id:'aceite',emoji:'🫙',label:'Aceite de Oliva',subtitle:'Aceite de Oliva · 2026 · Toneladas',data:buildEmptyData()},
 ];
-let currentProductId='aceitunas',hideEmpty=false,pendingDeleteId=null,selectedEmoji='📦';
+let currentProductId='aceituna_natural',hideEmpty=false,pendingDeleteId=null,selectedEmoji='📦';
 const EMOJI_OPTIONS=['🫒','🍅','🫙','🌽','🫑','🥫','🍋','🌾','🧂','🥩','🫐','🧅','🥬','🫘','🍃','🌿','📦','🏷️','⚡','🔹'];
 const PAIS_FLAG={Argentina:'🇦🇷',Australia:'🇦🇺',Brasil:'🇧🇷',Paraguay:'🇵🇾',Uruguay:'🇺🇾'};
 const NOTAS={};
