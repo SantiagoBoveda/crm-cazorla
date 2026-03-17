@@ -119,6 +119,7 @@ tr:hover td{background:rgba(123,29,58,.04)}
 .stock-bar{height:6px;background:var(--surface2);border-radius:3px;margin-top:4px;overflow:hidden}
 .stock-fill{height:100%;border-radius:3px}
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+#dash-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
 .chart-card h3{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--muted)}
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
@@ -489,6 +490,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 
   /* Charts */
   .chart-grid{grid-template-columns:1fr!important;gap:12px}
+  #dash-bottom-grid{grid-template-columns:1fr!important}
 
   /* Kanban: columnas en scroll horizontal */
   .kanban{
@@ -951,15 +953,28 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- DASHBOARD -->
   <div class="section active" id="section-dashboard">
-    <div class="page-header"><h1>Dashboard</h1><p>Resumen general del negocio</p></div>
-    <div class="cards-grid" id="dash-stats"></div>
+    <div class="page-header"><h1>📊 Dashboard</h1><p>Grupo Cazorla · Resumen ejecutivo</p></div>
+    <div class="cards-grid" id="dash-kpis"></div>
+    <div id="dash-olive-stock" style="margin-bottom:24px"></div>
     <div class="chart-grid">
-      <div class="chart-card"><h3>Ventas por mes</h3><canvas id="chart-ventas" height="180"></canvas></div>
-      <div class="chart-card"><h3>Clientes por estado</h3><canvas id="chart-clientes" height="180"></canvas></div>
+      <div class="chart-card"><h3>Ventas por mes (USD)</h3><canvas id="chart-ventas" height="180"></canvas></div>
+      <div class="chart-card"><h3>Stock aceitunas por tipo (ton)</h3><canvas id="chart-clientes" height="180"></canvas></div>
     </div>
-    <div class="table-container">
-      <div class="table-header"><h3>Actividad reciente</h3></div>
-      <div id="dash-actividad" style="padding:16px;font-size:13px;color:var(--muted)">Sin datos aún</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px" id="dash-bottom-grid">
+      <div class="table-container" style="margin-bottom:0">
+        <div class="table-header"><h3>🧾 Ventas recientes</h3></div>
+        <div id="dash-ventas-recientes"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="table-container" style="margin-bottom:0">
+          <div class="table-header"><h3>⚠️ Alertas</h3></div>
+          <div id="dash-alertas"></div>
+        </div>
+        <div class="table-container" style="margin-bottom:0">
+          <div class="table-header"><h3>🍅 Stock de Tomate</h3></div>
+          <div id="dash-tomate-stock"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1042,9 +1057,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       </div>
       <!-- VERDE COMERCIAL -->
       <div class="inv-subpanel active" id="inv-sub-verde_comercial">
-        <div class="olive-section-hdr"><span>📦 Stock general</span><button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button></div>
-        <div id="aceitunas-verde-wrap"></div>
-        <div class="olive-section-sep"></div>
         <div class="olive-section-hdr"><span>🛢 Bombonas</span><button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button></div>
         <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px">▸ click en celda · Tab para avanzar</div>
         <div id="bomb-verde_comercial-grid"></div>
@@ -1055,9 +1067,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       </div>
       <!-- NEGRA NATURAL -->
       <div class="inv-subpanel" id="inv-sub-negra_natural">
-        <div class="olive-section-hdr"><span>📦 Stock general</span><button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button></div>
-        <div id="aceitunas-negra-wrap"></div>
-        <div class="olive-section-sep"></div>
         <div class="olive-section-hdr"><span>🛢 Bombonas</span><button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button></div>
         <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px">▸ click en celda · Tab para avanzar</div>
         <div id="bomb-negra_natural-grid"></div>
@@ -1068,9 +1077,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       </div>
       <!-- NEGRA ACÉTICA -->
       <div class="inv-subpanel" id="inv-sub-negra_acetica">
-        <div class="olive-section-hdr"><span>📦 Stock general</span><button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button></div>
-        <div id="aceitunas-acetica-wrap"></div>
-        <div class="olive-section-sep"></div>
         <div class="olive-section-hdr"><span>🛢 Bombonas</span><button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button></div>
         <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px">▸ click en celda · Tab para avanzar</div>
         <div id="bomb-negra_acetica-grid"></div>
@@ -1764,13 +1770,143 @@ function showSection(id,el){
 /* ═══════════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════════ */
+function _computeOliveStock(tipo){
+  const config=getBombonasConfig();
+  function kgPB(catLabel,variedad){return((catLabel||'')+(variedad||'')).toUpperCase().match(/DH|RODAJADA/)?150:180;}
+  let totalBombonas=0,totalKgBombonas=0;
+  config.categorias.forEach(cat=>cat.variedades.forEach(v=>config.calibres.forEach(c=>{
+    const e=(DB.bombonas||[]).find(b=>b.catId===cat.id&&b.variedad===v&&b.calibre===c&&b.tipo===tipo);
+    const cant=e?parseFloat(e.cantidad)||0:0;
+    if(cant>0){totalBombonas+=cant;totalKgBombonas+=cant*kgPB(cat.label,v);}
+  })));
+  const ferms=(DB.fermentadores||[]).filter(f=>f.tipo===tipo);
+  const kgFerm=ferms.reduce((s,f)=>s+(parseFloat(f.kg)||0),0);
+  return{bombonas:totalBombonas,kgBombonas:totalKgBombonas,fermentadores:ferms.length,kgFerm,totalKg:totalKgBombonas+kgFerm,totalTon:(totalKgBombonas+kgFerm)/1000};
+}
 function renderDashboard(){
-  document.getElementById('dash-stats').innerHTML=`
-    <div class="stat-card"><div class="label">Clientes</div><div class="value">${DB.clientes.length}</div></div>
-    <div class="stat-card"><div class="label">Proyectos</div><div class="value">${DB.proyectos.length}</div></div>
-    <div class="stat-card"><div class="label">Tareas activas</div><div class="value">${DB.tareas.filter(t=>t.Estado!=='Completado').length}</div></div>
-    <div class="stat-card"><div class="label">Ventas USD</div><div class="value">$${DB.ventas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
-  `;
+  const hoy=new Date().toISOString().slice(0,10);
+  const en30=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+  const fmt=n=>n.toLocaleString('es-AR',{maximumFractionDigits:2});
+  const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+
+  // Stock aceitunas por tipo
+  const stocks={verde:_computeOliveStock('verde_comercial'),negra:_computeOliveStock('negra_natural'),acetica:_computeOliveStock('negra_acetica')};
+  const totalOliveTon=stocks.verde.totalTon+stocks.negra.totalTon+stocks.acetica.totalTon;
+
+  // Stock tomate (from DB.inventario)
+  const tomateCats=[{cat:'Pasta de Tomate',key:'pasta_tomate'},{cat:'Passata',key:'passata'},{cat:'Salsa',key:'salsa'},{cat:'Triturado',key:'triturado'}];
+  const tomateData=tomateCats.map(({cat})=>{
+    const items=(DB.inventario||[]).filter(i=>(i.Categoria||'').toLowerCase()===cat.toLowerCase());
+    return{cat,ton:items.reduce((s,i)=>s+_toTon(i.StockActual,i.Unidad),0)};
+  });
+  const totalTomateTon=tomateData.reduce((s,d)=>s+d.ton,0);
+
+  // Ventas
+  const totalVentasUSD=DB.ventas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const ventasConfirmadas=DB.ventas.filter(v=>['Confirmada','Despachada'].includes(v.Etapa));
+  const ventasVencidas=DB.ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa));
+  const ventasVencen30=DB.ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento>=hoy&&v.FechaVencimiento<=en30&&!['Cobrada','Cancelada'].includes(v.Etapa));
+
+  // Clientes
+  const clientesActivos=DB.clientes.filter(c=>c.Estado==='Activo').length;
+  const clientesProspecto=DB.clientes.filter(c=>c.Estado==='Prospecto').length;
+
+  // Tareas
+  const tareasAlta=DB.tareas.filter(t=>t.Prioridad==='Alta'&&t.Estado!=='Completado');
+  const tareasPend=DB.tareas.filter(t=>t.Estado!=='Completado').length;
+
+  // Reclamos
+  const reclamosAbiertos=(DB.reclamos||[]).filter(r=>['Abierto','En gestión'].includes(r.Estado));
+
+  // ── KPIs ──
+  const kpiAlertVencidos=ventasVencidas.length?'border-color:var(--red)':'';
+  const kpiAlertTareas=tareasAlta.length?'border-color:var(--yellow)':'';
+  const kpiAlertReclamos=reclamosAbiertos.length?'border-color:var(--red)':'';
+  document.getElementById('dash-kpis').innerHTML=`
+    <div class="stat-card"><div class="label">Total ventas (USD)</div><div class="value">${fmtUSD(totalVentasUSD)}</div><div class="sub" style="color:var(--muted)">${DB.ventas.length} órdenes</div></div>
+    <div class="stat-card"><div class="label">Ventas confirmadas</div><div class="value">${ventasConfirmadas.length}</div><div class="sub" style="color:var(--accent)">${fmtUSD(ventasConfirmadas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0))}</div></div>
+    <div class="stat-card"><div class="label">Clientes</div><div class="value">${DB.clientes.length}</div><div class="sub" style="color:var(--green)">${clientesActivos} activos · ${clientesProspecto} prospectos</div></div>
+    <div class="stat-card" style="${kpiAlertVencidos}"><div class="label">Cobros vencidos</div><div class="value" style="${ventasVencidas.length?'color:var(--red)':''}">${ventasVencidas.length}</div><div class="sub" style="color:var(--muted)">${ventasVencen30.length} vencen en 30 días</div></div>
+    <div class="stat-card"><div class="label">Stock aceitunas</div><div class="value">${fmt(totalOliveTon)}</div><div class="sub" style="color:var(--muted)">toneladas totales</div></div>
+    <div class="stat-card"><div class="label">Stock tomate</div><div class="value">${fmt(totalTomateTon)}</div><div class="sub" style="color:var(--muted)">toneladas totales</div></div>
+    <div class="stat-card" style="${kpiAlertTareas}"><div class="label">Tareas pendientes</div><div class="value">${tareasPend}</div><div class="sub" style="${tareasAlta.length?'color:var(--red)':'color:var(--muted)'}">${tareasAlta.length} alta prioridad</div></div>
+    <div class="stat-card" style="${kpiAlertReclamos}"><div class="label">Reclamos abiertos</div><div class="value" style="${reclamosAbiertos.length?'color:var(--red)':''}">${reclamosAbiertos.length}</div><div class="sub" style="color:var(--muted)">${(DB.reclamos||[]).length} total</div></div>`;
+
+  // ── Stock aceitunas por tipo ──
+  document.getElementById('dash-olive-stock').innerHTML=`
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px">🫒 Stock de Aceitunas por tipo</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+    ${[{label:'Verde Comercial',emoji:'🟢',s:stocks.verde},{label:'Negra Natural',emoji:'⚫',s:stocks.negra},{label:'Negra Acética',emoji:'🟤',s:stocks.acetica}].map(({label,emoji,s})=>`
+      <div class="chart-card" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px">${emoji} ${label}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Bombonas</div>
+            <div style="font-size:22px;font-weight:800;font-family:var(--mono)">${s.bombonas.toLocaleString()}</div>
+            <div style="font-size:11px;color:var(--muted)">${fmt(s.kgBombonas/1000)} ton</div></div>
+          <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">Fermentadores</div>
+            <div style="font-size:22px;font-weight:800;font-family:var(--mono)">${s.fermentadores}</div>
+            <div style="font-size:11px;color:var(--muted)">${fmt(s.kgFerm/1000)} ton</div></div>
+        </div>
+        <div style="padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;color:var(--muted)">Total estimado</span>
+          <span style="font-size:16px;font-weight:800;font-family:var(--mono);color:var(--accent)">${fmt(s.totalTon)} ton</span>
+        </div>
+      </div>`).join('')}
+    </div>`;
+
+  // ── Ventas recientes ──
+  const recent=[...DB.ventas].sort((a,b)=>(b.Fecha||'').localeCompare(a.Fecha||'')).slice(0,7);
+  document.getElementById('dash-ventas-recientes').innerHTML=recent.length
+    ?`<table style="width:100%;border-collapse:collapse"><tbody>${recent.map(v=>`<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 14px;font-size:11px;font-family:var(--mono);color:var(--muted);white-space:nowrap">${v.Fecha||'—'}</td>
+        <td style="padding:8px 6px;font-size:12px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.Cliente||'—'}</td>
+        <td style="padding:8px 6px;font-size:11px;color:var(--muted);font-family:var(--mono)">${v.NumOrden||'—'}</td>
+        <td style="padding:8px 14px;font-size:12px;font-family:var(--mono);font-weight:700;text-align:right;white-space:nowrap">${fmtUSD(parseFloat(v.ValorUSD)||0)}</td>
+        <td style="padding:8px 14px"><span class="badge badge-blue" style="font-size:10px">${v.Etapa||'—'}</span></td>
+      </tr>`).join('')}</tbody></table>`
+    :'<div style="padding:20px;color:var(--muted);font-size:13px;text-align:center">Sin ventas registradas</div>';
+
+  // ── Alertas ──
+  const alertas=[];
+  ventasVencidas.forEach(v=>alertas.push({c:'var(--red)',t:`Cobro vencido — ${v.Cliente} · ${fmtUSD(parseFloat(v.ValorUSD)||0)} · ${v.FechaVencimiento}`}));
+  ventasVencen30.forEach(v=>alertas.push({c:'var(--yellow)',t:`Vence pronto — ${v.Cliente} · ${fmtUSD(parseFloat(v.ValorUSD)||0)} · ${v.FechaVencimiento}`}));
+  reclamosAbiertos.forEach(r=>alertas.push({c:'var(--red)',t:`Reclamo ${r.Urgencia||''}: ${r.Cliente||'—'} · ${r.TipoReclamo||''}`}));
+  tareasAlta.forEach(t=>alertas.push({c:'var(--yellow)',t:`Tarea alta: ${t.Titulo||'Sin título'}${t.Asignado?' — '+t.Asignado:''}`}));
+  document.getElementById('dash-alertas').innerHTML=alertas.length
+    ?alertas.slice(0,8).map(a=>`<div style="padding:9px 14px;border-left:3px solid ${a.c};font-size:12px;border-bottom:1px solid var(--border);line-height:1.4">${a.t}</div>`).join('')
+    :'<div style="padding:16px;color:var(--green);font-size:13px;text-align:center">✅ Sin alertas pendientes</div>';
+
+  // ── Stock tomate ──
+  document.getElementById('dash-tomate-stock').innerHTML=`<div style="padding:4px 0">${tomateData.map(d=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${d.cat}</span>
+      <span style="font-family:var(--mono);font-weight:700;font-size:13px;color:${d.ton>0?'var(--accent)':'var(--muted)'}">${fmt(d.ton)} ton</span>
+    </div>`).join('')}</div>`;
+
+  // ── Charts ──
+  _renderDashCharts(stocks,DB.ventas);
+}
+function _renderDashCharts(stocks,ventas){
+  // Chart 1: Ventas por mes
+  const monthMap={};
+  ventas.forEach(v=>{if(!v.Fecha)return;const m=v.Fecha.slice(0,7);monthMap[m]=(monthMap[m]||0)+(parseFloat(v.ValorUSD)||0);});
+  const sortedM=Object.keys(monthMap).sort().slice(-8);
+  const mNames=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const mLabels=sortedM.map(m=>{const[,mo]=m.split('-');return mNames[parseInt(mo)-1]+' '+m.slice(2,4);});
+  const cv=document.getElementById('chart-ventas');
+  if(cv){
+    if(window._dChV)window._dChV.destroy();
+    window._dChV=new Chart(cv,{type:'bar',data:{labels:sortedM.length?mLabels:['Sin datos'],datasets:[{label:'USD',data:sortedM.length?sortedM.map(m=>monthMap[m]):[0],backgroundColor:'rgba(123,29,58,.75)',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#94a3b8',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(255,255,255,.05)'}}}}});
+  }
+  // Chart 2: Stock aceitunas apilado
+  const cc=document.getElementById('chart-clientes');
+  if(cc){
+    if(window._dChC)window._dChC.destroy();
+    window._dChC=new Chart(cc,{type:'bar',data:{labels:['Verde Comercial','Negra Natural','Negra Acética'],datasets:[
+      {label:'Bombonas (ton)',data:[stocks.verde.kgBombonas/1000,stocks.negra.kgBombonas/1000,stocks.acetica.kgBombonas/1000],backgroundColor:'rgba(34,197,94,.65)',borderRadius:4},
+      {label:'Fermentadores (ton)',data:[stocks.verde.kgFerm/1000,stocks.negra.kgFerm/1000,stocks.acetica.kgFerm/1000],backgroundColor:'rgba(59,130,246,.65)',borderRadius:4}
+    ]},options:{responsive:true,plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{size:10},boxWidth:12}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},stacked:true},y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},stacked:true}}}});
+  }
 }
 function renderClientes(){
   const tb=document.getElementById('clientes-tbody');if(!tb)return;
@@ -1862,11 +1998,8 @@ function showInvSubTab(subtab,btn,silent){
   if(panel)panel.classList.add('active');
   if(btn)btn.classList.add('active');
   else acPane.querySelectorAll('.inv-stab').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+subtab+"'"))b.classList.add('active');});
-  const OLIVE_TYPES={verde_comercial:{stockWrap:'aceitunas-verde-wrap',cat:'Verde Comercial'},negra_natural:{stockWrap:'aceitunas-negra-wrap',cat:'Negra Natural'},negra_acetica:{stockWrap:'aceitunas-acetica-wrap',cat:'Negra Acética'}};
-  if(OLIVE_TYPES[subtab]){
+  if(['verde_comercial','negra_natural','negra_acetica'].includes(subtab)){
     _currentOliveTipo=subtab;
-    const o=OLIVE_TYPES[subtab];
-    renderAceitunasSubInv(o.cat,o.stockWrap);
     renderBombonasGrid();
     renderFermentadores();
   }
