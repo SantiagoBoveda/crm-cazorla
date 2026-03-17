@@ -1526,6 +1526,10 @@ async function silentSyncToSheets(){
     document.getElementById('sync-status-text').textContent = `Sheets ${now} ✓`;
   }catch(e){
     console.warn('Auto-backup error:', e);
+    const dot=document.getElementById('storage-dot');
+    const lbl=document.getElementById('storage-label');
+    if(dot)dot.className='storage-dot red';
+    if(lbl)lbl.textContent='Error backup ⚠️';
   }
 }
 
@@ -2274,8 +2278,18 @@ function removeVentaLinea(i){
   renderVentaLineasUI();
 }
 function updateVentaLinea(i,field,val){
-  if(_vl[i])_vl[i][field]=val;
-  renderVentaLineasUI();
+  if(!_vl[i])return;
+  _vl[i][field]=val;
+  if(field==='producto'){
+    // Select change: just recalculate, no full re-render needed
+    calcVentaLineasTotal();
+  } else {
+    // Numeric input: update only this row's total cell to preserve focus
+    const tot=(parseFloat(_vl[i].cantidadTon)||0)*(parseFloat(_vl[i].precioUSD)||0);
+    const cells=document.querySelectorAll('#ventas-lineas-ui .vl-total-cell');
+    if(cells[i])cells[i].textContent=tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):'';
+    calcVentaLineasTotal();
+  }
 }
 function renderVentaLineasUI(){
   const wrap=document.getElementById('ventas-lineas-ui');if(!wrap)return;
@@ -2405,12 +2419,12 @@ async function deleteRecord(type, id){
   const dbKey = sheetKey[type];
   if(!DB[dbKey]) return;
 
-  const rec = DB[dbKey].find(r=>r.ID===id);
+  const rec = DB[dbKey]?.find(r=>r.ID===id);
   const label = rec?.Empresa||rec?.Nombre||rec?.Titulo||rec?.NumFactura||rec?.Cliente||rec?.Producto||'este registro';
   if(!confirm(`¿Eliminar "${label}"? Esta acción no se puede deshacer.`)) return;
 
   // Índice de la fila en Sheets (0-indexed dentro de los datos, +1 para saltar el header)
-  const rowIdx = DB[dbKey].indexOf(rec); // 0-based data row
+  const rowIdx = rec ? DB[dbKey].indexOf(rec) : -1; // 0-based data row
   const sheetRowIdx = rowIdx + 1;        // 0-based sheet row (row 0 = headers, row 1+ = data)
 
   // 1. Borrar de memoria local
@@ -2453,20 +2467,27 @@ async function saveModal(){
   // Collect values — skip any select still showing __new__
   const row = {ID: _editingId || genId()};
   let invalid = false;
+  let hasUnresolvedNew = false;
   HEADERS[sheet].forEach(h=>{
     const el = document.getElementById('f-'+h);
     if(!el) return;
     if(el.tagName==='SELECT' && el.value==='__new__'){
-      // field not resolved — treat as empty
+      // field not resolved — treat as empty and flag it
       row[h]='';
+      hasUnresolvedNew = true;
     } else {
       row[h] = el.value||'';
     }
   });
+  if(hasUnresolvedNew){
+    // Remove unresolved inline inputs before saving
+    document.querySelectorAll('.smart-input-row').forEach(r=>r.remove());
+  }
 
   if(_editingId){
     // UPDATE existing record in DB
-    const idx = DB[dbKey]?.findIndex(r=>r.ID===_editingId);
+    if(!DB[dbKey]){ console.error('saveModal: dbKey not found', dbKey); closeCRMModal(); return; }
+    const idx = DB[dbKey].findIndex(r=>r.ID===_editingId);
     const oldRecord = idx>=0 ? {...DB[dbKey][idx]} : null; // copia del registro anterior
     if(idx>=0) DB[dbKey][idx] = row;
     // Hook: si es cliente, sincronizar cambios en Previsión
@@ -2475,7 +2496,8 @@ async function saveModal(){
     }
   } else {
     // INSERT new record
-    DB[dbKey]?.push(row);
+    if(!DB[dbKey]){ console.error('saveModal: dbKey not found for insert', dbKey); closeCRMModal(); return; }
+    DB[dbKey].push(row);
     // ── POST-SAVE HOOKS ──
     if(currentCRMModal==='cliente'){
       onClienteSaved(row);
@@ -3030,7 +3052,7 @@ function autoCreateFactura(ventaRow){
     ID: genId(),
     NumFactura: numFactura,
     Cliente: ventaRow.Cliente||'',
-    Pais: (DB.clientes.find(c=>c.Empresa===ventaRow.Cliente)||{}).Pais||'',
+    Pais: DB.clientes.find(c=>c.Empresa===ventaRow.Cliente)?.Pais||'',
     NroPedido: ventaRow.NroOrden||'',
     Producto: ventaRow.Producto||'',
     Cantidad: ventaRow.CantidadTon||'',
@@ -3461,7 +3483,15 @@ function confirmDelete(){
   }
   // Eliminar
   PRODUCTS=PRODUCTS.filter(x=>x.id!==pendingDeleteId);
-  if(currentProductId===pendingDeleteId){currentProductId=PRODUCTS[0].id;document.getElementById('subtitle').textContent=currentProduct().subtitle;}
+  if(currentProductId===pendingDeleteId){
+    if(PRODUCTS.length>0){
+      currentProductId=PRODUCTS[0].id;
+      const sub=document.getElementById('subtitle');
+      if(sub)sub.textContent=currentProduct()?.subtitle||'';
+    } else {
+      currentProductId='';
+    }
+  }
   // Limpiar del snapshot del año activo
   if(PREVISION_YEARS[_previsionYear]&&PREVISION_YEARS[_previsionYear].products){
     PREVISION_YEARS[_previsionYear].products=PREVISION_YEARS[_previsionYear].products.filter(sp=>sp.id!==pendingDeleteId);
@@ -3471,7 +3501,13 @@ function confirmDelete(){
   savePrevisionYears();saveLocal();
 }
 
-function setProduct(id){currentProductId=id;document.getElementById('subtitle').textContent=currentProduct().subtitle;renderTabs();renderAll();}
+function setProduct(id){
+  currentProductId=id;
+  const p=currentProduct();
+  const sub=document.getElementById('subtitle');
+  if(sub&&p)sub.textContent=p.subtitle||'';
+  renderTabs();renderAll();
+}
 
 /* ── PREVISION RENDER ── */
 function renderTabs(){
@@ -3482,7 +3518,7 @@ function toggleEmpty(){hideEmpty=!hideEmpty;document.getElementById('hide-empty-
 function fmt(v){if(!v)return null;return v%1===0?v.toFixed(0):v.toFixed(1);}
 function showHint(el){const h=el.nextElementSibling;if(h&&h.classList.contains('tt-save-hint'))h.classList.add('show');}
 function hideHint(el){const h=el.nextElementSibling;if(h&&h.classList.contains('tt-save-hint'))h.classList.remove('show');}
-function renderAll(){renderHeaders();renderStats();renderTable();}
+function renderAll(){if(!currentProduct())return;renderHeaders();renderStats();renderTable();}
 
 function renderHeaders(){
   const mh=document.getElementById('main-header'),sh=document.getElementById('sub-header');
@@ -3492,7 +3528,8 @@ function renderHeaders(){
   mh.innerHTML=mhH;sh.innerHTML=shH;
 }
 function renderStats(){
-  const data=currentProduct().data,cf=document.getElementById('country-filter').value,com=document.getElementById('comercial-filter').value;
+  const _cp=currentProduct();if(!_cp)return;
+  const data=_cp.data,cf=document.getElementById('country-filter').value,com=document.getElementById('comercial-filter').value;
   let tp=0,tr2=0,tpa=0;
   for(const[pais,cs]of Object.entries(data)){
     if(cf!=='all'&&pais!==cf)continue;
@@ -3508,7 +3545,8 @@ function renderStats(){
 }
 function renderTable(){
   renderStats();
-  const data=currentProduct().data,cf=document.getElementById('country-filter').value,com=document.getElementById('comercial-filter').value;
+  const _cprt=currentProduct();if(!_cprt)return;
+  const data=_cprt.data,cf=document.getElementById('country-filter').value,com=document.getElementById('comercial-filter').value;
   const tbody=document.getElementById('table-body');
   let html='',gtP=Array(12).fill(0),gtR=Array(12).fill(0);
   for(const[pais,clientes]of Object.entries(data)){
