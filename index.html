@@ -94,7 +94,9 @@ body.warm .theme-thumb{left:15px}
 .stat-card .label{font-size:12px;color:var(--muted);margin-bottom:8px}
 .stat-card .value{font-size:28px;font-weight:700;color:var(--accent)}
 .stat-card .sub{font-size:12px;color:var(--green);margin-top:4px}
-.table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 4px rgba(123,29,58,.06)}
+.table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(123,29,58,.06)}
+#section-facturacion .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+#section-ventas .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .table-header h3{font-size:14px;font-weight:600;color:var(--accent)}
 table{width:100%;border-collapse:collapse}
@@ -1123,7 +1125,19 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="cards-grid" id="ventas-stats"></div>
     <div class="table-container">
-      <table><thead><tr><th>Nº Orden</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad (kg)</th><th>Total USD</th><th>Venta Neta</th><th>F. Pago / Plazo</th><th>Vencimiento</th><th>Etapa</th><th style="width:90px"></th></tr></thead>
+      <table><thead><tr>
+        <th style="white-space:nowrap">Nº Orden</th>
+        <th style="white-space:nowrap">Fecha</th>
+        <th>Cliente</th>
+        <th>Producto</th>
+        <th style="white-space:nowrap">Cant. (kg)</th>
+        <th style="white-space:nowrap">Total USD</th>
+        <th style="white-space:nowrap">Venta Neta</th>
+        <th style="white-space:nowrap">F. Pago / Plazo</th>
+        <th style="white-space:nowrap">Vencimiento</th>
+        <th>Etapa</th>
+        <th style="width:90px"></th>
+      </tr></thead>
       <tbody id="ventas-tbody"><tr><td colspan="11" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
     </div>
   </div>
@@ -1254,7 +1268,24 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="table-container">
       <table id="facturacion-table">
-        <thead><tr><th>Nº Factura</th><th>Cliente</th><th>País</th><th>Ref. OC</th><th>Producto</th><th>Cantidad (kg)</th><th>Monto</th><th>Cond. pago</th><th>Facturación</th><th>Estado</th><th>Emisión</th><th>Vencimiento</th><th>Nota Créd.</th><th>Nota Déb.</th><th>Docs</th><th></th></tr></thead>
+        <thead><tr>
+          <th style="white-space:nowrap;min-width:90px">Nº Factura</th>
+          <th style="min-width:120px">Cliente</th>
+          <th style="min-width:70px">País</th>
+          <th style="white-space:nowrap;min-width:70px">Ref. OC</th>
+          <th style="min-width:110px">Producto</th>
+          <th style="white-space:nowrap">Cant. (kg)</th>
+          <th style="min-width:90px">Monto</th>
+          <th style="min-width:80px">Cond. pago</th>
+          <th style="min-width:110px">Facturación</th>
+          <th style="min-width:80px">Estado</th>
+          <th style="white-space:nowrap">Emisión</th>
+          <th style="white-space:nowrap">Vencimiento</th>
+          <th style="white-space:nowrap">N. Créd.</th>
+          <th style="white-space:nowrap">N. Déb.</th>
+          <th>Docs</th>
+          <th style="width:70px"></th>
+        </tr></thead>
         <tbody id="facturacion-tbody"></tbody>
       </table>
     </div>
@@ -3825,13 +3856,13 @@ function renderFacturacion(){
       <td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td>
       <td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td>
       <td>${f.Producto||'—'}</td>
-      <td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' kg':'—'}</td>
-      <td>${montoFmt}</td>
-      <td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}${f.DiasVenc?` <span style="font-size:10px">(${f.DiasVenc}d)</span>`:''}</td>
-      <td style="font-size:11px;color:${estFactColor};font-weight:600">${estFact||'—'}</td>
+      <td style="font-family:var(--mono);white-space:nowrap">${f.Cantidad?f.Cantidad+' kg':'—'}</td>
+      <td style="white-space:nowrap">${montoFmt}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${f.CondPago||'—'}${f.DiasVenc?` <span style="font-size:10px">(${f.DiasVenc}d)</span>`:''}</td>
+      <td style="font-size:11px;color:${estFactColor};font-weight:600;white-space:nowrap">${estFact||'—'}</td>
       <td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td>
-      <td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td>
+      <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${f.FechaEmision||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td>
       <td>${ncFmt}</td><td>${ndFmt}</td>
       <td>${docsFmt}</td>
       <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')">🗑</button></td>
