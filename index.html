@@ -97,6 +97,12 @@ body.warm .theme-thumb{left:15px}
 .table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(123,29,58,.06)}
 #section-facturacion .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 #section-ventas .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.factura-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent) var(--surface2);border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 4px rgba(123,29,58,.06)}
+.factura-scroll-wrap::-webkit-scrollbar{height:7px}
+.factura-scroll-wrap::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
+.factura-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(123,29,58,.4);border-radius:4px}
+.factura-scroll-wrap::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.factura-scroll-wrap table thead th{position:sticky;top:0;background:var(--surface);z-index:1}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .table-header h3{font-size:14px;font-weight:600;color:var(--accent)}
 table{width:100%;border-collapse:collapse}
@@ -1266,24 +1272,24 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <button class="state-pill" onclick="filterSection('facturacion','Anulada',this)">🚫 Anulada</button>
       </div>
     </div>
-    <div class="table-container">
-      <table id="facturacion-table">
+    <div class="factura-scroll-wrap">
+      <table id="facturacion-table" style="min-width:1200px;width:100%">
         <thead><tr>
           <th style="white-space:nowrap;min-width:90px">Nº Factura</th>
           <th style="min-width:120px">Cliente</th>
           <th style="min-width:70px">País</th>
           <th style="white-space:nowrap;min-width:70px">Ref. OC</th>
           <th style="min-width:110px">Producto</th>
-          <th style="white-space:nowrap">Cant. (kg)</th>
+          <th style="white-space:nowrap;min-width:80px">Cant. (kg)</th>
           <th style="min-width:90px">Monto</th>
-          <th style="min-width:80px">Cond. pago</th>
+          <th style="min-width:100px">Cond. pago</th>
           <th style="min-width:110px">Facturación</th>
           <th style="min-width:80px">Estado</th>
-          <th style="white-space:nowrap">Emisión</th>
-          <th style="white-space:nowrap">Vencimiento</th>
-          <th style="white-space:nowrap">N. Créd.</th>
-          <th style="white-space:nowrap">N. Déb.</th>
-          <th>Docs</th>
+          <th style="white-space:nowrap;min-width:90px">Emisión</th>
+          <th style="white-space:nowrap;min-width:100px">Vencimiento</th>
+          <th style="white-space:nowrap;min-width:80px">N. Créd.</th>
+          <th style="white-space:nowrap;min-width:80px">N. Déb.</th>
+          <th style="min-width:60px">Docs</th>
           <th style="width:70px"></th>
         </tr></thead>
         <tbody id="facturacion-tbody"></tbody>
