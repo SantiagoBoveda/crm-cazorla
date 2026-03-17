@@ -581,6 +581,9 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .inv-stab.active{background:rgba(123,29,58,.1);border-color:var(--accent);color:var(--accent)}
 .inv-subpanel{display:none}.inv-subpanel.active{display:block}
 .inv-tomsub-panel{display:none}.inv-tomsub-panel.active{display:block}
+.olive-section-sep{border-top:1px solid var(--border);margin:24px 0 18px}
+.olive-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.olive-section-hdr>span{font-size:13px;font-weight:700;color:var(--accent)}
 /* ══ BOMBONAS TABLE ══ */
 .bomb-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
 .bomb-table{border-collapse:collapse;font-family:var(--mono);font-size:12px;width:100%}
@@ -1035,51 +1038,46 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
           <button class="inv-stab active" onclick="showInvSubTab('verde_comercial',this)">🟢 Verde Comercial</button>
           <button class="inv-stab" onclick="showInvSubTab('negra_natural',this)">⚫ Negra Natural</button>
           <button class="inv-stab" onclick="showInvSubTab('negra_acetica',this)">🟤 Negra Acética</button>
-          <button class="inv-stab" onclick="showInvSubTab('bombonas',this)">🛢 Bombonas</button>
-          <button class="inv-stab" onclick="showInvSubTab('fermentadores',this)">🏭 Fermentadores</button>
         </div>
       </div>
       <!-- VERDE COMERCIAL -->
       <div class="inv-subpanel active" id="inv-sub-verde_comercial">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:13px;font-weight:700;color:var(--accent)">🟢 Stock — Aceituna Verde Comercial</div>
-          <button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button>
-        </div>
+        <div class="olive-section-hdr"><span>📦 Stock general</span><button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button></div>
         <div id="aceitunas-verde-wrap"></div>
+        <div class="olive-section-sep"></div>
+        <div class="olive-section-hdr"><span>🛢 Bombonas</span><button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button></div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px">▸ click en celda · Tab para avanzar</div>
+        <div id="bomb-verde_comercial-grid"></div>
+        <div id="bomb-verde_comercial-kg" style="margin-top:16px"></div>
+        <div class="olive-section-sep"></div>
+        <div class="olive-section-hdr"><span>🏭 Fermentadores</span><button class="btn btn-primary btn-sm" onclick="openFermentadorModal()">＋ Agregar fermentador</button></div>
+        <div id="ferm-verde_comercial-wrap"></div>
       </div>
       <!-- NEGRA NATURAL -->
       <div class="inv-subpanel" id="inv-sub-negra_natural">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:13px;font-weight:700;color:var(--accent)">⚫ Stock — Aceituna Negra Natural</div>
-          <button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button>
-        </div>
+        <div class="olive-section-hdr"><span>📦 Stock general</span><button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button></div>
         <div id="aceitunas-negra-wrap"></div>
+        <div class="olive-section-sep"></div>
+        <div class="olive-section-hdr"><span>🛢 Bombonas</span><button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button></div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px">▸ click en celda · Tab para avanzar</div>
+        <div id="bomb-negra_natural-grid"></div>
+        <div id="bomb-negra_natural-kg" style="margin-top:16px"></div>
+        <div class="olive-section-sep"></div>
+        <div class="olive-section-hdr"><span>🏭 Fermentadores</span><button class="btn btn-primary btn-sm" onclick="openFermentadorModal()">＋ Agregar fermentador</button></div>
+        <div id="ferm-negra_natural-wrap"></div>
       </div>
       <!-- NEGRA ACÉTICA -->
       <div class="inv-subpanel" id="inv-sub-negra_acetica">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:13px;font-weight:700;color:var(--accent)">🟤 Stock — Aceituna Negra Acética</div>
-          <button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button>
-        </div>
+        <div class="olive-section-hdr"><span>📦 Stock general</span><button class="btn btn-primary btn-sm" onclick="openCRMModal('producto')">＋ Agregar stock</button></div>
         <div id="aceitunas-acetica-wrap"></div>
-      </div>
-      <!-- BOMBONAS -->
-      <div class="inv-subpanel" id="inv-sub-bombonas">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-          <div style="font-size:13px;font-weight:700;color:var(--accent)">Detalle de Enteras 1ras — Bombonas</div>
-          <button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button>
-          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">▸ click en celda · Tab para avanzar</div>
-        </div>
-        <div id="bombonas-grid-wrap"></div>
-        <div id="bombonas-kg-totales" style="margin-top:16px"></div>
-      </div>
-      <!-- FERMENTADORES -->
-      <div class="inv-subpanel" id="inv-sub-fermentadores">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div style="font-size:13px;font-weight:700;color:var(--accent)">Fermentadores</div>
-          <button class="btn btn-primary btn-sm" onclick="openFermentadorModal()">＋ Agregar fermentador</button>
-        </div>
-        <div id="fermentadores-wrap"></div>
+        <div class="olive-section-sep"></div>
+        <div class="olive-section-hdr"><span>🛢 Bombonas</span><button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button></div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px">▸ click en celda · Tab para avanzar</div>
+        <div id="bomb-negra_acetica-grid"></div>
+        <div id="bomb-negra_acetica-kg" style="margin-top:16px"></div>
+        <div class="olive-section-sep"></div>
+        <div class="olive-section-hdr"><span>🏭 Fermentadores</span><button class="btn btn-primary btn-sm" onclick="openFermentadorModal()">＋ Agregar fermentador</button></div>
+        <div id="ferm-negra_acetica-wrap"></div>
       </div>
     </div>
     <!-- ── PANEL TOMATE ── -->
@@ -1838,7 +1836,10 @@ function renderTareas(){
   });
 }
 /* ── Inventario tab state ── */
-let _invTab='aceitunas', _invSubTab='verde_comercial', _invTomSubTab='pasta_tomate';
+let _invTab='aceitunas', _invSubTab='verde_comercial', _invTomSubTab='pasta_tomate', _currentOliveTipo='verde_comercial';
+function _bombGridId(){ return 'bomb-'+_currentOliveTipo+'-grid'; }
+function _bombKgId(){   return 'bomb-'+_currentOliveTipo+'-kg'; }
+function _fermWrapId(){ return 'ferm-'+_currentOliveTipo+'-wrap'; }
 function renderInventario(){ showInvTab(_invTab,null,true); }
 function showInvTab(tab,btn,silent){
   _invTab=tab;
@@ -1861,11 +1862,14 @@ function showInvSubTab(subtab,btn,silent){
   if(panel)panel.classList.add('active');
   if(btn)btn.classList.add('active');
   else acPane.querySelectorAll('.inv-stab').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+subtab+"'"))b.classList.add('active');});
-  if(subtab==='verde_comercial') renderAceitunasSubInv('Verde Comercial','aceitunas-verde-wrap');
-  else if(subtab==='negra_natural') renderAceitunasSubInv('Negra Natural','aceitunas-negra-wrap');
-  else if(subtab==='negra_acetica') renderAceitunasSubInv('Negra Acética','aceitunas-acetica-wrap');
-  else if(subtab==='bombonas') renderBombonasGrid();
-  else if(subtab==='fermentadores') renderFermentadores();
+  const OLIVE_TYPES={verde_comercial:{stockWrap:'aceitunas-verde-wrap',cat:'Verde Comercial'},negra_natural:{stockWrap:'aceitunas-negra-wrap',cat:'Negra Natural'},negra_acetica:{stockWrap:'aceitunas-acetica-wrap',cat:'Negra Acética'}};
+  if(OLIVE_TYPES[subtab]){
+    _currentOliveTipo=subtab;
+    const o=OLIVE_TYPES[subtab];
+    renderAceitunasSubInv(o.cat,o.stockWrap);
+    renderBombonasGrid();
+    renderFermentadores();
+  }
 }
 function showInvTomSubTab(subtab,btn,silent){
   _invTomSubTab=subtab;
@@ -1887,8 +1891,8 @@ function ensureDefaultInventory(){
     {cat:'Negra Acética',    prod:'Aceituna Negra Acética'},
     {cat:'Pasta de Tomate',  prod:'Pasta de Tomate'},
     {cat:'Passata',          prod:'Passata'},
-    {cat:'Salsa',            prod:'Salsa de Tomate'},
-    {cat:'Triturado',        prod:'Tomate Triturado'},
+    {cat:'Salsa',            prod:'Salsas'},
+    {cat:'Triturado',        prod:'Triturado'},
   ];
   let changed=false;
   defaults.forEach(d=>{
@@ -3161,12 +3165,39 @@ function buildEmptyData(){
 }
 
 let PRODUCTS=[
-  {id:'aceituna_verde',emoji:'🟢',label:'Aceitunas Verdes',subtitle:'Aceitunas Verdes · Dic 2025 → Nov 2026 · Toneladas',data:buildEmptyData()},
-  {id:'aceituna_natural',emoji:'⚫',label:'Aceitunas Negras Naturales',subtitle:'Aceitunas Negras Naturales · Dic 2025 → Nov 2026 · Toneladas',data:buildDataFromClientes()},
-  {id:'aceituna_acetica',emoji:'🟤',label:'Aceitunas Negras Acéticas',subtitle:'Aceitunas Negras Acéticas · Dic 2025 → Nov 2026 · Toneladas',data:buildEmptyData()},
-  {id:'pasta',emoji:'🍅',label:'Pasta de Tomate',subtitle:'Pasta de Tomate · 2026 · Toneladas',data:buildEmptyData()},
+  {id:'aceituna_verde',  emoji:'🟢', label:'Aceituna Verde Comercial',   subtitle:'Aceituna Verde Comercial · 2026 · Toneladas',   data:buildEmptyData()},
+  {id:'aceituna_natural',emoji:'⚫', label:'Aceituna Negra Natural',     subtitle:'Aceituna Negra Natural · 2026 · Toneladas',     data:buildDataFromClientes()},
+  {id:'aceituna_acetica',emoji:'🟤', label:'Aceituna Negra Acética',     subtitle:'Aceituna Negra Acética · 2026 · Toneladas',     data:buildEmptyData()},
+  {id:'pasta',          emoji:'🍅', label:'Pasta de Tomate',             subtitle:'Pasta de Tomate · 2026 · Toneladas',            data:buildEmptyData()},
+  {id:'passata',        emoji:'🥫', label:'Passata',                     subtitle:'Passata · 2026 · Toneladas',                    data:buildEmptyData()},
+  {id:'salsa',          emoji:'🌶', label:'Salsas',                      subtitle:'Salsas · 2026 · Toneladas',                     data:buildEmptyData()},
+  {id:'triturado',      emoji:'🔶', label:'Triturado',                   subtitle:'Triturado · 2026 · Toneladas',                  data:buildEmptyData()},
+  {id:'otros',          emoji:'📦', label:'Otros',                       subtitle:'Otros · 2026 · Toneladas',                      data:buildEmptyData()},
 ];
 let currentProductId='aceituna_natural',hideEmpty=false,pendingDeleteId=null,selectedEmoji='📦';
+const _DEFAULT_PRODUCTS=[
+  {id:'aceituna_verde',  emoji:'🟢', label:'Aceituna Verde Comercial'},
+  {id:'aceituna_natural',emoji:'⚫', label:'Aceituna Negra Natural'},
+  {id:'aceituna_acetica',emoji:'🟤', label:'Aceituna Negra Acética'},
+  {id:'pasta',          emoji:'🍅', label:'Pasta de Tomate'},
+  {id:'passata',        emoji:'🥫', label:'Passata'},
+  {id:'salsa',          emoji:'🌶', label:'Salsas'},
+  {id:'triturado',      emoji:'🔶', label:'Triturado'},
+  {id:'otros',          emoji:'📦', label:'Otros'},
+];
+function ensureDefaultProducts(){
+  let changed=false;
+  _DEFAULT_PRODUCTS.forEach(d=>{
+    const ex=PRODUCTS.find(p=>p.id===d.id);
+    if(!ex){
+      PRODUCTS.push({id:d.id,emoji:d.emoji,label:d.label,subtitle:d.label+' · '+(_previsionYear||2026)+' · Toneladas',data:buildEmptyData()});
+      changed=true;
+    } else if(ex.label!==d.label||ex.emoji!==d.emoji){
+      ex.label=d.label; ex.emoji=d.emoji; changed=true;
+    }
+  });
+  if(changed) savePrevisionYears();
+}
 const EMOJI_OPTIONS=['🫒','🍅','🫙','🌽','🫑','🥫','🍋','🌾','🧂','🥩','🫐','🧅','🥬','🫘','🍃','🌿','📦','🏷️','⚡','🔹'];
 const PAIS_FLAG={Argentina:'🇦🇷',Australia:'🇦🇺',Brasil:'🇧🇷',Paraguay:'🇵🇾',Uruguay:'🇺🇾'};
 const NOTAS={};
@@ -3717,6 +3748,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('user-avatar').textContent='👤';
     loadPrevisionFromDB();
     loadPrevisionYears(); // ← restaurar snapshots por año
+    ensureDefaultProducts();
     syncProductsFromInventory();
     ensureDefaultInventory();
     renderDashboard();
@@ -4301,31 +4333,31 @@ function getBombonasConfig(){
   return DB.bombonas_config;
 }
 function getBombonasCell(catId,variedad,calibre){
-  const e=(DB.bombonas||[]).find(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre);
+  const e=(DB.bombonas||[]).find(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre&&b.tipo===_currentOliveTipo);
   return e?parseFloat(e.cantidad)||0:0;
 }
 function setBombonasCell(catId,variedad,calibre,cantidad){
   if(!DB.bombonas)DB.bombonas=[];
-  const idx=DB.bombonas.findIndex(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre);
+  const idx=DB.bombonas.findIndex(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre&&b.tipo===_currentOliveTipo);
   const val=parseFloat(cantidad)||0;
   if(idx>=0){
     if(val===0&&!DB.bombonas[idx].nota)DB.bombonas.splice(idx,1);
     else DB.bombonas[idx].cantidad=val;
-  } else if(val>0)DB.bombonas.push({id:genId(),catId,variedad,calibre,cantidad:val,nota:''});
+  } else if(val>0)DB.bombonas.push({id:genId(),catId,variedad,calibre,cantidad:val,nota:'',tipo:_currentOliveTipo});
   saveLocal();
 }
 function getBombonasNota(catId,variedad,calibre){
-  const e=(DB.bombonas||[]).find(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre);
+  const e=(DB.bombonas||[]).find(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre&&b.tipo===_currentOliveTipo);
   return e?e.nota||'':'';
 }
 function setBombonasNota(catId,variedad,calibre,nota){
   if(!DB.bombonas)DB.bombonas=[];
-  const idx=DB.bombonas.findIndex(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre);
+  const idx=DB.bombonas.findIndex(b=>b.catId===catId&&b.variedad===variedad&&b.calibre===calibre&&b.tipo===_currentOliveTipo);
   if(idx>=0){
     DB.bombonas[idx].nota=nota;
     if(!nota&&!DB.bombonas[idx].cantidad)DB.bombonas.splice(idx,1);
   } else if(nota){
-    DB.bombonas.push({id:genId(),catId,variedad,calibre,cantidad:0,nota});
+    DB.bombonas.push({id:genId(),catId,variedad,calibre,cantidad:0,nota,tipo:_currentOliveTipo});
   }
   saveLocal();
 }
@@ -4376,7 +4408,7 @@ function clearBombonaNotaPopover(){
 }
 function renderBombonasGrid(){
   const config=getBombonasConfig();
-  const wrap=document.getElementById('bombonas-grid-wrap');if(!wrap)return;
+  const wrap=document.getElementById(_bombGridId());if(!wrap)return;
   const cols=[];
   config.categorias.forEach(cat=>cat.variedades.forEach(v=>cols.push({catId:cat.id,catLabel:cat.label,catColor:cat.color,catTextColor:cat.textColor,variedad:v})));
   if(!cols.length){wrap.innerHTML='<div class="empty-state"><p>Configurá la tabla primero (⚙️)</p></div>';return;}
@@ -4463,7 +4495,7 @@ function updateBombonasTotals(){
   renderBombonasTotalesKg();
 }
 function renderBombonasTotalesKg(){
-  const wrap=document.getElementById('bombonas-kg-totales');if(!wrap)return;
+  const wrap=document.getElementById(_bombKgId());if(!wrap)return;
   const config=getBombonasConfig();
   // Kg por bombona: DH o RODAJADA → 150 kg, resto → 180 kg
   function kgPorBombona(catLabel,variedad){
@@ -4482,8 +4514,8 @@ function renderBombonasTotalesKg(){
       });
     });
   });
-  // Fermentadores
-  const ferms=DB.fermentadores||[];
+  // Fermentadores (solo del tipo activo)
+  const ferms=(DB.fermentadores||[]).filter(f=>f.tipo===_currentOliveTipo);
   const totalKgFerm=ferms.reduce((s,f)=>s+(parseFloat(f.kg)||0),0);
   const totalKgGral=totalKgBombonas+totalKgFerm;
   const fmt=n=>n.toLocaleString('es-AR',{maximumFractionDigits:0});
@@ -4579,8 +4611,8 @@ function _bcDragEnd(e){e.currentTarget.style.opacity='';_bcDragIdx=null;}
 ═══════════════════════════════════════ */
 let _editingFermId=null;
 function renderFermentadores(){
-  const data=DB.fermentadores||[];
-  const wrap=document.getElementById('fermentadores-wrap');if(!wrap)return;
+  const data=(DB.fermentadores||[]).filter(f=>f.tipo===_currentOliveTipo);
+  const wrap=document.getElementById(_fermWrapId());if(!wrap)return;
   if(!data.length){wrap.innerHTML='<div class="empty-state"><div class="icon">🏭</div><p>Sin fermentadores. Agregá el primero con el botón de arriba.</p></div>';return;}
   wrap.innerHTML=`<div class="ferm-grid">${data.map(f=>`
     <div class="ferm-card">
@@ -4626,8 +4658,8 @@ function saveFermentador(){
     kg:document.getElementById('fm-kg').value,
     entamada:document.getElementById('fm-entamada').value==='true',notas:document.getElementById('fm-notas').value.trim()};
   if(!DB.fermentadores)DB.fermentadores=[];
-  if(_editingFermId){const idx=DB.fermentadores.findIndex(x=>x.id===_editingFermId);if(idx>=0)DB.fermentadores[idx]={...DB.fermentadores[idx],...data};}
-  else DB.fermentadores.push({id:genId(),...data});
+  if(_editingFermId){const idx=DB.fermentadores.findIndex(x=>x.id===_editingFermId);if(idx>=0)DB.fermentadores[idx]={...DB.fermentadores[idx],...data,tipo:_currentOliveTipo};}
+  else DB.fermentadores.push({id:genId(),tipo:_currentOliveTipo,...data});
   saveLocal();closeFermentadorModal();renderFermentadores();renderBombonasTotalesKg();
 }
 function deleteFermentador(id){
@@ -4709,7 +4741,7 @@ function applyInventoryDiscount(){
     const accion=document.getElementById('invd-accion').value;
     const cur=getBombonasCell(catId,variedad,calibre);
     setBombonasCell(catId,variedad,calibre,accion==='agregar'?cur+cant:Math.max(0,cur-cant));
-    if(_invSubTab==='bombonas')updateBombonasTotals();
+    if(['verde_comercial','negra_natural','negra_acetica'].includes(_invSubTab))updateBombonasTotals();
   } else {
     const prodId=document.getElementById('invd-tomate-prod').value;
     const cant=parseFloat(document.getElementById('invd-cantidad-tom').value)||0;
