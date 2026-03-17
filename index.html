@@ -97,6 +97,10 @@ body.warm .theme-thumb{left:15px}
 .table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(123,29,58,.06)}
 #section-facturacion .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 #section-ventas .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.ventas-grupo{margin-bottom:28px}
+.ventas-grupo-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;border-bottom:none;font-size:14px;font-weight:700;color:var(--accent)}
+.ventas-grupo .table-container{border-radius:0 0 var(--radius) var(--radius)}
+.ventas-grupo-kpi{font-size:12px;font-weight:600;color:var(--muted);font-family:var(--mono)}
 .factura-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent) var(--surface2);border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 4px rgba(123,29,58,.06)}
 .factura-scroll-wrap::-webkit-scrollbar{height:7px}
 .factura-scroll-wrap::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
@@ -1132,28 +1136,68 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <button class="btn btn-primary" onclick="openCRMModal('venta')">+ Nueva venta</button>
       </div>
     </div>
-    <!-- Tabs de categoría -->
-    <div class="inv-maintabs" style="margin-bottom:16px">
-      <button class="inv-mtab active" id="vtab-todas"  onclick="setVentasTab('todas',this)">📋 Todas</button>
-      <button class="inv-mtab"        id="vtab-aceitunas" onclick="setVentasTab('aceitunas',this)">🫒 Aceitunas</button>
-      <button class="inv-mtab"        id="vtab-tomate"    onclick="setVentasTab('tomate',this)">🍅 Tomate</button>
-    </div>
+    <!-- KPIs globales -->
     <div class="cards-grid" id="ventas-stats"></div>
-    <div class="table-container" id="ventas-table">
-      <table><thead><tr>
-        <th style="white-space:nowrap">Nº Orden</th>
-        <th style="white-space:nowrap">Fecha</th>
-        <th>Cliente</th>
-        <th>Producto</th>
-        <th style="white-space:nowrap">Cant. (kg)</th>
-        <th style="white-space:nowrap">Total USD</th>
-        <th style="white-space:nowrap">Venta Neta</th>
-        <th style="white-space:nowrap">F. Pago / Plazo</th>
-        <th style="white-space:nowrap">Vencimiento</th>
-        <th>Etapa</th>
-        <th style="width:90px"></th>
-      </tr></thead>
-      <tbody id="ventas-tbody"><tr><td colspan="11" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
+
+    <!-- ── BLOQUE ACEITUNAS ── -->
+    <div class="ventas-grupo" id="ventas-grupo-aceitunas">
+      <div class="ventas-grupo-hdr">
+        <span>🫒 Aceitunas</span>
+        <span id="ventas-ace-kpi" class="ventas-grupo-kpi"></span>
+      </div>
+      <div class="table-container" style="margin-bottom:0">
+        <table><thead><tr>
+          <th style="white-space:nowrap">Nº Orden</th>
+          <th style="white-space:nowrap">Fecha</th>
+          <th>Cliente</th>
+          <th>Producto</th>
+          <th style="white-space:nowrap">Cant. (kg)</th>
+          <th style="white-space:nowrap">Total USD</th>
+          <th style="white-space:nowrap">Venta Neta</th>
+          <th style="white-space:nowrap">F. Pago / Plazo</th>
+          <th style="white-space:nowrap">Vencimiento</th>
+          <th>Etapa</th>
+          <th style="width:90px"></th>
+        </tr></thead>
+        <tbody id="ventas-tbody-aceitunas"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── BLOQUE TOMATE ── -->
+    <div class="ventas-grupo" id="ventas-grupo-tomate">
+      <div class="ventas-grupo-hdr">
+        <span>🍅 Tomate</span>
+        <span id="ventas-tom-kpi" class="ventas-grupo-kpi"></span>
+      </div>
+      <div class="table-container" style="margin-bottom:0">
+        <table><thead><tr>
+          <th style="white-space:nowrap">Nº Orden</th>
+          <th style="white-space:nowrap">Fecha</th>
+          <th>Cliente</th>
+          <th>Producto</th>
+          <th style="white-space:nowrap">Cant. (kg)</th>
+          <th style="white-space:nowrap">Total USD</th>
+          <th style="white-space:nowrap">Venta Neta</th>
+          <th style="white-space:nowrap">F. Pago / Plazo</th>
+          <th style="white-space:nowrap">Vencimiento</th>
+          <th>Etapa</th>
+          <th style="width:90px"></th>
+        </tr></thead>
+        <tbody id="ventas-tbody-tomate"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ── OTRAS (mixtas / sin clasificar) ── -->
+    <div class="ventas-grupo" id="ventas-grupo-otros" style="display:none">
+      <div class="ventas-grupo-hdr"><span>📦 Otros</span></div>
+      <div class="table-container" style="margin-bottom:0">
+        <table><thead><tr>
+          <th style="white-space:nowrap">Nº Orden</th><th style="white-space:nowrap">Fecha</th><th>Cliente</th><th>Producto</th>
+          <th style="white-space:nowrap">Cant. (kg)</th><th style="white-space:nowrap">Total USD</th><th style="white-space:nowrap">Venta Neta</th>
+          <th style="white-space:nowrap">F. Pago / Plazo</th><th style="white-space:nowrap">Vencimiento</th><th>Etapa</th><th style="width:90px"></th>
+        </tr></thead>
+        <tbody id="ventas-tbody-otros"></tbody></table>
+      </div>
     </div>
   </div>
 
@@ -2208,72 +2252,94 @@ function _ventaCategoria(v){
   if(hasTom&&hasAce) return 'mixta';
   return 'otro';
 }
-function setVentasTab(tab, btn){
-  _ventasTab=tab;
-  document.querySelectorAll('#section-ventas .inv-mtab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  renderVentas();
-}
-function renderVentas(){
-  const tb=document.getElementById('ventas-tbody');if(!tb)return;
-  // Filter by tab
-  const all=DB.ventas||[];
-  const filtered=_ventasTab==='todas' ? all
-    : _ventasTab==='tomate'   ? all.filter(v=>['tomate','mixta'].includes(_ventaCategoria(v)))
-    : _ventasTab==='aceitunas'? all.filter(v=>['aceitunas','mixta'].includes(_ventaCategoria(v)))
-    : all;
-  // KPI cards per current filter
-  const totalUSD=filtered.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
-  const confirmadas=filtered.filter(v=>['Confirmada','Despachada'].includes(v.Etapa));
-  const cobradas=filtered.filter(v=>v.Etapa==='Cobrada');
-  const hoy=new Date().toISOString().slice(0,10);
-  const vencidas=filtered.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa));
-  const statsEl=document.getElementById('ventas-stats');
-  if(statsEl) statsEl.innerHTML=`
-    <div class="stat-card"><div class="label">Total${_ventasTab!=='todas'?' '+(_ventasTab==='tomate'?'Tomate':'Aceitunas'):''}</div><div class="value">$${totalUSD.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="sub" style="color:var(--muted)">${filtered.length} ventas</div></div>
-    <div class="stat-card"><div class="label">Confirmadas</div><div class="value">${confirmadas.length}</div><div class="sub" style="color:var(--accent)">$${confirmadas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
-    <div class="stat-card"><div class="label">Cobradas</div><div class="value">${cobradas.length}</div><div class="sub" style="color:var(--green)">$${cobradas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
-    <div class="stat-card" style="${vencidas.length?'border-color:var(--red)':''}"><div class="label">Cobros vencidos</div><div class="value" style="${vencidas.length?'color:var(--red)':''}">${vencidas.length}</div><div class="sub" style="color:var(--muted)">sin cobrar</div></div>`;
-  if(!filtered.length){tb.innerHTML=`<tr><td colspan="11"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas${_ventasTab!=='todas'?' de '+(_ventasTab==='tomate'?'Tomate':'Aceitunas'):''}</p></div></td></tr>`;return;}
-  tb.innerHTML=filtered.map(v=>{
-    const venc=v.FechaVencimiento;
-    const vencVencido=venc&&venc<new Date().toISOString().slice(0,10);
-    const fpLabel=v.FormaPago||'—';
-    const plazoLabel=v.DiasPlayzo?` <span style="font-size:10px;color:var(--muted)">(${v.DiasPlayzo}d)</span>`:'';
-    const bruto=parseFloat(v.ValorUSD)||0;
-    const comision=bruto*((parseFloat(v.PorcentajeComision)||0)/100);
-    const flete=parseFloat(v.GastoFlete)||0;
-    const neta=bruto-comision-flete;
-    const netaHtml=bruto>0?`<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${neta>=0?'var(--green)':'var(--red)'}">$${neta.toLocaleString('es-AR',{maximumFractionDigits:0})}</span><div style="font-size:10px;color:var(--muted)">${comision>0?`−com $${comision.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''} ${flete>0?`−flete $${flete.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''}`.trim()+'</div>':`<span style="color:var(--muted)">—</span>`;
-    const vcat=_ventaCategoria(v);
-    const vcatBadge=vcat==='tomate'?'<span style="font-size:9px;background:#dc262622;color:#dc2626;border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🍅 Tom</span>'
-      :vcat==='aceitunas'?'<span style="font-size:9px;background:rgba(123,29,58,.12);color:var(--accent);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🫒 Ace</span>'
-      :vcat==='mixta'?'<span style="font-size:9px;background:#92400e22;color:#92400e;border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🔀 Mix</span>':'';
-    return`<tr>
-    <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}${_ventasTab==='todas'?'<br>'+vcatBadge:''}</td>
-    <td style="font-family:var(--mono);font-size:11px">${v.Fecha||'—'}</td>
+function _ventaRowHtml(v){
+  const venc=v.FechaVencimiento;
+  const vencVencido=venc&&venc<new Date().toISOString().slice(0,10);
+  const fpLabel=v.FormaPago||'—';
+  const plazoLabel=v.DiasPlayzo?` <span style="font-size:10px;color:var(--muted)">(${v.DiasPlayzo}d)</span>`:'';
+  const bruto=parseFloat(v.ValorUSD)||0;
+  const comision=bruto*((parseFloat(v.PorcentajeComision)||0)/100);
+  const flete=parseFloat(v.GastoFlete)||0;
+  const neta=bruto-comision-flete;
+  const netaHtml=bruto>0
+    ?`<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${neta>=0?'var(--green)':'var(--red)'}">$${neta.toLocaleString('es-AR',{maximumFractionDigits:0})}</span>`
+     +`<div style="font-size:10px;color:var(--muted)">${[comision>0?`−com $${comision.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''
+     ,flete>0?`−flete $${flete.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''].filter(Boolean).join(' ')}</div>`
+    :`<span style="color:var(--muted)">—</span>`;
+  return`<tr>
+    <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}</td>
+    <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${v.Fecha||'—'}</td>
     <td><strong>${v.Cliente||'—'}</strong></td>
     <td>${_ventaProductLabel(v)}</td>
-    <td style="font-family:var(--mono)">${v.CantidadTon||'—'} kg</td>
-    <td style="font-family:var(--mono)">$${bruto.toLocaleString()}</td>
+    <td style="font-family:var(--mono);white-space:nowrap">${v.CantidadTon||'—'} kg</td>
+    <td style="font-family:var(--mono);white-space:nowrap">$${bruto.toLocaleString()}</td>
     <td>${netaHtml}</td>
-    <td style="font-size:11px">${fpLabel}${plazoLabel}</td>
-    <td style="font-family:var(--mono);font-size:11px;color:${vencVencido?'var(--red)':venc?'var(--text)':'var(--muted)'}">${venc||'—'}</td>
+    <td style="font-size:11px;white-space:nowrap">${fpLabel}${plazoLabel}</td>
+    <td style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:${vencVencido?'var(--red)':venc?'var(--text)':'var(--muted)'}">${venc||'—'}</td>
     <td><span class="badge badge-blue">${v.Etapa||'—'}</span></td>
     <td class="row-actions">
       <button class="btn-row-edit" onclick="editRecord('venta','${v.ID}')">✏️</button>
-      <button class="btn-row-edit" onclick="generarOrdenPedido('${v.ID}')" title="Generar orden de pedido PDF">📄</button>
+      <button class="btn-row-edit" onclick="generarOrdenPedido('${v.ID}')" title="PDF">📄</button>
       <button class="btn-row-del" onclick="deleteRecord('venta','${v.ID}')">🗑</button>
     </td></tr>`;
-  }).join('');
+}
+function _fillVentasTbody(tbodyId, list){
+  const tb=document.getElementById(tbodyId);if(!tb)return;
+  tb.innerHTML=list.length
+    ?list.map(_ventaRowHtml).join('')
+    :'<tr><td colspan="11"><div class="empty-state" style="padding:20px"><div class="icon" style="font-size:24px">—</div><p>Sin órdenes</p></div></td></tr>';
+}
+function _ventasKpiHtml(list){
+  const usd=list.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const hoy=new Date().toISOString().slice(0,10);
+  const venc=list.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa)).length;
+  return`${list.length} órdenes · $${usd.toLocaleString('en-US',{maximumFractionDigits:0})} USD${venc?` · <span style="color:var(--red)">${venc} vencido(s)</span>`:''}`;
+}
+function renderVentas(){
+  const all=DB.ventas||[];
+  const aceitunas=all.filter(v=>['aceitunas'].includes(_ventaCategoria(v)));
+  const tomate=all.filter(v=>['tomate'].includes(_ventaCategoria(v)));
+  const otros=all.filter(v=>['mixta','otro'].includes(_ventaCategoria(v)));
+
+  // KPI global
+  const hoy=new Date().toISOString().slice(0,10);
+  const totalUSD=all.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const confirmadas=all.filter(v=>['Confirmada','Despachada'].includes(v.Etapa));
+  const cobradas=all.filter(v=>v.Etapa==='Cobrada');
+  const vencidas=all.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa));
+  const statsEl=document.getElementById('ventas-stats');
+  if(statsEl) statsEl.innerHTML=`
+    <div class="stat-card"><div class="label">Total ventas</div><div class="value">$${totalUSD.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="sub" style="color:var(--muted)">${all.length} órdenes</div></div>
+    <div class="stat-card"><div class="label">Confirmadas</div><div class="value">${confirmadas.length}</div><div class="sub" style="color:var(--accent)">$${confirmadas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card"><div class="label">Cobradas</div><div class="value">${cobradas.length}</div><div class="sub" style="color:var(--green)">$${cobradas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card" style="${vencidas.length?'border-color:var(--red)':''}"><div class="label">Cobros vencidos</div><div class="value" style="${vencidas.length?'color:var(--red)':''}">${vencidas.length}</div><div class="sub" style="color:var(--muted)">sin cobrar</div></div>`;
+
+  // Rellenar cada bloque
+  _fillVentasTbody('ventas-tbody-aceitunas', aceitunas);
+  _fillVentasTbody('ventas-tbody-tomate', tomate);
+  _fillVentasTbody('ventas-tbody-otros', otros);
+
+  // KPI por bloque en cabecera
+  const kpiAce=document.getElementById('ventas-ace-kpi');
+  const kpiTom=document.getElementById('ventas-tom-kpi');
+  if(kpiAce) kpiAce.innerHTML=_ventasKpiHtml(aceitunas);
+  if(kpiTom) kpiTom.innerHTML=_ventasKpiHtml(tomate);
+
+  // Mostrar/ocultar bloque "Otros"
+  const grupoOtros=document.getElementById('ventas-grupo-otros');
+  if(grupoOtros) grupoOtros.style.display=otros.length?'block':'none';
 }
 function filterTable(id,q){
   const rows=document.querySelectorAll('#'+id+' tbody tr');
   rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
 }
 function filterVentasSearch(q){
-  const rows=document.querySelectorAll('#ventas-tbody tr');
-  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
+  const ql=q.toLowerCase();
+  ['ventas-tbody-aceitunas','ventas-tbody-tomate','ventas-tbody-otros'].forEach(id=>{
+    document.querySelectorAll('#'+id+' tr').forEach(r=>{
+      r.style.display=r.textContent.toLowerCase().includes(ql)?'':'none';
+    });
+  });
 }
 
 /* ═══════════════════════════════════════
@@ -3447,14 +3513,22 @@ const _DEFAULT_PRODUCTS=[
   {id:'otros',          emoji:'📦', label:'Otros'},
 ];
 function ensureDefaultProducts(){
+  // Si ya existe una lista guardada en localStorage, respetarla completamente.
+  // loadPrevisionYears() ya la restauró — no volver a agregar los eliminados.
+  try{
+    const raw=localStorage.getItem('crm_cazorla_years');
+    if(raw){
+      const saved=JSON.parse(raw);
+      if(saved.productList && saved.productList.length>0) return;
+    }
+  }catch{}
+  // Sin lista guardada (primera vez) → sembrar defaults
   let changed=false;
   _DEFAULT_PRODUCTS.forEach(d=>{
     const ex=PRODUCTS.find(p=>p.id===d.id);
     if(!ex){
       PRODUCTS.push({id:d.id,emoji:d.emoji,label:d.label,subtitle:d.label+' · '+(_previsionYear||2026)+' · Toneladas',data:buildEmptyData()});
       changed=true;
-    } else if(ex.label!==d.label||ex.emoji!==d.emoji){
-      ex.label=d.label; ex.emoji=d.emoji; changed=true;
     }
   });
   if(changed) savePrevisionYears();
