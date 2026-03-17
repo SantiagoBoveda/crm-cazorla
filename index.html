@@ -1028,6 +1028,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
           <div style="margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)">▸ click en celda · Tab para avanzar</div>
         </div>
         <div id="bombonas-grid-wrap"></div>
+        <div id="bombonas-kg-totales" style="margin-top:16px"></div>
       </div>
       <!-- FERMENTADORES -->
       <div class="inv-subpanel" id="inv-sub-fermentadores">
@@ -1810,18 +1811,27 @@ function showInvSubTab(subtab,btn,silent){
   else if(subtab==='fermentadores') renderFermentadores();
 }
 /* ── TOMATE & OTROS ── */
+function _toTon(stock,unidad){
+  const u=(unidad||'').toLowerCase().trim();
+  const v=parseFloat(stock)||0;
+  if(u==='kg'||u==='kgs'||u==='kilos')return v/1000;
+  return v; // ya en ton
+}
 function renderTomateInv(){
   const data=(DB.inventario||[]).filter(i=>(i.Producto||'').toLowerCase().includes('tomate')||(i.Categoria||'').toLowerCase().includes('tomate'));
   const wrap=document.getElementById('tomate-wrap'); if(!wrap)return;
-  const total=data.reduce((s,i)=>s+(parseFloat(i.StockActual)||0),0);
+  const totalTon=data.reduce((s,i)=>s+_toTon(i.StockActual,i.Unidad),0);
   let html=`<div class="mod-stats" style="margin-bottom:16px">
-    <div class="mod-stat accent-blue"><div class="ms-label">Stock total</div><div class="ms-value">${total.toLocaleString('es-AR',{maximumFractionDigits:1})}</div><div class="ms-sub">toneladas</div></div>
+    <div class="mod-stat accent-blue"><div class="ms-label">Toneladas disponibles</div><div class="ms-value" id="tomate-total-ton">${totalTon.toLocaleString('es-AR',{maximumFractionDigits:2})}</div><div class="ms-sub">toneladas totales</div></div>
     <div class="mod-stat"><div class="ms-label">Lotes</div><div class="ms-value">${data.length}</div><div class="ms-sub">registros</div></div></div>`;
   if(!data.length){html+='<div class="empty-state"><div class="icon">🍅</div><p>Sin stock de tomate registrado</p></div>';wrap.innerHTML=html;return;}
-  html+=`<div class="table-container"><table><thead><tr><th>Producto</th><th>Categoría/Lote</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Precio</th><th style="width:70px"></th></tr></thead><tbody>${data.map(i=>{
+  html+=`<div class="table-container"><table><thead><tr><th>Producto</th><th>Categoría/Lote</th><th>Stock actual</th><th style="color:#1a6b3a;font-weight:700">Toneladas disp.</th><th>Stock mín.</th><th>Barra</th><th>Precio</th><th style="width:70px"></th></tr></thead><tbody>${data.map(i=>{
     const s=parseFloat(i.StockActual)||0,m=parseFloat(i.StockMin)||0,p=m>0?Math.min(s/m*100,100):100,c=p<50?'var(--red)':p<80?'var(--yellow)':'var(--green)';
+    const ton=_toTon(s,i.Unidad);
     return`<tr><td><strong>${i.Producto||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${i.Categoria||'—'}</td>
-      <td style="font-family:var(--mono)">${s} ${i.Unidad||'ton'}</td><td style="font-family:var(--mono)">${m} ${i.Unidad||'ton'}</td>
+      <td style="font-family:var(--mono)">${s} ${i.Unidad||'ton'}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:#1a6b3a">${ton.toLocaleString('es-AR',{maximumFractionDigits:3})} ton</td>
+      <td style="font-family:var(--mono)">${m} ${i.Unidad||'ton'}</td>
       <td><div class="stock-bar" style="width:80px"><div class="stock-fill" style="width:${p}%;background:${c}"></div></div></td>
       <td style="font-family:var(--mono)">$${(parseFloat(i.Precio)||0).toLocaleString()}</td>
       <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button></td></tr>`;
@@ -2247,42 +2257,8 @@ function onClienteUpdated(oldRow, newRow){
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
 }
 function onVentaSaved(row){
-  const cliente  = (row.Cliente||'').trim();
-  const producto = (row.Producto||'').trim();
-  const fecha    = row.Fecha||'';
-  const ton      = parseFloat(row.CantidadTon)||0;
-  if(!cliente||!fecha||!ton) return;
-
-  // Map product name → product id (fuzzy: lowercase contains)
-  const prod = PRODUCTS.find(p=>{
-    const lbl=p.label.toLowerCase();
-    const prd=producto.toLowerCase();
-    return prd&&(lbl.includes(prd)||prd.includes(lbl.split(' ')[0]));
-  }) || PRODUCTS[0];
-
-  // Map fecha → mes index (Dic=0 … Nov=11)
-  const mesIdx = fechaToMesIdx(fecha);
-  if(mesIdx<0) return;
-
-  // Find client across all paises
-  let found=false;
-  for(const [pais, clientes] of Object.entries(prod.data)){
-    const entry=clientes.find(c=>c.nombre.toLowerCase()===cliente.toLowerCase());
-    if(entry){
-      entry.real[mesIdx]=(entry.real[mesIdx]||0)+ton;
-      found=true;
-      break;
-    }
-  }
-  // If client not found in prevision, create it in 'Sin país asignado'
-  if(!found){
-    const pais='Sin país asignado';
-    if(!prod.data[pais]) prod.data[pais]=[];
-    prod.data[pais].push({nombre:cliente,comercial:'',fecha:fecha,proy:Array(12).fill(0),real:Array(12).fill(0).map((_,i)=>i===mesIdx?ton:0)});
-  }
+  // Auto-update de previsión deshabilitado: se gestiona manualmente.
   if(document.getElementById('section-prevision').classList.contains('active')) renderAll();
-  // Ofrecer descuento de inventario
-  offerInventoryDiscount(row);
 }
 
 /* Fecha YYYY-MM-DD → índice de mes según año activo (Dic año-1 = 0, Ene = 1 ... Nov = 11) */
@@ -4163,6 +4139,7 @@ function renderBombonasGrid(){
   html+=`<td class="bomb-grand-total" id="bomb-grand-total">${grandTotal.toLocaleString()}</td></tr>`;
   html+=`</tbody></table></div>`;
   wrap.innerHTML=html;
+  renderBombonasTotalesKg();
 }
 function editBombonaCell(td){
   if(td.querySelector('input'))return;
@@ -4207,6 +4184,55 @@ function updateBombonasTotals(){
     if(el)el.textContent=ct[ci]||'';
   });
   const gt=document.getElementById('bomb-grand-total');if(gt)gt.textContent=grand.toLocaleString();
+  renderBombonasTotalesKg();
+}
+function renderBombonasTotalesKg(){
+  const wrap=document.getElementById('bombonas-kg-totales');if(!wrap)return;
+  const config=getBombonasConfig();
+  // Kg por bombona: DH o RODAJADA → 150 kg, resto → 180 kg
+  function kgPorBombona(catLabel,variedad){
+    const lbl=((catLabel||'')+(variedad||'')).toUpperCase();
+    return (lbl.includes('DH')||lbl.includes('RODAJADA'))?150:180;
+  }
+  let totalBombonas=0,totalKgBombonas=0;
+  config.categorias.forEach(cat=>{
+    cat.variedades.forEach(v=>{
+      config.calibres.forEach(c=>{
+        const cant=getBombonasCell(cat.id,v,c);
+        if(cant>0){
+          totalBombonas+=cant;
+          totalKgBombonas+=cant*kgPorBombona(cat.label,v);
+        }
+      });
+    });
+  });
+  // Fermentadores
+  const ferms=DB.fermentadores||[];
+  const totalKgFerm=ferms.reduce((s,f)=>s+(parseFloat(f.kg)||0),0);
+  const totalKgGral=totalKgBombonas+totalKgFerm;
+  const fmt=n=>n.toLocaleString('es-AR',{maximumFractionDigits:0});
+  const fmtTon=n=>(n/1000).toLocaleString('es-AR',{maximumFractionDigits:2});
+  wrap.innerHTML=`<div style="border-top:2px solid var(--border);padding-top:14px">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px">Stock estimado de aceitunas</div>
+    <div class="mod-stats">
+      <div class="mod-stat accent-blue">
+        <div class="ms-label">Bombonas</div>
+        <div class="ms-value">${fmt(totalBombonas)}</div>
+        <div class="ms-sub">${fmt(totalKgBombonas)} kg · ${fmtTon(totalKgBombonas)} ton</div>
+      </div>
+      <div class="mod-stat">
+        <div class="ms-label">Fermentadores</div>
+        <div class="ms-value">${fmt(totalKgFerm)}</div>
+        <div class="ms-sub">kg · ${fmtTon(totalKgFerm)} ton</div>
+      </div>
+      <div class="mod-stat" style="border-left:3px solid var(--accent)">
+        <div class="ms-label">Total aceitunas</div>
+        <div class="ms-value" style="color:var(--accent)">${fmtTon(totalKgGral)}</div>
+        <div class="ms-sub">toneladas · ${fmt(totalKgGral)} kg</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:6px">* DH y RODAJADA: 150 kg/bombona · Resto: 180 kg/bombona</div>
+  </div>`;
 }
 /* ── Bombonas Config Modal ── */
 function openBombonasConfig(){renderBombonasConfigModal();document.getElementById('bomb-cfg-overlay').classList.add('open');}
@@ -4236,12 +4262,18 @@ function renderBombonasConfigModal(){
       </div>
     </div>`).join('');
   html+=`<button onclick="addBombCat()" style="width:100%;padding:10px;background:transparent;border:1px dashed var(--border2);border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;margin-bottom:16px">＋ Agregar categoría</button>`;
-  html+=`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Calibres (filas)</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+  html+=`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px">Calibres (filas) <span style="font-weight:400;font-style:italic">— arrastrá para reordenar</span></div>
+    <div id="bomb-calib-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
     ${config.calibres.map((c,ci)=>`
-      <span style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px">
+      <span draggable="true" data-ci="${ci}"
+        ondragstart="_bcDragStart(event,${ci})"
+        ondragover="_bcDragOver(event)"
+        ondrop="_bcDrop(event,${ci})"
+        ondragend="_bcDragEnd(event)"
+        style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:grab;user-select:none">
+        <span style="color:var(--muted);font-size:11px;cursor:grab">⠿</span>
         <input value="${c}" onchange="getBombonasConfig().calibres[${ci}]=this.value;saveLocal()"
-          style="background:transparent;border:none;outline:none;color:var(--text);font-size:12px;width:${Math.max(50,c.length*8)}px;font-family:var(--mono)">
+          style="background:transparent;border:none;outline:none;color:var(--text);font-size:12px;width:${Math.max(50,c.length*8)}px;font-family:var(--mono);cursor:text">
         <button onclick="deleteBombCalib(${ci})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px">✕</button>
       </span>`).join('')}
     <button onclick="addBombCalib()" style="padding:3px 12px;background:transparent;border:1px dashed var(--border2);border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer">＋ Calibre</button>
@@ -4254,6 +4286,17 @@ function deleteBombVar(ci,vi){getBombonasConfig().categorias[ci].variedades.spli
 function addBombCat(){getBombonasConfig().categorias.push({id:'cat_'+Date.now(),label:'Nueva categoría',color:'#aaaaaa',textColor:'#fff',variedades:[]});saveLocal();renderBombonasConfigModal();}
 function addBombCalib(){getBombonasConfig().calibres.push('Nuevo calibre');saveLocal();renderBombonasConfigModal();}
 function deleteBombCalib(ci){getBombonasConfig().calibres.splice(ci,1);saveLocal();renderBombonasConfigModal();}
+let _bcDragIdx=null;
+function _bcDragStart(e,ci){_bcDragIdx=ci;e.currentTarget.style.opacity='.4';e.dataTransfer.effectAllowed='move';}
+function _bcDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function _bcDrop(e,targetIdx){
+  e.preventDefault();
+  if(_bcDragIdx===null||_bcDragIdx===targetIdx)return;
+  const c=getBombonasConfig().calibres;
+  const [moved]=c.splice(_bcDragIdx,1);c.splice(targetIdx,0,moved);
+  saveLocal();renderBombonasConfigModal();
+}
+function _bcDragEnd(e){e.currentTarget.style.opacity='';_bcDragIdx=null;}
 
 /* ═══════════════════════════════════════
    FERMENTADORES
@@ -4276,7 +4319,6 @@ function renderFermentadores(){
         ${ff('🫒','Variedad',f.variedad)}
         ${ff('📏','Calibre',f.calibre)}
         ${ff('⚖️','Kg estimados',f.kg?parseFloat(f.kg).toLocaleString()+' kg':'—')}
-        ${f.brix?ff('🔬','Brix',f.brix):''}
         ${ff('📍','Entamada',(f.entamada=='true'||f.entamada===true)
           ?'<span class="badge badge-green" style="font-size:11px">✓ Sí</span>'
           :'<span class="badge badge-yellow" style="font-size:11px">✗ No</span>')}
@@ -4295,7 +4337,6 @@ function openFermentadorModal(id){
   document.getElementById('fm-variedad').value=f?.variedad||'';
   document.getElementById('fm-calibre').value=f?.calibre||'';
   document.getElementById('fm-kg').value=f?.kg||'';
-  document.getElementById('fm-brix').value=f?.brix||'';
   document.getElementById('fm-entamada').value=(f?.entamada=='true'||f?.entamada===true)?'true':'false';
   document.getElementById('fm-notas').value=f?.notas||'';
   document.getElementById('ferm-modal-overlay').classList.add('open');
@@ -4306,17 +4347,17 @@ function saveFermentador(){
   const nombre=document.getElementById('fm-nombre').value.trim();
   if(!nombre){document.getElementById('fm-nombre').focus();return;}
   const data={nombre,variedad:document.getElementById('fm-variedad').value.trim(),calibre:document.getElementById('fm-calibre').value.trim(),
-    kg:document.getElementById('fm-kg').value,brix:document.getElementById('fm-brix').value,
+    kg:document.getElementById('fm-kg').value,
     entamada:document.getElementById('fm-entamada').value==='true',notas:document.getElementById('fm-notas').value.trim()};
   if(!DB.fermentadores)DB.fermentadores=[];
   if(_editingFermId){const idx=DB.fermentadores.findIndex(x=>x.id===_editingFermId);if(idx>=0)DB.fermentadores[idx]={...DB.fermentadores[idx],...data};}
   else DB.fermentadores.push({id:genId(),...data});
-  saveLocal();closeFermentadorModal();renderFermentadores();
+  saveLocal();closeFermentadorModal();renderFermentadores();renderBombonasTotalesKg();
 }
 function deleteFermentador(id){
   const f=(DB.fermentadores||[]).find(x=>x.id===id);if(!f)return;
   if(!confirm(`¿Eliminar fermentador "${f.nombre}"?`))return;
-  DB.fermentadores=DB.fermentadores.filter(x=>x.id!==id);saveLocal();renderFermentadores();
+  DB.fermentadores=DB.fermentadores.filter(x=>x.id!==id);saveLocal();renderFermentadores();renderBombonasTotalesKg();
 }
 
 /* ═══════════════════════════════════════
@@ -4471,10 +4512,7 @@ function closeInvDiscount(){document.getElementById('inv-disc-overlay').classLis
       <div class="form-group"><label>Variedad</label><input id="fm-variedad" placeholder="Ej: MZ VC, ARAUCO…"></div>
       <div class="form-group"><label>Calibre</label><input id="fm-calibre" placeholder="Ej: 300/320, Perdgón…"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>Kg estimados</label><input id="fm-kg" type="number" step="0.1" placeholder="5000"></div>
-      <div class="form-group"><label>Brix</label><input id="fm-brix" type="number" step="0.01" placeholder="—"></div>
-    </div>
+    <div class="form-group"><label>Kg estimados</label><input id="fm-kg" type="number" step="0.1" placeholder="5000"></div>
     <div class="form-group"><label>¿Entamada?</label>
       <select id="fm-entamada"><option value="false">No</option><option value="true">Sí</option></select>
     </div>
