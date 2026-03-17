@@ -590,6 +590,14 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .bomb-cell:hover{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
 .bomb-val{display:block;text-align:center;font-size:12px;min-height:20px;line-height:20px}
 .bomb-cell-input{width:50px;background:transparent;border:none;border-bottom:2px solid var(--accent);outline:none;font-size:12px;font-family:var(--mono);text-align:center;color:var(--text);padding:1px 0;display:block}
+/* ══ VENTAS LÍNEAS ══ */
+.vl-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+.vl-table th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;padding:4px 6px;text-align:left;border-bottom:1px solid var(--border)}
+.vl-table td{padding:4px 6px;vertical-align:middle}
+.vl-table select,.vl-table input[type=number]{width:100%;padding:4px 6px;border:1px solid var(--border2);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:var(--sans)}
+.vl-table .vl-total-cell{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--accent);text-align:right}
+.vl-table .vl-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:0 4px}
+.vl-table .vl-remove:hover{color:var(--red)}
 /* ══ BOMBONA CELL NOTES ══ */
 .bomb-nota-btn{display:none;position:absolute;top:1px;right:1px;background:none;border:none;padding:0;font-size:10px;line-height:1;cursor:pointer;opacity:.6;z-index:4}.bomb-nota-btn:hover{opacity:1}
 .bomb-cell:hover .bomb-nota-btn{display:block}
@@ -874,7 +882,13 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="main-sidebar">
-  <div class="logo"><h2>CRM</h2><p>Grupo Cazorla</p></div>
+  <div class="logo">
+  <img id="sidebar-logo" src="logo_cazorla.png" alt="Aceitunas Cazorla"
+    style="width:100%;max-width:176px;height:auto;display:block;margin-bottom:4px"
+    onerror="this.style.display='none';document.getElementById('sidebar-logo-text').style.display='block'">
+  <h2 id="sidebar-logo-text" style="display:none">CRM</h2>
+  <p>Grupo Cazorla</p>
+</div>
   <div class="nav-item active" onclick="showSection('dashboard',this)"><span class="icon">📊</span><span>Dashboard</span></div>
   <div class="nav-item" onclick="showSection('clientes',this)"><span class="icon">👥</span><span>Clientes</span></div>
   <div class="nav-item" onclick="showSection('contactos',this)"><span class="icon">📇</span><span>Contactos</span></div>
@@ -1025,7 +1039,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div style="font-size:13px;font-weight:700;color:var(--accent)">Detalle de Enteras 1ras — Bombonas</div>
           <button class="btn btn-outline btn-sm" onclick="openBombonasConfig()">⚙️ Configurar tabla</button>
-          <div style="margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono)">▸ click en celda · Tab para avanzar</div>
+          <button class="btn btn-outline btn-sm" onclick="exportInventarioExcel()" style="margin-left:auto">📊 Exportar Excel</button>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">▸ click en celda · Tab para avanzar</div>
         </div>
         <div id="bombonas-grid-wrap"></div>
         <div id="bombonas-kg-totales" style="margin-top:16px"></div>
@@ -1094,6 +1109,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
           <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Proyectado</div>
           <div class="leg-item"><div class="leg-dot" style="background:#16a34a"></div>Realizado</div>
         </div>
+        <button class="btn btn-outline btn-sm" onclick="exportPrevisionExcel()">📊 Exportar Excel</button>
         <button class="btn-export" id="btn-export" onclick="exportExcel()">
           <span class="export-icon">📥</span>
           <span class="spinner"></span>
@@ -1574,7 +1590,7 @@ const HEADERS={
   Proyectos:['ID','Nombre','Cliente','Producto','ValorUSD','Etapa','Responsable','FechaInicio','FechaEstimada','Notas'],
   Tareas:['ID','Titulo','Descripcion','Asignado','Prioridad','Estado','FechaVenc'],
   Inventario:['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],
-  Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Comisionista','PorcentajeComision','Etapa','Responsable','Notas'],
+  Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Comisionista','PorcentajeComision','Etapa','Responsable','Notas','Lineas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
   Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'],
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
@@ -1853,6 +1869,15 @@ function renderOtrosInv(){
       <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button></td></tr>`;
   }).join('');
 }
+function _ventaProductLabel(v){
+  try{
+    const ls=v.Lineas?JSON.parse(v.Lineas):null;
+    if(ls&&ls.length>1){
+      return ls.map(l=>l.producto||'—').filter(Boolean).join('<br>');
+    }
+  }catch{}
+  return v.Producto||'—';
+}
 function renderVentas(){
   const tb=document.getElementById('ventas-tbody');if(!tb)return;
   if(!DB.ventas.length){tb.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';return;}
@@ -1865,7 +1890,7 @@ function renderVentas(){
     <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}</td>
     <td style="font-family:var(--mono);font-size:11px">${v.Fecha||'—'}</td>
     <td><strong>${v.Cliente||'—'}</strong></td>
-    <td>${v.Producto||'—'}</td>
+    <td>${_ventaProductLabel(v)}</td>
     <td style="font-family:var(--mono)">${v.CantidadTon||'—'} ton</td>
     <td style="font-family:var(--mono)">$${(parseFloat(v.ValorUSD)||0).toLocaleString()}</td>
     <td style="font-size:11px">${fpLabel}${plazoLabel}</td>
@@ -1891,7 +1916,7 @@ const FORMS={
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
   producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" data-smartlist="Categoría"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
-  venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-CantidadTon" type="number" step="0.1" oninput="calcVentaTotal()"></div><div class="form-group"><label>Precio USD/ton</label><input id="f-PrecioUSD" type="number" placeholder="ej: 850" oninput="calcVentaTotal()"></div></div><div class="form-row"><div class="form-group"><label>Total USD</label><input id="f-ValorUSD" type="number" oninput="calcVentaTotal()"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-dias-row" style="display:none" class="form-row"><div class="form-group"><label>Días de plazo</label><input id="f-DiasPlayzo" type="number" min="1" step="1" placeholder="ej: 90" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-dias-row" style="display:none" class="form-row"><div class="form-group"><label>Días de plazo</label><input id="f-DiasPlayzo" type="number" min="1" step="1" placeholder="ej: 90" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
@@ -1922,7 +1947,72 @@ function openCRMModal(type){
       <div class="historial-empty">Guardá el registro primero para poder agregar novedades.</div>`;
     document.getElementById('modal-body').appendChild(panel);
   }
-  if(type==='venta') setTimeout(()=>{calcVentaTotal();onFormaPagoChange();populateComisionistas();}, 30);
+  if(type==='venta') setTimeout(()=>{initVentaLineas('');onFormaPagoChange();populateComisionistas();}, 30);
+}
+/* ── VENTAS: LÍNEAS DE PRODUCTO ── */
+let _vl=[];
+function initVentaLineas(lineasJson){
+  try{_vl=lineasJson?JSON.parse(lineasJson):[];}catch{_vl=[];}
+  if(!_vl.length)_vl=[{producto:'',cantidadTon:'',precioUSD:''}];
+  renderVentaLineasUI();
+}
+function addVentaLinea(){
+  _vl.push({producto:'',cantidadTon:'',precioUSD:''});
+  renderVentaLineasUI();
+}
+function removeVentaLinea(i){
+  if(_vl.length<=1)return;
+  _vl.splice(i,1);
+  renderVentaLineasUI();
+}
+function updateVentaLinea(i,field,val){
+  if(_vl[i])_vl[i][field]=val;
+  renderVentaLineasUI();
+}
+function renderVentaLineasUI(){
+  const wrap=document.getElementById('ventas-lineas-ui');if(!wrap)return;
+  // Rebuild product options from SMART_LIST
+  const prods=[...new Set([...((typeof SMART_LISTS!=='undefined'?SMART_LISTS.Producto:[])||[]),...(DB.inventario||[]).map(i=>i.Producto).filter(Boolean),...(typeof PRODUCTS!=='undefined'?PRODUCTS.map(p=>p.label):[])].filter(Boolean))];
+  const opts=prods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (ton)</th><th>USD/ton</th><th>Total</th><th></th></tr></thead><tbody>${
+    _vl.map((l,i)=>{
+      const tot=(parseFloat(l.cantidadTon)||0)*(parseFloat(l.precioUSD)||0);
+      return`<tr>
+        <td><select onchange="updateVentaLinea(${i},'producto',this.value)"><option value="">— Seleccionar —</option>${opts.replace(`value="${l.producto}"`,`value="${l.producto}" selected`)}</select></td>
+        <td><input type="number" step="0.1" min="0" value="${l.cantidadTon||''}" placeholder="ton" oninput="updateVentaLinea(${i},'cantidadTon',this.value)"></td>
+        <td><input type="number" step="0.01" min="0" value="${l.precioUSD||''}" placeholder="$/ton" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
+        <td class="vl-total-cell">${tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):''}</td>
+        <td><button class="vl-remove" onclick="removeVentaLinea(${i})" title="Quitar línea" ${_vl.length<=1?'disabled':''}>✕</button></td>
+      </tr>`;
+    }).join('')
+  }</tbody></table>`;
+  calcVentaLineasTotal();
+}
+function calcVentaLineasTotal(){
+  let totKg=0,totUSD=0;
+  _vl.forEach(l=>{
+    const k=parseFloat(l.cantidadTon)||0;
+    const p=parseFloat(l.precioUSD)||0;
+    totKg+=k;totUSD+=k*p;
+  });
+  const fv=document.getElementById('f-ValorUSD');if(fv)fv.value=totUSD?totUSD.toFixed(2):'';
+  const fc=document.getElementById('f-CantidadTon');if(fc)fc.value=totKg||'';
+  const fp=document.getElementById('f-Producto');if(fp){
+    const names=_vl.map(l=>l.producto).filter(Boolean);
+    fp.value=names.length>1?names.join(', '):(names[0]||'');
+  }
+  const fl=document.getElementById('f-Lineas');if(fl)fl.value=JSON.stringify(_vl);
+  // Update total display box
+  const box=document.getElementById('venta-total-display');
+  const valEl=document.getElementById('venta-total-value');
+  const detEl=document.getElementById('venta-total-detail');
+  if(box&&valEl&&detEl){
+    if(totUSD>0){
+      box.style.display='block';
+      valEl.textContent='USD '+totUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      detEl.textContent=totKg.toLocaleString('es-AR')+' ton · '+_vl.filter(l=>l.producto).map(l=>l.producto).join(' + ');
+    }else{box.style.display='none';}
+  }
 }
 function calcVentaTotal(){
   const ton=parseFloat(document.getElementById('f-CantidadTon')?.value)||0;
@@ -1996,7 +2086,7 @@ function editRecord(type, id){
   if(type==='proyecto' || type==='tarea'){
     renderHistorialPanel(type, id);
   }
-  if(type==='venta') setTimeout(()=>{calcVentaTotal();onFormaPagoChange();populateComisionistas(record?.Comisionista);}, 30);
+  if(type==='venta') setTimeout(()=>{initVentaLineas(record?.Lineas||'');onFormaPagoChange();populateComisionistas(record?.Comisionista);}, 30);
 }
 
 /* Eliminar registro — borra en DB local Y en Google Sheets */
@@ -4550,6 +4640,10 @@ function generarOrdenPedido(ventaId){
   const v=(DB.ventas||[]).find(x=>x.ID===ventaId);if(!v)return;
   const cli=DB.clientes?.find(c=>(c.Empresa||'').toLowerCase()===(v.Cliente||'').toLowerCase());
   const fecha=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  let lineas=[];
+  try{lineas=v.Lineas?JSON.parse(v.Lineas):[];}catch{}
+  if(!lineas.length)lineas=[{producto:v.Producto,cantidadTon:v.CantidadTon}];
+  const lineasHTML=lineas.map((l,i)=>`<tr><td class="lbl">${lineas.length>1?'Producto '+(i+1):'Producto'}</td><td><strong style="font-size:13px">${l.producto||'—'}</strong></td><td class="lbl">Cantidad</td><td><strong>${l.cantidadTon||'—'} ton</strong></td></tr>`).join('');
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <title>Orden de Pedido — ${v.NumOrden||'N/A'}</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1a1a1a;padding:32px 40px}
@@ -4570,9 +4664,13 @@ table.info td.lbl{font-weight:700;background:#fafafa;width:160px;color:#555;font
 @media print{body{padding:16px 20px}}</style></head><body>
 <div class="header">
   <div>
-    <h1>GRUPO CAZORLA</h1>
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <img src="${window.location.href.replace(/[^/\\\\]*$/, '')}logo_cazorla.png" alt="Cazorla" style="height:44px;object-fit:contain" onerror="this.style.display='none'">
+      <img src="${window.location.href.replace(/[^/\\\\]*$/, '')}logo_seville.png" alt="Seville Cazorla" style="height:44px;object-fit:contain" onerror="this.style.display='none'">
+      <img src="${window.location.href.replace(/[^/\\\\]*$/, '')}logo_tomalar.png" alt="Tomalar" style="height:36px;object-fit:contain" onerror="this.style.display='none'">
+    </div>
     <div class="doc-sub">Orden de Pedido Interna — Producción</div>
-    <div style="margin-top:12px;font-size:11px;color:#888">Fecha de emisión: <strong>${fecha}</strong></div>
+    <div style="margin-top:6px;font-size:11px;color:#888">Fecha de emisión: <strong>${fecha}</strong></div>
   </div>
   <div><div class="ord-badge">${v.NumOrden||'ORD-?'}<span class="sub">N° de Orden</span></div></div>
 </div>
@@ -4586,9 +4684,10 @@ table.info td.lbl{font-weight:700;background:#fafafa;width:160px;color:#555;font
   <tr><td class="lbl">Empresa</td><td><strong>${v.Cliente||'—'}</strong></td><td class="lbl">País</td><td>${cli?.Pais||'—'}</td></tr>
   ${cli?.Contacto?`<tr><td class="lbl">Contacto</td><td>${cli.Contacto}</td><td class="lbl">Cargo</td><td>${cli.Cargo||'—'}</td></tr>`:''}
 </table></div>
-<div class="sect"><div class="sect-title">Producto solicitado</div>
+<div class="sect"><div class="sect-title">Producto${lineas.length>1?'s':''} solicitado${lineas.length>1?'s':''}</div>
 <table class="info">
-  <tr><td class="lbl">Producto</td><td><strong style="font-size:13px">${v.Producto||'—'}</strong></td><td class="lbl">Cantidad</td><td><strong style="font-size:13px">${v.CantidadTon||'—'} toneladas</strong></td></tr>
+  ${lineasHTML}
+  ${lineas.length>1?`<tr><td class="lbl">Total</td><td colspan="3"><strong style="font-size:14px">${v.CantidadTon||'—'} toneladas</strong></td></tr>`:''}
   ${v.Notas?`<tr><td class="lbl">Instrucciones / notas</td><td colspan="3">${v.Notas}</td></tr>`:''}
 </table></div>
 <div class="sign-row">
@@ -4601,6 +4700,61 @@ table.info td.lbl{font-weight:700;background:#fafafa;width:160px;color:#555;font
   const w=window.open('','_blank','width=860,height=720,scrollbars=yes');
   if(!w){alert('Permitir ventanas emergentes para generar el PDF.');return;}
   w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),700);
+}
+
+/* ═══════════════════════════════════════
+   EXCEL / CSV EXPORTS
+═══════════════════════════════════════ */
+function _downloadCSV(filename, rows){
+  const csv=rows.map(r=>r.map(c=>{
+    const s=String(c==null?'':c).replace(/"/g,'""');
+    return /[,"\n]/.test(s)?`"${s}"`:s;
+  }).join(',')).join('\n');
+  const bom='\uFEFF'; // UTF-8 BOM for Excel
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);
+}
+function exportInventarioExcel(){
+  const config=getBombonasConfig();
+  const rows=[['INVENTARIO DE ACEITUNAS — BOMBONAS']];
+  rows.push([]);
+  // Header row: Calibre + category/variedad columns + Total
+  const cols=[];config.categorias.forEach(cat=>cat.variedades.forEach(v=>cols.push({catLabel:cat.label,variedad:v,catId:cat.id})));
+  rows.push(['Calibre',...cols.map(c=>c.catLabel+' / '+c.variedad),'Total fila']);
+  config.calibres.forEach(calib=>{
+    const vals=cols.map(c=>getBombonasCell(c.catId,c.variedad,calib)||0);
+    rows.push([calib,...vals,vals.reduce((a,b)=>a+b,0)]);
+  });
+  // Totals row
+  const colTots=cols.map(c=>config.calibres.reduce((s,cal)=>s+getBombonasCell(c.catId,c.variedad,cal),0));
+  rows.push(['TOTAL',...colTots,colTots.reduce((a,b)=>a+b,0)]);
+  rows.push([]);
+  rows.push(['FERMENTADORES']);
+  rows.push(['Nombre','Variedad','Calibre','Kg estimados','Entamada','Notas']);
+  (DB.fermentadores||[]).forEach(f=>rows.push([f.nombre,f.variedad,f.calibre,f.kg||0,(f.entamada?'Sí':'No'),f.notas||'']));
+  rows.push([]);
+  rows.push(['INVENTARIO GENERAL (Tomate y otros)']);
+  rows.push(['Producto','Categoría','Stock actual','Unidad','Stock mínimo','Precio USD']);
+  (DB.inventario||[]).forEach(i=>rows.push([i.Producto,i.Categoria,i.StockActual,i.Unidad,i.StockMin,i.Precio]));
+  _downloadCSV('inventario_cazorla_'+new Date().toISOString().slice(0,10)+'.csv',rows);
+}
+function exportPrevisionExcel(){
+  const meses=getMesesForYear(_previsionYear);
+  const rows=[['PREVISIÓN DE VENTAS '+_previsionYear,'','','','','','','','','','','','','','','','']];
+  rows.push([]);
+  PRODUCTS.forEach(prod=>{
+    rows.push([prod.emoji+' '+prod.label]);
+    rows.push(['Cliente','País','Comercial','Fecha contacto',...meses.map(m=>'Proy '+m),...meses.map(m=>'Real '+m),'Total Proy','Total Real']);
+    Object.entries(prod.data).forEach(([pais,clientes])=>{
+      clientes.forEach(c=>{
+        const proy=Array(12).fill(0).map((_,i)=>c.proy?c.proy[i]||0:0);
+        const real=Array(12).fill(0).map((_,i)=>c.real?c.real[i]||0:0);
+        rows.push([c.nombre,pais,c.comercial||'',c.fecha||'',...proy,...real,proy.reduce((a,b)=>a+b,0),real.reduce((a,b)=>a+b,0)]);
+      });
+    });
+    rows.push([]);
+  });
+  _downloadCSV('prevision_cazorla_'+_previsionYear+'_'+new Date().toISOString().slice(0,10)+'.csv',rows);
 }
 </script>
 <!-- MODAL CONTACTO -->
