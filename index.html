@@ -1127,10 +1127,19 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="section" id="section-ventas">
     <div class="ph-row">
       <div><h1>Ventas</h1><p>Registro y seguimiento</p></div>
-      <button class="btn btn-primary" onclick="openCRMModal('venta')">+ Nueva venta</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="search-bar"><input type="text" placeholder="Buscar venta..." oninput="filterVentasSearch(this.value)"></div>
+        <button class="btn btn-primary" onclick="openCRMModal('venta')">+ Nueva venta</button>
+      </div>
+    </div>
+    <!-- Tabs de categoría -->
+    <div class="inv-maintabs" style="margin-bottom:16px">
+      <button class="inv-mtab active" id="vtab-todas"  onclick="setVentasTab('todas',this)">📋 Todas</button>
+      <button class="inv-mtab"        id="vtab-aceitunas" onclick="setVentasTab('aceitunas',this)">🫒 Aceitunas</button>
+      <button class="inv-mtab"        id="vtab-tomate"    onclick="setVentasTab('tomate',this)">🍅 Tomate</button>
     </div>
     <div class="cards-grid" id="ventas-stats"></div>
-    <div class="table-container">
+    <div class="table-container" id="ventas-table">
       <table><thead><tr>
         <th style="white-space:nowrap">Nº Orden</th>
         <th style="white-space:nowrap">Fecha</th>
@@ -2184,10 +2193,49 @@ function _ventaProductLabel(v){
   }catch{}
   return v.Producto||'—';
 }
+let _ventasTab='todas';
+const _TOMATE_PRODS=['pasta de tomate','passata','salsa','triturado','tomate'];
+const _ACEIT_PRODS=['aceituna','verde comercial','negra natural','negra acética','negra acetica'];
+function _ventaCategoria(v){
+  // Determine if venta belongs to tomate, aceitunas, or other
+  const prods=[];
+  try{ const ls=v.Lineas?JSON.parse(v.Lineas):null; if(ls&&ls.length) ls.forEach(l=>prods.push((l.producto||'').toLowerCase())); }catch{}
+  if(!prods.length) prods.push((v.Producto||'').toLowerCase());
+  const hasTom=prods.some(p=>_TOMATE_PRODS.some(t=>p.includes(t)));
+  const hasAce=prods.some(p=>_ACEIT_PRODS.some(a=>p.includes(a)));
+  if(hasTom&&!hasAce) return 'tomate';
+  if(hasAce&&!hasTom) return 'aceitunas';
+  if(hasTom&&hasAce) return 'mixta';
+  return 'otro';
+}
+function setVentasTab(tab, btn){
+  _ventasTab=tab;
+  document.querySelectorAll('#section-ventas .inv-mtab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderVentas();
+}
 function renderVentas(){
   const tb=document.getElementById('ventas-tbody');if(!tb)return;
-  if(!DB.ventas.length){tb.innerHTML='<tr><td colspan="11"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';return;}
-  tb.innerHTML=DB.ventas.map(v=>{
+  // Filter by tab
+  const all=DB.ventas||[];
+  const filtered=_ventasTab==='todas' ? all
+    : _ventasTab==='tomate'   ? all.filter(v=>['tomate','mixta'].includes(_ventaCategoria(v)))
+    : _ventasTab==='aceitunas'? all.filter(v=>['aceitunas','mixta'].includes(_ventaCategoria(v)))
+    : all;
+  // KPI cards per current filter
+  const totalUSD=filtered.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const confirmadas=filtered.filter(v=>['Confirmada','Despachada'].includes(v.Etapa));
+  const cobradas=filtered.filter(v=>v.Etapa==='Cobrada');
+  const hoy=new Date().toISOString().slice(0,10);
+  const vencidas=filtered.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa));
+  const statsEl=document.getElementById('ventas-stats');
+  if(statsEl) statsEl.innerHTML=`
+    <div class="stat-card"><div class="label">Total${_ventasTab!=='todas'?' '+(_ventasTab==='tomate'?'Tomate':'Aceitunas'):''}</div><div class="value">$${totalUSD.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="sub" style="color:var(--muted)">${filtered.length} ventas</div></div>
+    <div class="stat-card"><div class="label">Confirmadas</div><div class="value">${confirmadas.length}</div><div class="sub" style="color:var(--accent)">$${confirmadas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card"><div class="label">Cobradas</div><div class="value">${cobradas.length}</div><div class="sub" style="color:var(--green)">$${cobradas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+    <div class="stat-card" style="${vencidas.length?'border-color:var(--red)':''}"><div class="label">Cobros vencidos</div><div class="value" style="${vencidas.length?'color:var(--red)':''}">${vencidas.length}</div><div class="sub" style="color:var(--muted)">sin cobrar</div></div>`;
+  if(!filtered.length){tb.innerHTML=`<tr><td colspan="11"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas${_ventasTab!=='todas'?' de '+(_ventasTab==='tomate'?'Tomate':'Aceitunas'):''}</p></div></td></tr>`;return;}
+  tb.innerHTML=filtered.map(v=>{
     const venc=v.FechaVencimiento;
     const vencVencido=venc&&venc<new Date().toISOString().slice(0,10);
     const fpLabel=v.FormaPago||'—';
@@ -2197,8 +2245,12 @@ function renderVentas(){
     const flete=parseFloat(v.GastoFlete)||0;
     const neta=bruto-comision-flete;
     const netaHtml=bruto>0?`<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${neta>=0?'var(--green)':'var(--red)'}">$${neta.toLocaleString('es-AR',{maximumFractionDigits:0})}</span><div style="font-size:10px;color:var(--muted)">${comision>0?`−com $${comision.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''} ${flete>0?`−flete $${flete.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''}`.trim()+'</div>':`<span style="color:var(--muted)">—</span>`;
+    const vcat=_ventaCategoria(v);
+    const vcatBadge=vcat==='tomate'?'<span style="font-size:9px;background:#dc262622;color:#dc2626;border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🍅 Tom</span>'
+      :vcat==='aceitunas'?'<span style="font-size:9px;background:rgba(123,29,58,.12);color:var(--accent);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🫒 Ace</span>'
+      :vcat==='mixta'?'<span style="font-size:9px;background:#92400e22;color:#92400e;border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🔀 Mix</span>':'';
     return`<tr>
-    <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}</td>
+    <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}${_ventasTab==='todas'?'<br>'+vcatBadge:''}</td>
     <td style="font-family:var(--mono);font-size:11px">${v.Fecha||'—'}</td>
     <td><strong>${v.Cliente||'—'}</strong></td>
     <td>${_ventaProductLabel(v)}</td>
@@ -2217,6 +2269,10 @@ function renderVentas(){
 }
 function filterTable(id,q){
   const rows=document.querySelectorAll('#'+id+' tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
+}
+function filterVentasSearch(q){
+  const rows=document.querySelectorAll('#ventas-tbody tr');
   rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});
 }
 
