@@ -1123,8 +1123,8 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="cards-grid" id="ventas-stats"></div>
     <div class="table-container">
-      <table><thead><tr><th>Nº Orden</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total USD</th><th>F. Pago / Plazo</th><th>Vencimiento</th><th>Etapa</th><th style="width:90px"></th></tr></thead>
-      <tbody id="ventas-tbody"><tr><td colspan="10" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
+      <table><thead><tr><th>Nº Orden</th><th>Fecha</th><th>Cliente</th><th>Producto</th><th>Cantidad (kg)</th><th>Total USD</th><th>Venta Neta</th><th>F. Pago / Plazo</th><th>Vencimiento</th><th>Etapa</th><th style="width:90px"></th></tr></thead>
+      <tbody id="ventas-tbody"><tr><td colspan="11" class="loading">Iniciá sesión para cargar datos</td></tr></tbody></table>
     </div>
   </div>
 
@@ -1254,7 +1254,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="table-container">
       <table id="facturacion-table">
-        <thead><tr><th>Nº Factura</th><th>Cliente</th><th>País</th><th>Ref. OC</th><th>Producto</th><th>Cantidad</th><th>Monto</th><th>Cond. pago</th><th>Estado</th><th>Emisión</th><th>Vencimiento</th><th>Nota Crédito</th><th>Nota Débito</th><th></th></tr></thead>
+        <thead><tr><th>Nº Factura</th><th>Cliente</th><th>País</th><th>Ref. OC</th><th>Producto</th><th>Cantidad (kg)</th><th>Monto</th><th>Cond. pago</th><th>Facturación</th><th>Estado</th><th>Emisión</th><th>Vencimiento</th><th>Nota Créd.</th><th>Nota Déb.</th><th>Docs</th><th></th></tr></thead>
         <tbody id="facturacion-tbody"></tbody>
       </table>
     </div>
@@ -1629,9 +1629,9 @@ const HEADERS={
   Proyectos:['ID','Nombre','Cliente','Producto','ValorUSD','Etapa','Responsable','FechaInicio','FechaEstimada','Notas'],
   Tareas:['ID','Titulo','Descripcion','Asignado','Prioridad','Estado','FechaVenc'],
   Inventario:['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],
-  Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Comisionista','PorcentajeComision','Etapa','Responsable','Notas','Lineas'],
+  Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Comisionista','PorcentajeComision','GastoFlete','Etapa','Responsable','Notas','Lineas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
-  Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'],
+  Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','DiasVenc','EstadoFactura','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','FacturaFileId','FacturaFileName','FacturaTransFileId','FacturaTransFileName','Notas'],
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
   Novedades:['ID','Tipo','RefId','Fecha','Texto','Autor'],
@@ -2145,19 +2145,25 @@ function _ventaProductLabel(v){
 }
 function renderVentas(){
   const tb=document.getElementById('ventas-tbody');if(!tb)return;
-  if(!DB.ventas.length){tb.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';return;}
+  if(!DB.ventas.length){tb.innerHTML='<tr><td colspan="11"><div class="empty-state"><div class="icon">💰</div><p>Sin ventas</p></div></td></tr>';return;}
   tb.innerHTML=DB.ventas.map(v=>{
     const venc=v.FechaVencimiento;
     const vencVencido=venc&&venc<new Date().toISOString().slice(0,10);
     const fpLabel=v.FormaPago||'—';
     const plazoLabel=v.DiasPlayzo?` <span style="font-size:10px;color:var(--muted)">(${v.DiasPlayzo}d)</span>`:'';
+    const bruto=parseFloat(v.ValorUSD)||0;
+    const comision=bruto*((parseFloat(v.PorcentajeComision)||0)/100);
+    const flete=parseFloat(v.GastoFlete)||0;
+    const neta=bruto-comision-flete;
+    const netaHtml=bruto>0?`<span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${neta>=0?'var(--green)':'var(--red)'}">$${neta.toLocaleString('es-AR',{maximumFractionDigits:0})}</span><div style="font-size:10px;color:var(--muted)">${comision>0?`−com $${comision.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''} ${flete>0?`−flete $${flete.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''}`.trim()+'</div>':`<span style="color:var(--muted)">—</span>`;
     return`<tr>
     <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}</td>
     <td style="font-family:var(--mono);font-size:11px">${v.Fecha||'—'}</td>
     <td><strong>${v.Cliente||'—'}</strong></td>
     <td>${_ventaProductLabel(v)}</td>
-    <td style="font-family:var(--mono)">${v.CantidadTon||'—'} ton</td>
-    <td style="font-family:var(--mono)">$${(parseFloat(v.ValorUSD)||0).toLocaleString()}</td>
+    <td style="font-family:var(--mono)">${v.CantidadTon||'—'} kg</td>
+    <td style="font-family:var(--mono)">$${bruto.toLocaleString()}</td>
+    <td>${netaHtml}</td>
     <td style="font-size:11px">${fpLabel}${plazoLabel}</td>
     <td style="font-family:var(--mono);font-size:11px;color:${vencVencido?'var(--red)':venc?'var(--text)':'var(--muted)'}">${venc||'—'}</td>
     <td><span class="badge badge-blue">${v.Etapa||'—'}</span></td>
@@ -2181,9 +2187,9 @@ const FORMS={
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
   producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" data-smartlist="Categoría"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
-  venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-dias-row" style="display:none" class="form-row"><div class="form-group"><label>Días de plazo</label><input id="f-DiasPlayzo" type="number" min="1" step="1" placeholder="ej: 90" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-dias-row" style="display:none" class="form-row"><div class="form-group"><label>Días de plazo</label><input id="f-DiasPlayzo" type="number" min="1" step="1" placeholder="ej: 90" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0" oninput="calcVentaNeta()"></div></div><div class="form-row"><div class="form-group"><label>Gastos de flete (USD)</label><input id="f-GastoFlete" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcVentaNeta()"></div><div class="form-group" id="venta-neta-group" style="display:none"><label>Venta neta</label><div id="venta-neta-display" style="padding:6px 0"></div></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (ton)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (kg)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Días de plazo</label><input id="f-DiasVenc" type="number" min="1" step="1" placeholder="ej: 60" oninput="calcFacturaVencimiento()"></div></div><div class="form-row"><div class="form-group"><label>Estado facturación</label><select id="f-EstadoFactura"><option value="">— Seleccionar —</option><option>No facturado</option><option>Facturado</option><option>Cobro en prueba</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date" oninput="calcFacturaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📎 Documentos</div><input type="hidden" id="f-FacturaFileId"><input type="hidden" id="f-FacturaFileName"><input type="hidden" id="f-FacturaTransFileId"><input type="hidden" id="f-FacturaTransFileName"><div class="form-row"><div class="form-group"><label>Factura (PDF / imagen)</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-file-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-file-input\',\'f-FacturaFileId\',\'f-FacturaFileName\',\'factura-file-status\')">☁️ Drive</button></div><div id="factura-file-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div><div class="form-group"><label>Factura de transporte</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-trans-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-trans-input\',\'f-FacturaTransFileId\',\'f-FacturaTransFileName\',\'factura-trans-status\')">☁️ Drive</button></div><div id="factura-trans-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
 };
 const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas',calidad:'Calidad'};
@@ -2239,13 +2245,13 @@ function renderVentaLineasUI(){
   // Rebuild product options from SMART_LIST
   const prods=[...new Set([...((typeof SMART_LISTS!=='undefined'?SMART_LISTS.Producto:[])||[]),...(DB.inventario||[]).map(i=>i.Producto).filter(Boolean),...(typeof PRODUCTS!=='undefined'?PRODUCTS.map(p=>p.label):[])].filter(Boolean))];
   const opts=prods.map(p=>`<option value="${p}">${p}</option>`).join('');
-  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (ton)</th><th>USD/ton</th><th>Total</th><th></th></tr></thead><tbody>${
+  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (kg)</th><th>USD/kg</th><th>Total</th><th></th></tr></thead><tbody>${
     _vl.map((l,i)=>{
       const tot=(parseFloat(l.cantidadTon)||0)*(parseFloat(l.precioUSD)||0);
       return`<tr>
         <td><select onchange="updateVentaLinea(${i},'producto',this.value)"><option value="">— Seleccionar —</option>${opts.replace(`value="${l.producto}"`,`value="${l.producto}" selected`)}</select></td>
-        <td><input type="number" step="0.1" min="0" value="${l.cantidadTon||''}" placeholder="ton" oninput="updateVentaLinea(${i},'cantidadTon',this.value)"></td>
-        <td><input type="number" step="0.01" min="0" value="${l.precioUSD||''}" placeholder="$/ton" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
+        <td><input type="number" step="1" min="0" value="${l.cantidadTon||''}" placeholder="kg" oninput="updateVentaLinea(${i},'cantidadTon',this.value)"></td>
+        <td><input type="number" step="0.001" min="0" value="${l.precioUSD||''}" placeholder="$/kg" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
         <td class="vl-total-cell">${tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):''}</td>
         <td><button class="vl-remove" onclick="removeVentaLinea(${i})" title="Quitar línea" ${_vl.length<=1?'disabled':''}>✕</button></td>
       </tr>`;
@@ -2267,6 +2273,7 @@ function calcVentaLineasTotal(){
     fp.value=names.length>1?names.join(', '):(names[0]||'');
   }
   const fl=document.getElementById('f-Lineas');if(fl)fl.value=JSON.stringify(_vl);
+  calcVentaNeta();
   // Update total display box
   const box=document.getElementById('venta-total-display');
   const valEl=document.getElementById('venta-total-value');
@@ -2275,7 +2282,7 @@ function calcVentaLineasTotal(){
     if(totUSD>0){
       box.style.display='block';
       valEl.textContent='USD '+totUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-      detEl.textContent=totKg.toLocaleString('es-AR')+' ton · '+_vl.filter(l=>l.producto).map(l=>l.producto).join(' + ');
+      detEl.textContent=totKg.toLocaleString('es-AR')+' kg · '+_vl.filter(l=>l.producto).map(l=>l.producto).join(' + ');
     }else{box.style.display='none';}
   }
 }
@@ -2351,7 +2358,7 @@ function editRecord(type, id){
   if(type==='proyecto' || type==='tarea'){
     renderHistorialPanel(type, id);
   }
-  if(type==='venta') setTimeout(()=>{initVentaLineas(record?.Lineas||'');onFormaPagoChange();populateComisionistas(record?.Comisionista);}, 30);
+  if(type==='venta') setTimeout(()=>{initVentaLineas(record?.Lineas||'');onFormaPagoChange();populateComisionistas(record?.Comisionista);calcVentaNeta();}, 30);
 }
 
 /* Eliminar registro — borra en DB local Y en Google Sheets */
@@ -2993,11 +3000,14 @@ function autoCreateFactura(ventaRow){
     Monto: ventaRow.ValorUSD||'',
     Moneda: 'USD',
     CondPago: ventaRow.FormaPago||'',
+    DiasVenc: ventaRow.DiasPlayzo||'',
+    EstadoFactura: 'No facturado',
     Estado: 'Emitida',
     FechaEmision: ventaRow.Fecha||new Date().toISOString().slice(0,10),
-    FechaVencimiento: '',
+    FechaVencimiento: ventaRow.FechaVencimiento||'',
     NotaCredito: '',
     NotaDebito: '',
+    FacturaFileId:'',FacturaFileName:'',FacturaTransFileId:'',FacturaTransFileName:'',
     Notas: `Generada automáticamente desde venta ${ventaRow.NroOrden||ventaRow.ID}`
   };
   DB.facturas.push(factura);
@@ -3014,10 +3024,13 @@ function openEditFactura(facturaId){
   document.getElementById('modal-title').textContent = 'Editar Factura';
   document.getElementById('modal-body').innerHTML = cfg.fields;
   // fill values
-  ['NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','Notas'].forEach(k=>{
+  ['NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','DiasVenc','EstadoFactura','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','FacturaFileId','FacturaFileName','FacturaTransFileId','FacturaTransFileName','Notas'].forEach(k=>{
     const el=document.getElementById('f-'+k);
     if(el) el.value=f[k]||'';
   });
+  // Show existing file links if present
+  if(f.FacturaFileId){const s=document.getElementById('factura-file-status');if(s)s.innerHTML=`<a href="https://drive.google.com/file/d/${f.FacturaFileId}/view" target="_blank" style="color:var(--accent)">📄 ${f.FacturaFileName||'Ver archivo'}</a>`;}
+  if(f.FacturaTransFileId){const s=document.getElementById('factura-trans-status');if(s)s.innerHTML=`<a href="https://drive.google.com/file/d/${f.FacturaTransFileId}/view" target="_blank" style="color:var(--accent)">🚛 ${f.FacturaTransFileName||'Ver archivo'}</a>`;}
   document.getElementById('main-modal').classList.add('open');
 }
 
@@ -3793,14 +3806,36 @@ function renderFacturacion(){
   const montoCob=DB.facturas.filter(f=>f.Estado==='Cobrada').reduce((a,f)=>a+(parseFloat(f.Monto)||0),0);
   document.getElementById('facturacion-stats').innerHTML=stat('Total facturas',total,total+' emitidas','')+stat('Pendiente cobro','USD '+montoPend.toLocaleString('es-AR',{minimumFractionDigits:0}),pendiente+' facturas','accent-yellow')+stat('Vencidas',vencidas,'requieren seguimiento','accent-red')+stat('Cobradas',cobradas,'facturas','accent-green')+stat('Total cobrado','USD '+montoCob.toLocaleString('es-AR',{minimumFractionDigits:0}),'acumulado','accent-blue');
   const tb=document.getElementById('facturacion-tbody'),today_ms=today.getTime();
-  if(!data.length){tb.innerHTML=`<tr><td colspan="12"><div class="empty-state"><div class="icon">🧾</div><p>Sin facturas${filter!=='all'?' en este estado':''}</p></div></td></tr>`;return;}
+  if(!data.length){tb.innerHTML=`<tr><td colspan="16"><div class="empty-state"><div class="icon">🧾</div><p>Sin facturas${filter!=='all'?' en este estado':''}</p></div></td></tr>`;return;}
   tb.innerHTML=data.map(f=>{
     const venc_ms=f.FechaVencimiento?new Date(f.FechaVencimiento).getTime():null;
     const isOverdue=venc_ms&&today_ms>venc_ms&&f.Estado!=='Cobrada'&&f.Estado!=='Anulada';
     const montoFmt=f.Monto?`<span class="amount-cell ${f.Estado==='Cobrada'?'positive':isOverdue?'negative':'pending'}">${f.Moneda||'USD'} ${parseFloat(f.Monto).toLocaleString()}</span>`:'—';
     const ncFmt=f.NotaCredito?`<span style="color:var(--green);font-size:11px;font-family:var(--mono)">${f.NotaCredito}</span>`:'<span style="color:var(--muted)">—</span>';
     const ndFmt=f.NotaDebito?`<span style="color:var(--red);font-size:11px;font-family:var(--mono)">${f.NotaDebito}</span>`:'<span style="color:var(--muted)">—</span>';
-    return`<tr class="${isOverdue?'overdue':''}"><td><span style="font-family:var(--mono);font-weight:600;color:var(--accent)">${f.NumFactura||'—'}</span></td><td><strong>${f.Cliente||'—'}</strong></td><td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td><td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td><td>${f.Producto||'—'}</td><td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' ton':'—'}</td><td>${montoFmt}</td><td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}</td><td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td><td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td><td>${ncFmt}</td><td>${ndFmt}</td><td class="row-actions"><button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')">🗑</button></td></tr>`;
+    const estFact=f.EstadoFactura||'';
+    const estFactColor=estFact==='Facturado'?'var(--green)':estFact==='Cobro en prueba'?'var(--yellow)':'var(--muted)';
+    const docsFmt=[
+      f.FacturaFileId?`<a href="https://drive.google.com/file/d/${f.FacturaFileId}/view" target="_blank" title="${f.FacturaFileName||'Factura'}" style="font-size:11px;color:var(--accent);text-decoration:none">📄 FAC</a>`:'',
+      f.FacturaTransFileId?`<a href="https://drive.google.com/file/d/${f.FacturaTransFileId}/view" target="_blank" title="${f.FacturaTransFileName||'Transporte'}" style="font-size:11px;color:var(--accent);text-decoration:none">🚛 TRP</a>`:''
+    ].filter(Boolean).join(' ') || '<span style="color:var(--muted)">—</span>';
+    return`<tr class="${isOverdue?'overdue':''}">
+      <td><span style="font-family:var(--mono);font-weight:600;color:var(--accent)">${f.NumFactura||'—'}</span></td>
+      <td><strong>${f.Cliente||'—'}</strong></td>
+      <td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td>
+      <td>${f.Producto||'—'}</td>
+      <td style="font-family:var(--mono)">${f.Cantidad?f.Cantidad+' kg':'—'}</td>
+      <td>${montoFmt}</td>
+      <td style="font-size:12px;color:var(--muted)">${f.CondPago||'—'}${f.DiasVenc?` <span style="font-size:10px">(${f.DiasVenc}d)</span>`:''}</td>
+      <td style="font-size:11px;color:${estFactColor};font-weight:600">${estFact||'—'}</td>
+      <td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td>
+      <td style="font-family:var(--mono);font-size:11px">${f.FechaEmision||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td>
+      <td>${ncFmt}</td><td>${ndFmt}</td>
+      <td>${docsFmt}</td>
+      <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')">🗑</button></td>
+    </tr>`;
   }).join('');
 }
 function stat(label,value,sub,accent){return`<div class="mod-stat ${accent}"><div class="ms-label">${label}</div><div class="ms-value">${value}</div><div class="ms-sub">${sub}</div></div>`;}
@@ -4916,6 +4951,58 @@ function calcFechaVencimiento(){
   d.setDate(d.getDate()+dias);
   const fv=document.getElementById('f-FechaVencimiento');
   if(fv)fv.value=d.toISOString().slice(0,10);
+}
+function calcFacturaVencimiento(){
+  const fecha=(document.getElementById('f-FechaEmision')?.value)||'';
+  const dias=parseInt(document.getElementById('f-DiasVenc')?.value)||0;
+  if(!fecha||!dias)return;
+  const d=new Date(fecha+'T00:00:00');
+  d.setDate(d.getDate()+dias);
+  const fv=document.getElementById('f-FechaVencimiento');
+  if(fv)fv.value=d.toISOString().slice(0,10);
+}
+function calcVentaNeta(){
+  const bruto=parseFloat(document.getElementById('f-ValorUSD')?.value)||0;
+  const comPct=parseFloat(document.getElementById('f-PorcentajeComision')?.value)||0;
+  const flete=parseFloat(document.getElementById('f-GastoFlete')?.value)||0;
+  const comision=bruto*(comPct/100);
+  const neta=bruto-comision-flete;
+  const grp=document.getElementById('venta-neta-group');
+  const disp=document.getElementById('venta-neta-display');
+  if(!grp||!disp)return;
+  if(bruto>0){
+    grp.style.display='';
+    const parts=[];
+    if(comision>0)parts.push(`−com $${comision.toLocaleString('es-AR',{maximumFractionDigits:0})}`);
+    if(flete>0)parts.push(`−flete $${flete.toLocaleString('es-AR',{maximumFractionDigits:0})}`);
+    disp.innerHTML=`<span style="font-size:18px;font-weight:800;font-family:var(--mono);color:${neta>=0?'var(--green)':'var(--red)'}">USD ${neta.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>`+(parts.length?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${parts.join(' ')}</div>`:'');
+  }else{grp.style.display='none';}
+}
+async function uploadFacturaFile(fileInputId,fileIdFieldId,fileNameFieldId,statusId){
+  const input=document.getElementById(fileInputId);
+  if(!input||!input.files.length){alert('Seleccioná un archivo primero.');return;}
+  const file=input.files[0];
+  if(!token){alert('Necesitás iniciar sesión con Google para subir archivos a Drive.');return;}
+  const statusEl=document.getElementById(statusId);
+  if(statusEl)statusEl.innerHTML='<span style="color:var(--muted)">Subiendo...</span>';
+  try{
+    const metadata={name:file.name,mimeType:file.type||'application/octet-stream'};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+    form.append('file',file);
+    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+token},body:form});
+    const data=await res.json();
+    if(data.id){
+      const idEl=document.getElementById(fileIdFieldId);if(idEl)idEl.value=data.id;
+      const nmEl=document.getElementById(fileNameFieldId);if(nmEl)nmEl.value=file.name;
+      if(statusEl)statusEl.innerHTML=`<a href="${data.webViewLink||'https://drive.google.com/file/d/'+data.id+'/view'}" target="_blank" style="color:var(--green)">✅ ${file.name}</a>`;
+    }else{
+      if(statusEl)statusEl.innerHTML='<span style="color:var(--red)">Error al subir</span>';
+      console.error('Drive upload error:',data);
+    }
+  }catch(e){
+    if(statusEl)statusEl.innerHTML='<span style="color:var(--red)">Error: '+e.message+'</span>';
+  }
 }
 function populateComisionistas(selected=''){
   const sel=document.getElementById('f-Comisionista');if(!sel)return;
