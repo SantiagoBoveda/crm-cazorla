@@ -595,6 +595,12 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .inv-stab.active{background:rgba(123,29,58,.1);border-color:var(--accent);color:var(--accent)}
 .inv-subpanel{display:none}.inv-subpanel.active{display:block}
 .inv-tomsub-panel{display:none}.inv-tomsub-panel.active{display:block}
+#cotiz-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+#cotiz-modal-overlay.open{display:flex}
+#cotiz-modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(44,13,28,.25)}
+.cotiz-linea-row td{padding:4px 6px;vertical-align:middle}
+.cotiz-linea-row input,.cotiz-linea-row select{width:100%;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;box-sizing:border-box}
+.cotiz-linea-row input:focus,.cotiz-linea-row select:focus{border-color:var(--accent);outline:none}
 .olive-section-sep{border-top:1px solid var(--border);margin:24px 0 18px}
 .olive-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .olive-section-hdr>span{font-size:13px;font-weight:700;color:var(--accent)}
@@ -846,7 +852,11 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="prod-modal">
     <div class="modal-header">
       <div class="modal-title">⚙️ Gestionar productos</div>
-      <button class="modal-close" onclick="closeProdModal()">✕</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="resetPrevisionProducts()">↺ Defaults</button>
+        <button class="btn btn-outline btn-sm" onclick="closeProdModal()">Cerrar</button>
+        <button class="modal-close" onclick="closeProdModal()">✕</button>
+      </div>
     </div>
     <div class="prod-list" id="prod-list"></div>
     <hr class="modal-divider">
@@ -911,6 +921,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="nav-item" onclick="showSection('clientes',this)"><span class="icon">👥</span><span>Clientes</span></div>
   <div class="nav-item" onclick="showSection('contactos',this)"><span class="icon">📇</span><span>Contactos</span></div>
   <div class="nav-item" onclick="showSection('proyectos',this)"><span class="icon">📁</span><span>Proyectos</span></div>
+  <div class="nav-item" onclick="showSection('cotizaciones',this)"><span class="icon">📝</span><span>Cotizaciones</span></div>
   <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
   <div class="nav-item" onclick="showSection('inventario',this)"><span class="icon">📦</span><span>Inventario</span></div>
   <div class="nav-item" onclick="showSection('ventas',this)"><span class="icon">💰</span><span>Ventas</span></div>
@@ -1013,6 +1024,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       <div><h1>📇 Contactos</h1><p>Agenda de personas · vinculada a clientes</p></div>
       <div class="ph-right">
         <div class="search-bar"><input type="text" id="contactos-search" placeholder="Buscar contacto..." oninput="filterContactos(this.value)"></div>
+        <button class="btn btn-outline btn-sm" onclick="syncContactsFromClientes()" style="margin-right:6px">🔄 Sync desde clientes</button>
         <button class="btn btn-primary" onclick="openContactModal()">+ Nuevo contacto</button>
       </div>
     </div>
@@ -1123,6 +1135,104 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       <div class="table-container">
         <table><thead><tr><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mín.</th><th>Unidad</th><th>Precio</th><th style="width:70px"></th></tr></thead>
         <tbody id="inventario-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- COTIZACIONES -->
+  <div class="section" id="section-cotizaciones">
+    <div class="ph-row">
+      <div><h1>📝 Cotizaciones</h1><p>Presupuestos y propuestas comerciales</p></div>
+      <button class="btn btn-primary" onclick="openCotizacionModal()">+ Nueva cotización</button>
+    </div>
+    <div class="cards-grid" id="cotiz-stats"></div>
+    <div class="table-container" style="overflow-x:auto">
+      <table><thead><tr>
+        <th style="white-space:nowrap">Nº Cotiz.</th>
+        <th style="white-space:nowrap">Fecha</th>
+        <th>Cliente</th>
+        <th>País</th>
+        <th>Incoterm</th>
+        <th>Moneda</th>
+        <th style="white-space:nowrap">Total</th>
+        <th>Idioma</th>
+        <th>Estado</th>
+        <th style="width:90px"></th>
+      </tr></thead>
+      <tbody id="cotiz-tbody"><tr><td colspan="10"><div class="empty-state"><div class="icon">📝</div><p>Sin cotizaciones</p></div></td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- MODAL COTIZACION -->
+  <div class="modal-overlay" id="cotiz-modal-overlay" onclick="if(event.target===this)closeCotizacionModal()">
+    <div class="modal" style="max-width:720px;width:95%" id="cotiz-modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h2 id="cotiz-modal-title" style="font-size:18px;font-weight:700">Nueva Cotización</h2>
+        <button onclick="closeCotizacionModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
+      </div>
+      <div id="cotiz-modal-body">
+        <div class="form-row">
+          <div class="form-group"><label>Nº Cotización</label><input id="cz-num" readonly style="background:var(--surface2);font-family:var(--mono);font-weight:700;color:var(--accent)"></div>
+          <div class="form-group"><label>Fecha</label><input id="cz-fecha" type="date"></div>
+          <div class="form-group"><label>Validez (días)</label><input id="cz-validez" type="number" min="1" value="30" placeholder="30"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Cliente *</label><input id="cz-cliente" list="cz-client-list" autocomplete="off" placeholder="Seleccionar o escribir"><datalist id="cz-client-list"></datalist></div>
+          <div class="form-group"><label>País</label><input id="cz-pais" list="cz-pais-list" autocomplete="off" placeholder="Argentina, España..."><datalist id="cz-pais-list"><option value="Argentina"><option value="España"><option value="Brasil"><option value="Uruguay"><option value="Paraguay"><option value="Australia"><option value="Portugal"></datalist></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Condición de venta (Incoterm)</label>
+            <select id="cz-condicion" onchange="onCotizIncotermChange()">
+              <option value="FCA">FCA – Free Carrier</option>
+              <option value="FOB">FOB – Free On Board</option>
+              <option value="CFR">CFR – Cost &amp; Freight</option>
+              <option value="DDP">DDP – Delivered Duty Paid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="cz-ubicacion-lbl">Lugar de entrega (FCA)</label>
+            <input id="cz-ubicacion" placeholder="Ciudad / Puerto / Dirección">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Moneda</label><select id="cz-moneda" onchange="updateCotizTotal()"><option value="USD">USD – Dólar</option><option value="EUR">EUR – Euro</option></select></div>
+          <div class="form-group"><label>Idioma del PDF</label><select id="cz-idioma"><option value="es">🇦🇷 Español</option><option value="en">🇬🇧 Inglés</option><option value="pt">🇧🇷 Portugués</option></select></div>
+          <div class="form-group"><label>Responsable</label><input id="cz-responsable" list="cz-resp-list" autocomplete="off"><datalist id="cz-resp-list"><option value="Santiago"><option value="Alfonso"></datalist></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <label style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Líneas de producto</label>
+            <button type="button" class="btn btn-outline btn-sm" onclick="addCotizLinea()">＋ Agregar línea</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="border-bottom:2px solid var(--border)">
+                <th style="padding:6px 8px;text-align:left;color:var(--muted);font-weight:600">Descripción</th>
+                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:80px">Cant.</th>
+                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:100px">Unidad</th>
+                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:110px">Precio unit.</th>
+                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:110px">Subtotal</th>
+                <th style="width:32px"></th>
+              </tr></thead>
+              <tbody id="cotiz-lineas-body"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:2px solid var(--accent)">
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Total</div>
+              <div id="cotiz-total-display" style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Estado</label><select id="cz-estado"><option>Borrador</option><option>Enviada</option><option>Aceptada</option><option>Rechazada</option><option>Vencida</option></select></div>
+          <div class="form-group"><label>Notas internas</label><input id="cz-notas" placeholder="Observaciones..."></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+        <button class="btn btn-outline" onclick="closeCotizacionModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveCotizacion()">💾 Guardar</button>
       </div>
     </div>
   </div>
@@ -1465,7 +1575,7 @@ function getActiveClientId(){
   return DEFAULT_CLIENT_ID;
 }
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null,comisionistas:[]};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null,comisionistas:[],cotizaciones:[]};
 let currentCRMModal=null;
 
 const LS_KEY = 'crm_cazorla_db';
@@ -1729,6 +1839,7 @@ const HEADERS={
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
   Novedades:['ID','Tipo','RefId','Fecha','Texto','Autor'],
+  Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','Lineas','ValorTotal'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11']
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
@@ -1852,6 +1963,7 @@ function showSection(id,el){
   else if(id==='proyectos')renderProyectos();
   else if(id==='tareas')renderTareas();
   else if(id==='inventario')renderInventario();
+  else if(id==='cotizaciones')renderCotizaciones();
   else if(id==='ventas')renderVentas();
   else if(id==='prevision'){renderTabs();renderAll();}
   else if(id==='proveedores')renderProvGrid();
@@ -1877,6 +1989,202 @@ function _computeOliveStock(tipo){
   const kgFerm=ferms.reduce((s,f)=>s+(parseFloat(f.kg)||0),0);
   return{bombonas:totalBombonas,kgBombonas:totalKgBombonas,fermentadores:ferms.length,kgFerm,totalKg:totalKgBombonas+kgFerm,totalTon:(totalKgBombonas+kgFerm)/1000};
 }
+/* ═══════════════════════════════════════
+   COTIZACIONES
+═══════════════════════════════════════ */
+let _editingCotizId=null;
+let _cotizLineas=[];
+
+function generateNroCotizacion(){
+  const yr=new Date().getFullYear();
+  const prefix='COT-'+yr+'-';
+  const nums=(DB.cotizaciones||[]).map(c=>(c.NroCotizacion||'')).filter(n=>n.startsWith(prefix)).map(n=>parseInt(n.slice(prefix.length))||0);
+  return prefix+String(Math.max(0,...nums)+1).padStart(2,'0');
+}
+function onCotizIncotermChange(){
+  const v=document.getElementById('cz-condicion')?.value||'FCA';
+  const lbl=document.getElementById('cz-ubicacion-lbl');
+  if(!lbl)return;
+  const labels={FCA:'Lugar de entrega (FCA)',FOB:'Puerto de embarque (FOB)',CFR:'Puerto de destino (CFR)',DDP:'Lugar de destino (DDP)'};
+  lbl.textContent=labels[v]||'Ubicación';
+}
+function addCotizLinea(l){
+  _cotizLineas.push(l||{desc:'',cantidad:1,unidad:'ton',precio:0});
+  renderCotizLineas();
+}
+function removeCotizLinea(i){_cotizLineas.splice(i,1);renderCotizLineas();}
+function updateCotizLinea(i,field,val){
+  if(!_cotizLineas[i])return;
+  _cotizLineas[i][field]=(field==='cantidad'||field==='precio')?parseFloat(val)||0:val;
+  const tr=document.getElementById('czl-'+i);
+  if(tr){const sub=tr.querySelector('.czl-sub');if(sub)sub.textContent=(_cotizLineas[i].cantidad*_cotizLineas[i].precio).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  updateCotizTotal();
+}
+function updateCotizTotal(){
+  const total=_cotizLineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
+  const mon=document.getElementById('cz-moneda')?.value||'USD';
+  const el=document.getElementById('cotiz-total-display');
+  if(el)el.textContent=mon+' '+total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return total;
+}
+function renderCotizLineas(){
+  const tbody=document.getElementById('cotiz-lineas-body');if(!tbody)return;
+  const units=['unidad','kg','ton','bombona','caja','pallet'];
+  tbody.innerHTML=_cotizLineas.map((l,i)=>`
+    <tr class="cotiz-linea-row" id="czl-${i}" style="border-bottom:1px solid var(--border)">
+      <td><input value="${(l.desc||'').replace(/"/g,'&quot;')}" oninput="updateCotizLinea(${i},'desc',this.value)" placeholder="Producto / descripción"></td>
+      <td><input type="number" value="${l.cantidad}" min="0" step="0.001" oninput="updateCotizLinea(${i},'cantidad',this.value)" style="text-align:center"></td>
+      <td><select onchange="updateCotizLinea(${i},'unidad',this.value)">${units.map(u=>`<option value="${u}"${u===l.unidad?' selected':''}>${u}</option>`).join('')}</select></td>
+      <td><input type="number" value="${l.precio}" min="0" step="0.01" oninput="updateCotizLinea(${i},'precio',this.value)" style="text-align:right"></td>
+      <td style="text-align:right;font-family:var(--mono);font-weight:700;font-size:12px" class="czl-sub">${(l.cantidad*l.precio).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td><button type="button" onclick="removeCotizLinea(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px">✕</button></td>
+    </tr>`).join('');
+  updateCotizTotal();
+}
+function openCotizacionModal(id){
+  _editingCotizId=id||null;
+  const cotiz=id?(DB.cotizaciones||[]).find(c=>c.ID===id):null;
+  _cotizLineas=[];
+  if(cotiz){try{_cotizLineas=JSON.parse(cotiz.Lineas||'[]');}catch{_cotizLineas=[];}}
+  if(!_cotizLineas.length)_cotizLineas=[{desc:'',cantidad:1,unidad:'ton',precio:0}];
+  document.getElementById('cotiz-modal-title').textContent=id?'Editar Cotización':'Nueva Cotización';
+  document.getElementById('cz-num').value=cotiz?.NroCotizacion||generateNroCotizacion();
+  document.getElementById('cz-fecha').value=cotiz?.Fecha||new Date().toISOString().slice(0,10);
+  document.getElementById('cz-validez').value=cotiz?.ValidezDias||'30';
+  document.getElementById('cz-cliente').value=cotiz?.Cliente||'';
+  document.getElementById('cz-pais').value=cotiz?.Pais||'';
+  document.getElementById('cz-condicion').value=cotiz?.Condicion||'FCA';
+  document.getElementById('cz-ubicacion').value=cotiz?.Ubicacion||'';
+  document.getElementById('cz-moneda').value=cotiz?.Moneda||'USD';
+  document.getElementById('cz-idioma').value=cotiz?.Idioma||'es';
+  document.getElementById('cz-responsable').value=cotiz?.Responsable||'';
+  document.getElementById('cz-estado').value=cotiz?.Estado||'Borrador';
+  document.getElementById('cz-notas').value=cotiz?.Notas||'';
+  const dl=document.getElementById('cz-client-list');
+  if(dl)dl.innerHTML=[...new Set((DB.clientes||[]).map(c=>c.Empresa).filter(Boolean))].map(e=>`<option value="${e}">`).join('');
+  onCotizIncotermChange();
+  renderCotizLineas();
+  document.getElementById('cotiz-modal-overlay').classList.add('open');
+}
+function closeCotizacionModal(){
+  document.getElementById('cotiz-modal-overlay').classList.remove('open');
+  _editingCotizId=null;_cotizLineas=[];
+}
+function saveCotizacion(){
+  const num=document.getElementById('cz-num').value;
+  const cliente=document.getElementById('cz-cliente').value.trim();
+  if(!cliente){document.getElementById('cz-cliente').focus();alert('Ingresá el nombre del cliente.');return;}
+  const total=_cotizLineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
+  const row={
+    ID:_editingCotizId||genId(),
+    NroCotizacion:num,
+    Fecha:document.getElementById('cz-fecha').value,
+    ValidezDias:document.getElementById('cz-validez').value,
+    Cliente:cliente,
+    Pais:document.getElementById('cz-pais').value,
+    Condicion:document.getElementById('cz-condicion').value,
+    Ubicacion:document.getElementById('cz-ubicacion').value,
+    Moneda:document.getElementById('cz-moneda').value,
+    Idioma:document.getElementById('cz-idioma').value,
+    Responsable:document.getElementById('cz-responsable').value,
+    Estado:document.getElementById('cz-estado').value,
+    Notas:document.getElementById('cz-notas').value,
+    Lineas:JSON.stringify(_cotizLineas),
+    ValorTotal:total
+  };
+  if(!DB.cotizaciones)DB.cotizaciones=[];
+  if(_editingCotizId){
+    const idx=DB.cotizaciones.findIndex(c=>c.ID===_editingCotizId);
+    if(idx>=0)DB.cotizaciones[idx]=row;else DB.cotizaciones.push(row);
+  }else{
+    DB.cotizaciones.push(row);
+    // Auto-crear cliente si no existe
+    if(!(DB.clientes||[]).find(c=>(c.Empresa||'').toLowerCase()===cliente.toLowerCase())){
+      DB.clientes.push({ID:genId(),Empresa:cliente,Pais:row.Pais||'',Estado:'Prospecto',UltimaInteraccion:row.Fecha||''});
+    }
+  }
+  saveLocal();closeCotizacionModal();renderCotizaciones();renderDashboard();
+}
+function deleteCotizacion(id){
+  const c=(DB.cotizaciones||[]).find(x=>x.ID===id);
+  if(!c||!confirm(`¿Eliminar cotización ${c.NroCotizacion||id}?`))return;
+  DB.cotizaciones=DB.cotizaciones.filter(x=>x.ID!==id);
+  saveLocal();renderCotizaciones();renderDashboard();
+}
+function renderCotizaciones(){
+  const tb=document.getElementById('cotiz-tbody');if(!tb)return;
+  const data=DB.cotizaciones||[];
+  const stats=document.getElementById('cotiz-stats');
+  if(stats){
+    const env=data.filter(c=>c.Estado==='Enviada').length,ace=data.filter(c=>c.Estado==='Aceptada').length;
+    const totalAce=data.filter(c=>c.Estado==='Aceptada').reduce((s,c)=>s+(parseFloat(c.ValorTotal)||0),0);
+    stats.innerHTML=`
+      <div class="stat-card"><div class="label">Total cotizaciones</div><div class="value">${data.length}</div></div>
+      <div class="stat-card"><div class="label">Enviadas</div><div class="value">${env}</div></div>
+      <div class="stat-card"><div class="label">Aceptadas</div><div class="value">${ace}</div></div>
+      <div class="stat-card"><div class="label">USD aceptado</div><div class="value">$${totalAce.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>`;
+  }
+  if(!data.length){tb.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="icon">📝</div><p>Sin cotizaciones</p></div></td></tr>';return;}
+  const eB=e=>({Borrador:'badge-blue',Enviada:'badge-yellow',Aceptada:'badge-green',Rechazada:'badge-red',Vencida:'badge-red'}[e]||'badge-blue');
+  const lF=l=>({es:'🇦🇷',en:'🇬🇧',pt:'🇧🇷'}[l]||'🌐');
+  tb.innerHTML=[...data].sort((a,b)=>(b.Fecha||'').localeCompare(a.Fecha||'')).map(c=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${c.NroCotizacion||'—'}</td>
+    <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${c.Fecha||'—'}</td>
+    <td><strong>${c.Cliente||'—'}</strong></td>
+    <td style="font-size:12px;color:var(--muted)">${c.Pais||'—'}</td>
+    <td style="font-size:12px;white-space:nowrap"><strong>${c.Condicion||'—'}</strong>${c.Ubicacion?` <span style="color:var(--muted);font-size:11px">· ${c.Ubicacion}</span>`:''}</td>
+    <td style="font-family:var(--mono);font-size:11px">${c.Moneda||'USD'}</td>
+    <td style="font-family:var(--mono);font-weight:700;white-space:nowrap">${c.Moneda||'USD'} ${(parseFloat(c.ValorTotal)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    <td style="font-size:14px;text-align:center">${lF(c.Idioma)}</td>
+    <td><span class="badge ${eB(c.Estado)}">${c.Estado||'—'}</span></td>
+    <td class="row-actions">
+      <button class="btn-row-edit" onclick="openCotizacionModal('${c.ID}')">✏️</button>
+      <button class="btn-row-edit" onclick="generarCotizacionPDF('${c.ID}')" title="PDF">📄</button>
+      <button class="btn-row-del" onclick="deleteCotizacion('${c.ID}')">🗑</button>
+    </td>
+  </tr>`).join('');
+}
+function generarCotizacionPDF(id){
+  const c=(DB.cotizaciones||[]).find(x=>x.ID===id);if(!c)return;
+  const lang=c.Idioma||'es';
+  let lineas=[];try{lineas=JSON.parse(c.Lineas||'[]');}catch{}
+  const T={
+    es:{title:'COTIZACIÓN',to:'Señores',date:'Fecha',validity:'Válida hasta',delivery:'Condición de venta',place:'Lugar',currency:'Moneda',desc:'Descripción',qty:'Cantidad',unit:'Unidad',unitPrice:'Precio unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observaciones',footer:'Cotización válida por el período indicado. Precios no incluyen impuestos locales salvo indicación.',responsible:'Responsable',units:{unidad:'Unidad',kg:'Kilogramo',ton:'Tonelada',bombona:'Bombona',caja:'Caja',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
+    en:{title:'QUOTATION',to:'Dear',date:'Date',validity:'Valid until',delivery:'Delivery Terms',place:'Location',currency:'Currency',desc:'Description',qty:'Quantity',unit:'Unit',unitPrice:'Unit Price',subtotal:'Subtotal',total:'TOTAL',notes:'Notes',footer:'This quotation is valid for the indicated period. Prices exclude local taxes unless otherwise stated.',responsible:'Contact',units:{unidad:'Unit',kg:'Kilogram',ton:'Ton',bombona:'Barrel',caja:'Box',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
+    pt:{title:'COTAÇÃO',to:'Prezados',date:'Data',validity:'Válida até',delivery:'Condição de entrega',place:'Local',currency:'Moeda',desc:'Descrição',qty:'Quantidade',unit:'Unidade',unitPrice:'Preço unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observações',footer:'Cotação válida pelo período indicado. Preços excluem impostos locais salvo indicação.',responsible:'Responsável',units:{unidad:'Unidade',kg:'Quilograma',ton:'Tonelada',bombona:'Bombona',caja:'Caixa',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}}
+  };
+  const t=T[lang]||T.es;
+  const validUntil=c.Fecha&&c.ValidezDias?new Date(new Date(c.Fecha).getTime()+parseInt(c.ValidezDias)*86400000).toISOString().slice(0,10):'—';
+  const total=lineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
+  const mon=c.Moneda||'USD';
+  const baseDir=window.location.href.replace(/[^/\\]*$/,'');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t.title} ${c.NroCotizacion||''}</title>
+<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:0}.page{padding:40px 50px;max-width:800px;margin:0 auto}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #7b1d3a}.doc-title{font-size:26px;font-weight:800;color:#7b1d3a;letter-spacing:1px}.doc-num{font-size:14px;color:#555;margin-top:4px;font-weight:600}.to-block{background:#f9f6f7;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:4px solid #7b1d3a}.to-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#7b1d3a;font-weight:700}.to-val{font-size:15px;font-weight:700;margin-top:4px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;background:#f9f6f7;border-radius:8px;padding:14px;margin-bottom:20px}.mi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600}.mi .val{font-size:13px;font-weight:600;color:#222;margin-top:2px}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#7b1d3a;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}tbody tr:nth-child(even){background:#fdf8f9}tbody td{padding:9px 12px;border-bottom:1px solid #e8dfe2}.num{text-align:right;font-family:monospace}.tr-total{background:#7b1d3a!important}.tr-total td{color:#fff;font-weight:800;font-size:14px;padding:12px;font-family:monospace}.notes-box{background:#fff8f4;border:1px solid #e8dfe2;border-radius:6px;padding:12px 16px;font-size:11px;color:#555;margin-bottom:20px}.footer{text-align:center;font-size:10px;color:#999;border-top:1px solid #e8dfe2;padding-top:12px;margin-top:20px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+</head><body><div class="page">
+<div class="hdr">
+  <div><img src="${baseDir}logo_cazorla.png" height="55" onerror="this.style.display='none'"><div style="font-size:16px;font-weight:800;color:#7b1d3a;margin-top:4px">GRUPO CAZORLA</div></div>
+  <div style="text-align:right"><div class="doc-title">${t.title}</div><div class="doc-num">${c.NroCotizacion||''}</div></div>
+</div>
+<div class="to-block"><div class="to-lbl">${t.to}</div><div class="to-val">${c.Cliente||'—'}</div>${c.Pais?`<div style="color:#666;font-size:12px">${c.Pais}</div>`:''}</div>
+<div class="meta">
+  <div class="mi"><div class="lbl">${t.date}</div><div class="val">${c.Fecha||'—'}</div></div>
+  <div class="mi"><div class="lbl">${t.validity}</div><div class="val">${validUntil}</div></div>
+  <div class="mi"><div class="lbl">${t.currency}</div><div class="val">${mon}</div></div>
+  <div class="mi"><div class="lbl">${t.delivery}</div><div class="val">${t.inco[c.Condicion]||c.Condicion||'—'}</div></div>
+  <div class="mi"><div class="lbl">${t.place}</div><div class="val">${c.Ubicacion||'—'}</div></div>
+  ${c.Responsable?`<div class="mi"><div class="lbl">${t.responsible}</div><div class="val">${c.Responsable}</div></div>`:''}
+</div>
+<table><thead><tr><th>${t.desc}</th><th style="text-align:center">${t.qty}</th><th style="text-align:center">${t.unit}</th><th style="text-align:right">${t.unitPrice}</th><th style="text-align:right">${t.subtotal}</th></tr></thead>
+<tbody>
+${lineas.map(l=>`<tr><td>${l.desc||'—'}</td><td class="num">${(l.cantidad||0).toLocaleString('es-AR',{maximumFractionDigits:3})}</td><td style="text-align:center">${t.units[l.unidad]||l.unidad||'—'}</td><td class="num">${mon} ${(l.precio||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">${mon} ${((l.cantidad||0)*(l.precio||0)).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join('')}
+<tr class="tr-total"><td colspan="4">${t.total}</td><td class="num">${mon} ${total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
+</tbody></table>
+${c.Notas?`<div class="notes-box"><strong>${t.notes}:</strong> ${c.Notas}</div>`:''}
+<div class="footer">${t.footer}</div>
+</div><script>window.onload=()=>window.print();<\/script></body></html>`;
+  const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}
+}
+
 function renderDashboard(){
   const hoy=new Date().toISOString().slice(0,10);
   const en30=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
@@ -2349,7 +2657,7 @@ const FORMS={
   cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro / Productos</label><input type="hidden" id="f-Rubro"><div class="rubro-picker" id="rubro-picker"></div></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
-  producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Categoría</label><select id="f-Categoria" data-smartlist="Categoría"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
+  producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto" placeholder="Ej: Passata Extra" autocomplete="off" list="inv-prod-dl"><datalist id="inv-prod-dl"></datalist></div><div class="form-group"><label>Categoría</label><input id="f-Categoria" placeholder="Ej: Pasta de Tomate" autocomplete="off" list="inv-cat-dl"><datalist id="inv-cat-dl"></datalist></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad" placeholder="kg / ton / unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
   venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-dias-row" style="display:none" class="form-row"><div class="form-group"><label>Días de plazo</label><input id="f-DiasPlayzo" type="number" min="1" step="1" placeholder="ej: 90" oninput="calcFechaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0" oninput="calcVentaNeta()"></div></div><div class="form-row"><div class="form-group"><label>Gastos de flete (USD)</label><input id="f-GastoFlete" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcVentaNeta()"></div><div class="form-group" id="venta-neta-group" style="display:none"><label>Venta neta</label><div id="venta-neta-display" style="padding:6px 0"></div></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (kg)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Días de plazo</label><input id="f-DiasVenc" type="number" min="1" step="1" placeholder="ej: 60" oninput="calcFacturaVencimiento()"></div></div><div class="form-row"><div class="form-group"><label>Estado facturación</label><select id="f-EstadoFactura"><option value="">— Seleccionar —</option><option>No facturado</option><option>Facturado</option><option>Cobro en prueba</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date" oninput="calcFacturaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📎 Documentos</div><input type="hidden" id="f-FacturaFileId"><input type="hidden" id="f-FacturaFileName"><input type="hidden" id="f-FacturaTransFileId"><input type="hidden" id="f-FacturaTransFileName"><div class="form-row"><div class="form-group"><label>Factura (PDF / imagen)</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-file-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-file-input\',\'f-FacturaFileId\',\'f-FacturaFileName\',\'factura-file-status\')">☁️ Drive</button></div><div id="factura-file-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div><div class="form-group"><label>Factura de transporte</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-trans-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-trans-input\',\'f-FacturaTransFileId\',\'f-FacturaTransFileName\',\'factura-trans-status\')">☁️ Drive</button></div><div id="factura-trans-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
@@ -2382,6 +2690,12 @@ function openCRMModal(type){
     document.getElementById('modal-body').appendChild(panel);
   }
   if(type==='venta') setTimeout(()=>{initVentaLineas('');onFormaPagoChange();populateComisionistas();}, 30);
+  if(type==='producto') setTimeout(()=>{
+    const dlProd=document.getElementById('inv-prod-dl');
+    const dlCat=document.getElementById('inv-cat-dl');
+    if(dlProd){const prods=[...new Set((DB.inventario||[]).map(i=>i.Producto).filter(Boolean))];dlProd.innerHTML=prods.map(p=>`<option value="${p}">`).join('');}
+    if(dlCat){const cats=[...new Set((DB.inventario||[]).map(i=>i.Categoria).filter(Boolean))];dlCat.innerHTML=cats.map(c=>`<option value="${c}">`).join('');}
+  },30);
 }
 /* ── VENTAS: LÍNEAS DE PRODUCTO ── */
 let _vl=[];
@@ -3222,6 +3536,24 @@ const _origSaveModal = saveModal;
 ═══════════════════════════════════════ */
 let _editingContactId = null;
 
+function syncContactsFromClientes(){
+  let added=0;
+  (DB.clientes||[]).forEach(c=>{
+    if(!c.Contacto) return;
+    const exists=(DB.contactos||[]).find(ct=>
+      (ct.Nombre||'').toLowerCase()===(c.Contacto||'').toLowerCase()&&
+      (ct.Empresa||'').toLowerCase()===(c.Empresa||'').toLowerCase()
+    );
+    if(!exists){
+      if(!DB.contactos) DB.contactos=[];
+      DB.contactos.push({ID:genId(),Nombre:c.Contacto,Empresa:c.Empresa||'',Cargo:c.Cargo||'',Tel1:c.Telefono||'',Tel2:c.Telefono2||'',Email1:c.Email||'',Email2:c.Email2||'',Pais:c.Pais||'',WhatsApp:'',Notas:'Sincronizado desde clientes'});
+      added++;
+    }
+  });
+  if(added){saveLocal();}
+  renderContactos();
+  if(added) alert(`${added} contacto${added!==1?'s':''} sincronizado${added!==1?'s':''} desde clientes.`);
+}
 function renderContactos(filter){
   const grid = document.getElementById('contacts-grid');
   if(!grid) return;
@@ -3512,6 +3844,17 @@ const _DEFAULT_PRODUCTS=[
   {id:'triturado',      emoji:'🔶', label:'Triturado'},
   {id:'otros',          emoji:'📦', label:'Otros'},
 ];
+function resetPrevisionProducts(){
+  if(!confirm('¿Restablecer la lista a los 8 productos por defecto? Se eliminarán los adicionales (sus datos de previsión se perderán).')) return;
+  const kept=_DEFAULT_PRODUCTS.map(d=>{
+    const ex=PRODUCTS.find(p=>p.id===d.id);
+    return{id:d.id,emoji:d.emoji,label:d.label,subtitle:d.label+' · '+(_previsionYear||2026)+' · Toneladas',data:ex?ex.data:buildEmptyData()};
+  });
+  PRODUCTS.length=0;
+  kept.forEach(p=>PRODUCTS.push(p));
+  if(!PRODUCTS.find(p=>p.id===currentProductId))currentProductId=PRODUCTS[0]?.id||'';
+  savePrevisionYears();renderModalList();renderTabs();renderAll();
+}
 function ensureDefaultProducts(){
   // Si ya existe una lista guardada en localStorage, respetarla completamente.
   // loadPrevisionYears() ya la restauró — no volver a agregar los eliminados.
@@ -4124,6 +4467,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     ensureDefaultProducts();
     syncProductsFromInventory();
     ensureDefaultInventory();
+    syncContactsFromClientes();
     renderDashboard();
     updateStorageStatus();
   } else {
