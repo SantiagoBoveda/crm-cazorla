@@ -1146,6 +1146,78 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       <button class="btn btn-primary" onclick="openCotizacionModal()">+ Nueva cotización</button>
     </div>
     <div class="cards-grid" id="cotiz-stats"></div>
+
+    <!-- ══ CALCULADORA EXW → CFR ══ -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px">
+      <div onclick="toggleCalcEXW()" style="cursor:pointer;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:14px;user-select:none">
+        <div>
+          <span style="font-size:15px;font-weight:700;color:var(--accent)">🧮 Calculadora </span><em style="font-size:15px;font-weight:700;color:var(--green)">EXW → CFR</em>
+          <span style="font-size:11px;color:var(--muted);margin-left:10px">Costos logísticos · La Rioja → Destino</span>
+        </div>
+        <span id="calc-exw-icon" style="font-size:11px;color:var(--muted)">▼ mostrar</span>
+      </div>
+      <div id="calc-exw-body" style="display:none;padding:0 20px 20px">
+        <!-- Mode tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;padding-top:4px;border-top:1px solid var(--border)">
+          <button id="calc-tab-env" class="btn btn-primary btn-sm" onclick="setCalcMode('envasado')">ENVASADO</button>
+          <button id="calc-tab-gran" class="btn btn-outline btn-sm" onclick="setCalcMode('granel')">GRANEL</button>
+        </div>
+        <!-- PRODUCTO -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px">Producto</div>
+        <div class="form-row">
+          <div class="form-group"><label>PRECIO EXW / CAJA (USD)</label><input id="calc-precio-caja" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcEXW()"></div>
+          <div class="form-group"><label>PRECIO EXW / KG (USD)</label><input id="calc-precio-kg" type="number" min="0" step="0.001" placeholder="0.000" oninput="calcEXW()"></div>
+        </div>
+        <div class="form-row" id="calc-peso-row">
+          <div class="form-group" style="max-width:280px"><label>PESO NETO / CAJA (G)</label><input id="calc-peso-caja" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+        </div>
+        <!-- ESTRUCTURA CONTENEDOR -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px;margin-top:4px">Estructura del contenedor</div>
+        <div class="form-row">
+          <div class="form-group"><label>TIPO CONTENEDOR</label><select id="calc-tipo-cont" onchange="calcEXW()"><option value="20std">20' Standard (21.7 t)</option><option value="40std">40' Standard (26.5 t)</option><option value="40hc" selected>40' HC (26.5 t)</option></select></div>
+          <div class="form-group"><label>PALLETS</label><input id="calc-pallets" type="number" min="0" step="1" placeholder="20" oninput="calcEXW()"></div>
+          <div class="form-group"><label>CAJAS / PALLET</label><input id="calc-cajas-pallet" type="number" min="0" step="1" placeholder="55" oninput="calcEXW()"></div>
+        </div>
+        <!-- COSTOS LOGÍSTICOS -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px;margin-top:4px">Costos logísticos (USD · por contenedor)</div>
+        <div class="form-row">
+          <div class="form-group"><label>TRANSPORTE TERRESTRE</label><input id="calc-transp" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+          <div class="form-group"><label>GASTOS PUERTO / GATE</label><input id="calc-puerto" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>DESPACHO ADUANA EXPORT</label><input id="calc-aduana" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+          <div class="form-group"><label>OTROS GASTOS INTERNOS</label><input id="calc-otros" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+        </div>
+        <!-- SEGURO Y FLETE -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px;margin-top:4px">Seguro y flete marítimo</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>SEGURO INTERNACIONAL (%)</label>
+            <input id="calc-seguro" type="number" min="0" step="0.01" placeholder="0.4" oninput="calcEXW()">
+            <small style="color:var(--muted);font-size:11px">% sobre valor EXW total</small>
+          </div>
+          <div class="form-group">
+            <label>FLETE MARÍTIMO (USD)</label>
+            <input id="calc-flete" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()">
+            <small style="color:var(--muted);font-size:11px">opcional · dejar en 0 para solo CFR inland</small>
+          </div>
+        </div>
+        <!-- RESULTADO -->
+        <div id="calc-resultado" style="background:#1c1c1c;border-radius:12px;padding:20px 24px;margin-top:12px;font-family:var(--mono);color:#e5e5e5">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#8aab6a;margin-bottom:4px;text-transform:uppercase">Resultado — Cadena de valor</div>
+          <div id="calc-res-rows"></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid #333;flex-wrap:wrap">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888">Margen obj.</span>
+            <input id="calc-margen" type="number" min="0" step="0.1" placeholder="0" oninput="calcEXW()" style="width:70px;background:#2a2a2a;border:1px solid #444;border-radius:6px;color:#e5e5e5;padding:5px 8px;font-family:var(--mono);font-size:13px">
+            <span style="color:#888;font-size:12px">%</span>
+            <span style="margin-left:auto;font-size:11px;color:#888">Precio venta sugerido</span>
+            <span id="calc-precio-sugerido" style="font-size:20px;font-weight:800;color:#8aab6a;font-family:var(--mono)">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ══ FIN CALCULADORA ══ -->
+
     <div class="table-container" style="overflow-x:auto">
       <table><thead><tr>
         <th style="white-space:nowrap">Nº Cotiz.</th>
@@ -1211,8 +1283,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
                 <th style="padding:6px 8px;text-align:left;color:var(--muted);font-weight:600">Descripción</th>
                 <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:80px">Cant.</th>
                 <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:100px">Unidad</th>
-                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:110px">Precio unit.</th>
-                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:110px">Subtotal</th>
+                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:130px">Precio unit.</th>
                 <th style="width:32px"></th>
               </tr></thead>
               <tbody id="cotiz-lineas-body"></tbody>
@@ -2048,8 +2119,6 @@ function removeCotizLinea(i){_cotizLineas.splice(i,1);renderCotizLineas();}
 function updateCotizLinea(i,field,val){
   if(!_cotizLineas[i])return;
   _cotizLineas[i][field]=(field==='cantidad'||field==='precio')?parseFloat(val)||0:val;
-  const tr=document.getElementById('czl-'+i);
-  if(tr){const sub=tr.querySelector('.czl-sub');if(sub)sub.textContent=(_cotizLineas[i].cantidad*_cotizLineas[i].precio).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
   updateCotizTotal();
 }
 function updateCotizTotal(){
@@ -2068,11 +2137,97 @@ function renderCotizLineas(){
       <td><input type="number" value="${l.cantidad}" min="0" step="0.001" oninput="updateCotizLinea(${i},'cantidad',this.value)" style="text-align:center"></td>
       <td><select onchange="updateCotizLinea(${i},'unidad',this.value)">${units.map(u=>`<option value="${u}"${u===l.unidad?' selected':''}>${u}</option>`).join('')}</select></td>
       <td><input type="number" value="${l.precio}" min="0" step="0.01" oninput="updateCotizLinea(${i},'precio',this.value)" style="text-align:right"></td>
-      <td style="text-align:right;font-family:var(--mono);font-weight:700;font-size:12px" class="czl-sub">${(l.cantidad*l.precio).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       <td><button type="button" onclick="removeCotizLinea(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px">✕</button></td>
     </tr>`).join('');
   updateCotizTotal();
 }
+/* ═══════════════════════════════════════
+   CALCULADORA EXW → CFR
+═══════════════════════════════════════ */
+let _calcMode='envasado';
+function toggleCalcEXW(){
+  const body=document.getElementById('calc-exw-body');
+  const icon=document.getElementById('calc-exw-icon');
+  if(!body)return;
+  const shown=body.style.display!=='none';
+  body.style.display=shown?'none':'block';
+  if(icon)icon.textContent=shown?'▼ mostrar':'▲ ocultar';
+}
+function setCalcMode(mode){
+  _calcMode=mode;
+  document.getElementById('calc-tab-env').className=mode==='envasado'?'btn btn-primary btn-sm':'btn btn-outline btn-sm';
+  document.getElementById('calc-tab-gran').className=mode==='granel'?'btn btn-primary btn-sm':'btn btn-outline btn-sm';
+  const pesoRow=document.getElementById('calc-peso-row');
+  if(pesoRow)pesoRow.style.display=mode==='envasado'?'':'none';
+  calcEXW();
+}
+function calcEXW(){
+  const precioCaja=parseFloat(document.getElementById('calc-precio-caja')?.value)||0;
+  const precioKg=parseFloat(document.getElementById('calc-precio-kg')?.value)||0;
+  const pesoCajaG=parseFloat(document.getElementById('calc-peso-caja')?.value)||0;
+  const pallets=parseFloat(document.getElementById('calc-pallets')?.value)||0;
+  const cajasPallet=parseFloat(document.getElementById('calc-cajas-pallet')?.value)||0;
+  const transp=parseFloat(document.getElementById('calc-transp')?.value)||0;
+  const puerto=parseFloat(document.getElementById('calc-puerto')?.value)||0;
+  const aduana=parseFloat(document.getElementById('calc-aduana')?.value)||0;
+  const otros=parseFloat(document.getElementById('calc-otros')?.value)||0;
+  const seguroPct=parseFloat(document.getElementById('calc-seguro')?.value)||0;
+  const flete=parseFloat(document.getElementById('calc-flete')?.value)||0;
+  const margen=parseFloat(document.getElementById('calc-margen')?.value)||0;
+  const totalCajas=pallets*cajasPallet;
+  let exwTotal=0,unidad='caja',totalUnidades=totalCajas;
+  if(_calcMode==='envasado'){
+    exwTotal=totalCajas*precioCaja;
+    unidad='caja';totalUnidades=totalCajas;
+    if(pesoCajaG>0&&precioCaja>0){
+      const kgEl=document.getElementById('calc-precio-kg');
+      if(kgEl&&!kgEl.matches(':focus'))kgEl.value=(precioCaja/(pesoCajaG/1000)).toFixed(3);
+    }
+  } else {
+    const totalKg=totalCajas*(pesoCajaG/1000);
+    exwTotal=totalKg*precioKg;
+    unidad='kg';totalUnidades=totalKg;
+  }
+  const logistica=transp+puerto+aduana+otros;
+  const seguroAmt=exwTotal*(seguroPct/100);
+  const fob=exwTotal+logistica+seguroAmt;
+  const cfr=fob+flete;
+  const exwU=totalUnidades>0?exwTotal/totalUnidades:0;
+  const fobU=totalUnidades>0?fob/totalUnidades:0;
+  const cfrU=totalUnidades>0?cfr/totalUnidades:0;
+  const logU=totalUnidades>0?logistica/totalUnidades:0;
+  const sugerido=cfrU*(1+margen/100);
+  const f2=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const row=(label,detail,value,hl=false)=>`<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #2a2a2a;gap:10px">
+    <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:${hl?'#8aab6a':'#888'};width:130px;flex-shrink:0">${label}</span>
+    <span style="font-size:11px;color:#555;flex:1">${detail}</span>
+    <span style="font-size:${hl?'17':'13'}px;font-weight:${hl?'800':'600'};color:${hl?'#8aab6a':'#ccc'}">${f2(value)}</span>
+  </div>`;
+  const rowsEl=document.getElementById('calc-res-rows');
+  if(rowsEl)rowsEl.innerHTML=
+    row('EXW TOTAL',`${totalCajas.toLocaleString()} cajas × ${f2(precioCaja)}`,exwTotal)+
+    row('+ Logística int.',`terrestre ${f2(transp)} · puerto ${f2(puerto)}`,logistica)+
+    row('+ Seguro',`${seguroPct.toFixed(2)}% s/ EXW = ${f2(seguroAmt)}`,seguroAmt)+
+    `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #2a2a2a;gap:10px">
+      <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#8aab6a;width:130px;flex-shrink:0">≈ FOB</span>
+      <span style="font-size:11px;color:#555;flex:1">libre a bordo puerto</span>
+      <span style="font-size:17px;font-weight:800;color:#8aab6a">${f2(fob)}</span>
+    </div>`+
+    row('+ Flete marítimo',flete>0?f2(flete):'no ingresado',flete)+
+    `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #333;gap:10px">
+      <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#8aab6a;width:130px;flex-shrink:0">CFR DESTINO</span>
+      <span style="font-size:11px;color:#555;flex:1">costo + flete</span>
+      <span style="font-size:17px;font-weight:800;color:#8aab6a">${f2(cfr)}</span>
+    </div>`+
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;padding:12px;background:#252525;border-radius:8px">
+      ${[['EXW / '+unidad,exwU],['FOB / '+unidad,fobU],['CFR / '+unidad,cfrU],['Logística / '+unidad,logU]].map(([l,v])=>`
+        <div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:4px">${l}</div>
+        <div style="font-size:13px;font-weight:700;color:#ddd">${f2(v)}/${unidad}</div></div>`).join('')}
+    </div>`;
+  const sugEl=document.getElementById('calc-precio-sugerido');
+  if(sugEl)sugEl.textContent=sugerido>0?`${f2(sugerido)}/${unidad}`:'—';
+}
+
 function onCotizPaisChange(){
   const pais=(document.getElementById('cz-pais')?.value||'').trim().toLowerCase();
   const warn=document.getElementById('cz-iva-warn');
@@ -2215,10 +2370,10 @@ function generarCotizacionPDF(id){
   <div class="mi"><div class="lbl">${t.place}</div><div class="val">${c.Ubicacion||'—'}</div></div>
   ${c.Responsable?`<div class="mi"><div class="lbl">${t.responsible}</div><div class="val">${c.Responsable}</div></div>`:''}
 </div>
-<table><thead><tr><th>${t.desc}</th><th style="text-align:center">${t.qty}</th><th style="text-align:center">${t.unit}</th><th style="text-align:right">${t.unitPrice}</th><th style="text-align:right">${t.subtotal}</th></tr></thead>
+<table><thead><tr><th>${t.desc}</th><th style="text-align:center">${t.qty}</th><th style="text-align:center">${t.unit}</th><th style="text-align:right">${t.unitPrice}</th></tr></thead>
 <tbody>
-${lineas.map(l=>`<tr><td>${l.desc||'—'}</td><td class="num">${(l.cantidad||0).toLocaleString('es-AR',{maximumFractionDigits:3})}</td><td style="text-align:center">${t.units[l.unidad]||l.unidad||'—'}</td><td class="num">${mon} ${(l.precio||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">${mon} ${((l.cantidad||0)*(l.precio||0)).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join('')}
-<tr class="tr-total"><td colspan="4">${t.total}</td><td class="num">${mon} ${total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
+${lineas.map(l=>`<tr><td>${l.desc||'—'}</td><td class="num">${(l.cantidad||0).toLocaleString('es-AR',{maximumFractionDigits:3})}</td><td style="text-align:center">${t.units[l.unidad]||l.unidad||'—'}</td><td class="num">${mon} ${(l.precio||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join('')}
+<tr class="tr-total"><td colspan="3">${t.total}</td><td class="num">${mon} ${total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
 </tbody></table>
 ${c.Notas?`<div class="notes-box"><strong>${t.notes}:</strong> ${c.Notas}</div>`:''}
 ${c.NotaExtra?`<div class="notes-box" style="font-style:italic">${c.NotaExtra}</div>`:''}
