@@ -1165,7 +1165,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- MODAL COTIZACION -->
   <div class="modal-overlay" id="cotiz-modal-overlay" onclick="if(event.target===this)closeCotizacionModal()">
-    <div class="modal" style="max-width:980px;width:98%" id="cotiz-modal-box">
+    <div class="modal" style="max-width:720px;width:95%" id="cotiz-modal-box">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
         <h2 id="cotiz-modal-title" style="font-size:18px;font-weight:700">Nueva Cotización</h2>
         <button onclick="closeCotizacionModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
@@ -1208,16 +1208,12 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
           <div style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:12px">
               <thead><tr style="border-bottom:2px solid var(--border)">
-                <th style="padding:6px 8px;text-align:left;color:var(--muted);font-weight:600;min-width:130px">Descripción</th>
-                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:65px">Cant.</th>
-                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:80px">Unidad</th>
-                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:90px">Precio unit.</th>
-                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:62px" title="Cajas por pallet">Caj/Plt</th>
-                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:62px" title="Kg por caja">Kg/Caja</th>
-                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:80px" title="Flete por unidad (contenedor lleno)">Flete/U.</th>
-                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:88px" title="Precio + flete incluido">P+Flete</th>
-                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:90px">Subtotal</th>
-                <th style="width:28px"></th>
+                <th style="padding:6px 8px;text-align:left;color:var(--muted);font-weight:600">Descripción</th>
+                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:80px">Cant.</th>
+                <th style="padding:6px 8px;text-align:center;color:var(--muted);font-weight:600;width:100px">Unidad</th>
+                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:110px">Precio unit.</th>
+                <th style="padding:6px 8px;text-align:right;color:var(--muted);font-weight:600;width:110px">Subtotal</th>
+                <th style="width:32px"></th>
               </tr></thead>
               <tbody id="cotiz-lineas-body"></tbody>
             </table>
@@ -1231,76 +1227,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         </div>
         <!-- IVA Argentina warning -->
         <div id="cz-iva-warn" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#856404;font-weight:600;font-size:13px">⚠️ Precios sin IVA – mercado Argentina</div>
-
-        <!-- Calculadora logística -->
-        <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:14px">
-          <div onclick="toggleLogistica()" style="cursor:pointer;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border-radius:10px">
-            <span style="font-weight:700;font-size:13px;color:var(--accent)">🚢 Calculadora Logística</span>
-            <span id="logistica-toggle-icon" style="font-size:12px;color:var(--muted)">▼ mostrar</span>
-          </div>
-          <div id="logistica-body" style="display:none;padding:16px">
-            <div class="form-row">
-              <div class="form-group" style="flex:2">
-                <label>Tipo de contenedor</label>
-                <select id="log-contenedor" onchange="onContenedorChange()">
-                  <option value="20std">20' Standard (21.7 t / 33 m³)</option>
-                  <option value="40std">40' Standard (26.5 t / 67 m³)</option>
-                  <option value="40hc">40' HC (26.5 t / 76 m³)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Carga (toneladas)</label>
-                <input id="log-tonelaje" type="number" min="0" step="0.1" placeholder="0.0" oninput="updateLogisticaResults()">
-              </div>
-              <div class="form-group">
-                <label>Capacidad máx.</label>
-                <input id="log-cap-max" readonly style="background:var(--surface2);color:var(--muted)">
-              </div>
-            </div>
-            <div class="form-row" style="margin-bottom:10px">
-              <div class="form-group" style="flex:2">
-                <label>Modalidad de flete</label>
-                <select id="log-tipo-flete" onchange="updateLogisticaResults()">
-                  <option value="FCL">FCL – Contenedor completo</option>
-                  <option value="LCL">LCL – Grupaje / carga suelta</option>
-                  <option value="Aéreo">Aéreo</option>
-                  <option value="Terrestre">Terrestre</option>
-                  <option value="Courier">Courier / Expreso</option>
-                </select>
-              </div>
-            </div>
-            <div style="margin-bottom:14px">
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
-                <span>Ocupación del contenedor</span><span id="log-fill-pct">0%</span>
-              </div>
-              <div style="height:10px;background:var(--surface2);border-radius:5px;overflow:hidden">
-                <div id="log-fill-bar" style="height:100%;width:0%;background:var(--accent);border-radius:5px;transition:width .3s"></div>
-              </div>
-            </div>
-            <div style="margin-bottom:12px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <label style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Costos logísticos</label>
-                <button type="button" class="btn btn-outline btn-sm" onclick="addLogisticaItem()">＋ Agregar ítem</button>
-              </div>
-              <div id="log-costos-body"></div>
-              <div style="display:flex;align-items:center;gap:10px;margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
-                <label style="font-size:12px;color:var(--muted);white-space:nowrap">Margen adicional %</label>
-                <input id="log-margen" type="number" min="0" step="0.1" placeholder="0" style="width:80px" oninput="updateLogisticaResults()">
-              </div>
-            </div>
-            <div id="log-resultados" style="background:var(--surface2);border-radius:8px;padding:12px;font-size:12px">
-              <div style="font-weight:700;font-size:11px;text-transform:uppercase;color:var(--accent);letter-spacing:.5px;margin-bottom:8px">Resultado por unidad</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 24px">
-                <div><span style="color:var(--muted)">Total costos:</span> <span id="log-r-total-costos" style="font-family:var(--mono);font-weight:700">—</span></div>
-                <div><span style="color:var(--muted)">USD/tonelada:</span> <span id="log-r-ton" style="font-family:var(--mono);font-weight:700">—</span></div>
-                <div><span style="color:var(--muted)">Toneladas cargadas:</span> <span id="log-r-ton-carg" style="font-family:var(--mono)">—</span></div>
-                <div><span style="color:var(--muted)">USD/pallet:</span> <span id="log-r-pallet" style="font-family:var(--mono)">—</span></div>
-                <div><span style="color:var(--muted)">Total con margen:</span> <span id="log-r-total-margen" style="font-family:var(--mono);font-weight:700;color:var(--accent)">—</span></div>
-                <div><span style="color:var(--muted)">USD/caja:</span> <span id="log-r-caja" style="font-family:var(--mono)">—</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- Nota extra al pie -->
         <div class="form-row" style="margin-bottom:14px">
@@ -1930,7 +1856,7 @@ const HEADERS={
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
   Novedades:['ID','Tipo','RefId','Fecha','Texto','Autor'],
-  Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','NotaExtra','Lineas','LogisticaData','ValorTotal'],
+  Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','NotaExtra','Lineas','ValorTotal'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11'],
   Fermentadores:['id','nombre','variedad','calibre','kg','entamada','notas','tipo'],
   Comisionistas:['Nombre']
@@ -2100,9 +2026,6 @@ function _computeOliveStock(tipo){
 ═══════════════════════════════════════ */
 let _editingCotizId=null;
 let _cotizLineas=[];
-let _cotizLogistica={contenedor:'20std',tonelaje:0,costos:[],margen:0,resultados:{}};
-const LOG_CONTENEDORES={'20std':{label:"20' Standard",maxTon:21.7,maxM3:33},'40std':{label:"40' Standard",maxTon:26.5,maxM3:67},'40hc':{label:"40' HC",maxTon:26.5,maxM3:76}};
-const LOG_DEFAULT_COSTOS=[{nombre:'Flete internacional',monto:0,activo:true,esPorc:false},{nombre:'THC origen',monto:0,activo:true,esPorc:false},{nombre:'Documentación',monto:0,activo:true,esPorc:false},{nombre:'Aduana origen',monto:0,activo:true,esPorc:false},{nombre:'Comisión agente/bróker',monto:0,activo:true,esPorc:true}];
 
 function generateNroCotizacion(){
   const yr=new Date().getFullYear();
@@ -2117,31 +2040,17 @@ function onCotizIncotermChange(){
   const labels={FCA:'Lugar de entrega (FCA)',FOB:'Puerto de embarque (FOB)',CFR:'Puerto de destino (CFR)',DDP:'Lugar de destino (DDP)'};
   lbl.textContent=labels[v]||'Ubicación';
 }
-function calcFletePerLine(line){
-  const cajPall=parseFloat(line.cajasPallet)||0;
-  const kgCaja=parseFloat(line.kgCaja)||0;
-  if(!cajPall||!kgCaja)return{palletsEnCont:0,fletePerUnit:0,precioConFlete:parseFloat(line.precio)||0};
-  const cont=LOG_CONTENEDORES[_cotizLogistica.contenedor]||LOG_CONTENEDORES['20std'];
-  const maxKg=cont.maxTon*1000;
-  const kgPerPallet=kgCaja*cajPall;
-  const palletsEnCont=Math.floor(maxKg/kgPerPallet);
-  const totalCost=(_cotizLogistica.resultados||{}).totalConMargen||0;
-  if(!palletsEnCont||!totalCost)return{palletsEnCont,fletePerUnit:0,precioConFlete:parseFloat(line.precio)||0};
-  const fletePerPallet=totalCost/palletsEnCont;
-  const fletePerUnit=fletePerPallet/cajPall;
-  const precioConFlete=(parseFloat(line.precio)||0)+fletePerUnit;
-  return{palletsEnCont,fletePerUnit,precioConFlete};
-}
 function addCotizLinea(l){
-  _cotizLineas.push(l||{desc:'',cantidad:1,unidad:'caja',precio:0,cajasPallet:0,kgCaja:0});
+  _cotizLineas.push(l||{desc:'',cantidad:1,unidad:'ton',precio:0});
   renderCotizLineas();
 }
 function removeCotizLinea(i){_cotizLineas.splice(i,1);renderCotizLineas();}
 function updateCotizLinea(i,field,val){
   if(!_cotizLineas[i])return;
-  const nums=['cantidad','precio','cajasPallet','kgCaja'];
-  _cotizLineas[i][field]=nums.includes(field)?parseFloat(val)||0:val;
-  renderCotizLineas();
+  _cotizLineas[i][field]=(field==='cantidad'||field==='precio')?parseFloat(val)||0:val;
+  const tr=document.getElementById('czl-'+i);
+  if(tr){const sub=tr.querySelector('.czl-sub');if(sub)sub.textContent=(_cotizLineas[i].cantidad*_cotizLineas[i].precio).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  updateCotizTotal();
 }
 function updateCotizTotal(){
   const total=_cotizLineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
@@ -2153,110 +2062,21 @@ function updateCotizTotal(){
 function renderCotizLineas(){
   const tbody=document.getElementById('cotiz-lineas-body');if(!tbody)return;
   const units=['unidad','kg','ton','bombona','caja','pallet'];
-  const inp='padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--surface);color:var(--text);width:100%';
-  tbody.innerHTML=_cotizLineas.map((l,i)=>{
-    const f=calcFletePerLine(l);
-    const hasFlete=f.fletePerUnit>0;
-    const fmtN=n=>n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-    return`<tr class="cotiz-linea-row" id="czl-${i}" style="border-bottom:1px solid var(--border)">
-      <td style="padding:4px 6px"><input value="${(l.desc||'').replace(/"/g,'&quot;')}" oninput="updateCotizLinea(${i},'desc',this.value)" placeholder="Producto / descripción" style="${inp};min-width:120px"></td>
-      <td style="padding:4px 4px"><input type="number" value="${l.cantidad||''}" min="0" step="0.001" oninput="updateCotizLinea(${i},'cantidad',this.value)" style="${inp};text-align:center"></td>
-      <td style="padding:4px 4px"><select onchange="updateCotizLinea(${i},'unidad',this.value)" style="${inp}">${units.map(u=>`<option value="${u}"${u===l.unidad?' selected':''}>${u}</option>`).join('')}</select></td>
-      <td style="padding:4px 4px"><input type="number" value="${l.precio||''}" min="0" step="0.001" oninput="updateCotizLinea(${i},'precio',this.value)" style="${inp};text-align:right"></td>
-      <td style="padding:4px 4px"><input type="number" value="${l.cajasPallet||''}" min="0" step="1" placeholder="—" title="Cajas por pallet" oninput="updateCotizLinea(${i},'cajasPallet',this.value)" style="${inp};text-align:center"></td>
-      <td style="padding:4px 4px"><input type="number" value="${l.kgCaja||''}" min="0" step="0.01" placeholder="—" title="Kg por caja" oninput="updateCotizLinea(${i},'kgCaja',this.value)" style="${inp};text-align:center"></td>
-      <td style="padding:4px 6px;text-align:right;font-family:var(--mono);font-size:11px;white-space:nowrap">${hasFlete?`<span style="color:var(--muted)">${fmtN(f.fletePerUnit)}</span>${f.palletsEnCont?`<br><span style="font-size:9px;color:var(--muted)">${f.palletsEnCont} plt</span>`:''}` :'<span style="color:var(--muted)">—</span>'}</td>
-      <td style="padding:4px 6px;text-align:right;font-family:var(--mono);font-size:12px;font-weight:800;white-space:nowrap;color:${hasFlete?'var(--green)':'var(--muted)'}">${hasFlete?fmtN(f.precioConFlete):'—'}</td>
-      <td style="padding:4px 6px;text-align:right;font-family:var(--mono);font-weight:700;font-size:12px;white-space:nowrap" class="czl-sub">${fmtN((l.cantidad||0)*(l.precio||0))}</td>
-      <td style="padding:4px 2px"><button type="button" onclick="removeCotizLinea(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 4px">✕</button></td>
-    </tr>`;
-  }).join('');
+  tbody.innerHTML=_cotizLineas.map((l,i)=>`
+    <tr class="cotiz-linea-row" id="czl-${i}" style="border-bottom:1px solid var(--border)">
+      <td><input value="${(l.desc||'').replace(/"/g,'&quot;')}" oninput="updateCotizLinea(${i},'desc',this.value)" placeholder="Producto / descripción"></td>
+      <td><input type="number" value="${l.cantidad}" min="0" step="0.001" oninput="updateCotizLinea(${i},'cantidad',this.value)" style="text-align:center"></td>
+      <td><select onchange="updateCotizLinea(${i},'unidad',this.value)">${units.map(u=>`<option value="${u}"${u===l.unidad?' selected':''}>${u}</option>`).join('')}</select></td>
+      <td><input type="number" value="${l.precio}" min="0" step="0.01" oninput="updateCotizLinea(${i},'precio',this.value)" style="text-align:right"></td>
+      <td style="text-align:right;font-family:var(--mono);font-weight:700;font-size:12px" class="czl-sub">${(l.cantidad*l.precio).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td><button type="button" onclick="removeCotizLinea(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px">✕</button></td>
+    </tr>`).join('');
   updateCotizTotal();
 }
 function onCotizPaisChange(){
   const pais=(document.getElementById('cz-pais')?.value||'').trim().toLowerCase();
   const warn=document.getElementById('cz-iva-warn');
   if(warn)warn.style.display=pais==='argentina'?'block':'none';
-}
-function toggleLogistica(){
-  const body=document.getElementById('logistica-body');
-  const icon=document.getElementById('logistica-toggle-icon');
-  if(!body)return;
-  const shown=body.style.display!=='none';
-  body.style.display=shown?'none':'block';
-  if(icon)icon.textContent=shown?'▼ mostrar':'▲ ocultar';
-}
-function onContenedorChange(){
-  const sel=document.getElementById('log-contenedor');
-  if(!sel)return;
-  const info=LOG_CONTENEDORES[sel.value]||LOG_CONTENEDORES['20std'];
-  const capEl=document.getElementById('log-cap-max');
-  if(capEl)capEl.value=`${info.maxTon} t / ${info.maxM3} m³`;
-  _cotizLogistica.contenedor=sel.value;
-  updateLogisticaResults();
-}
-function addLogisticaItem(item){
-  if(!_cotizLogistica.costos)_cotizLogistica.costos=[];
-  _cotizLogistica.costos.push(item||{nombre:'',monto:0,activo:true,esPorc:false});
-  renderLogisticaItems();
-}
-function removeLogisticaItem(i){
-  _cotizLogistica.costos.splice(i,1);
-  renderLogisticaItems();
-  updateLogisticaResults();
-}
-function renderLogisticaItems(){
-  const body=document.getElementById('log-costos-body');
-  if(!body)return;
-  body.innerHTML=(_cotizLogistica.costos||[]).map((item,i)=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-    <input type="checkbox" ${item.activo?'checked':''} onchange="_cotizLogistica.costos[${i}].activo=this.checked;updateLogisticaResults()">
-    <input type="text" value="${(item.nombre||'').replace(/"/g,'&quot;')}" placeholder="Descripción" style="flex:1;min-width:0;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px" oninput="_cotizLogistica.costos[${i}].nombre=this.value">
-    <input type="number" value="${item.monto||0}" min="0" step="0.01" style="width:90px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px" oninput="_cotizLogistica.costos[${i}].monto=parseFloat(this.value)||0;updateLogisticaResults()">
-    <label style="font-size:11px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:3px"><input type="checkbox" ${item.esPorc?'checked':''} onchange="_cotizLogistica.costos[${i}].esPorc=this.checked;updateLogisticaResults()"> %</label>
-    <button type="button" onclick="removeLogisticaItem(${i})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:18px;line-height:1;padding:0">×</button>
-  </div>`).join('');
-}
-function updateLogisticaResults(){
-  const sel=document.getElementById('log-contenedor');
-  const tonEl=document.getElementById('log-tonelaje');
-  const margenEl=document.getElementById('log-margen');
-  if(!sel||!tonEl)return;
-  const cont=LOG_CONTENEDORES[sel.value]||LOG_CONTENEDORES['20std'];
-  const ton=parseFloat(tonEl.value)||0;
-  const margen=parseFloat(margenEl?.value)||0;
-  // fill bar
-  const fillPct=cont.maxTon>0?Math.min(100,(ton/cont.maxTon)*100):0;
-  const fillBar=document.getElementById('log-fill-bar');
-  const fillPctEl=document.getElementById('log-fill-pct');
-  if(fillBar)fillBar.style.width=fillPct+'%';
-  if(fillPctEl)fillPctEl.textContent=fillPct.toFixed(1)+'%';
-  // costos
-  let totalFijo=0,totalPorc=0;
-  (_cotizLogistica.costos||[]).forEach(c=>{
-    if(!c.activo)return;
-    if(c.esPorc)totalPorc+=parseFloat(c.monto)||0;
-    else totalFijo+=parseFloat(c.monto)||0;
-  });
-  const totalCostosBase=totalFijo*(1+totalPorc/100);
-  const totalConMargen=totalCostosBase*(1+margen/100);
-  const usdTon=ton>0?totalConMargen/ton:0;
-  // pallet ~ 1 ton approx; caja ~ usdTon/20 (rough)
-  const usdPallet=ton>0?totalConMargen/Math.max(1,Math.floor(ton)):0;
-  const mon=document.getElementById('cz-moneda')?.value||'USD';
-  const fmt=n=>n>0?`${mon} ${n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'—';
-  if(document.getElementById('log-r-total-costos'))document.getElementById('log-r-total-costos').textContent=fmt(totalCostosBase);
-  if(document.getElementById('log-r-ton'))document.getElementById('log-r-ton').textContent=fmt(usdTon);
-  if(document.getElementById('log-r-ton-carg'))document.getElementById('log-r-ton-carg').textContent=ton>0?ton.toFixed(2)+' t':'—';
-  if(document.getElementById('log-r-pallet'))document.getElementById('log-r-pallet').textContent=ton>=1?fmt(usdPallet):'—';
-  if(document.getElementById('log-r-total-margen'))document.getElementById('log-r-total-margen').textContent=fmt(totalConMargen);
-  if(document.getElementById('log-r-caja'))document.getElementById('log-r-caja').textContent='—';
-  _cotizLogistica.contenedor=sel.value;
-  _cotizLogistica.tonelaje=ton;
-  _cotizLogistica.margen=margen;
-  _cotizLogistica.tipoFlete=document.getElementById('log-tipo-flete')?.value||'FCL';
-  _cotizLogistica.resultados={totalCostosBase,totalConMargen,usdTon,fillPct};
-  // Refresh line flete columns
-  if(document.getElementById('cotiz-lineas-body'))renderCotizLineas();
 }
 function openCotizacionModal(id){
   _editingCotizId=id||null;
@@ -2281,25 +2101,9 @@ function openCotizacionModal(id){
   if(notaExtraEl)notaExtraEl.value=cotiz?.NotaExtra||'';
   const dl=document.getElementById('cz-client-list');
   if(dl)dl.innerHTML=[...new Set((DB.clientes||[]).map(c=>c.Empresa).filter(Boolean))].map(e=>`<option value="${e}">`).join('');
-  // logistics
-  try{_cotizLogistica=cotiz?.LogisticaData?JSON.parse(cotiz.LogisticaData):{contenedor:'20std',tonelaje:0,costos:LOG_DEFAULT_COSTOS.map(c=>({...c})),margen:0,resultados:{}};}catch{_cotizLogistica={contenedor:'20std',tonelaje:0,costos:LOG_DEFAULT_COSTOS.map(c=>({...c})),margen:0,resultados:{}};}
-  const logBody=document.getElementById('logistica-body');
-  if(logBody)logBody.style.display='none';
-  const logIcon=document.getElementById('logistica-toggle-icon');
-  if(logIcon)logIcon.textContent='▼ mostrar';
-  const logCont=document.getElementById('log-contenedor');
-  if(logCont)logCont.value=_cotizLogistica.contenedor||'20std';
-  const logTon=document.getElementById('log-tonelaje');
-  if(logTon)logTon.value=_cotizLogistica.tonelaje||'';
-  const logMargen=document.getElementById('log-margen');
-  if(logMargen)logMargen.value=_cotizLogistica.margen||'';
-  const logTipoFlete=document.getElementById('log-tipo-flete');
-  if(logTipoFlete)logTipoFlete.value=_cotizLogistica.tipoFlete||'FCL';
   onCotizPaisChange();
   onCotizIncotermChange();
   renderCotizLineas();
-  renderLogisticaItems();
-  onContenedorChange();
   document.getElementById('cotiz-modal-overlay').classList.add('open');
 }
 function closeCotizacionModal(){
@@ -2327,7 +2131,6 @@ function saveCotizacion(){
     Notas:document.getElementById('cz-notas').value,
     NotaExtra:document.getElementById('cz-nota-extra')?.value||'',
     Lineas:JSON.stringify(_cotizLineas),
-    LogisticaData:JSON.stringify(_cotizLogistica),
     ValorTotal:total
   };
   if(!DB.cotizaciones)DB.cotizaciones=[];
@@ -2386,11 +2189,10 @@ function generarCotizacionPDF(id){
   const c=(DB.cotizaciones||[]).find(x=>x.ID===id);if(!c)return;
   const lang=c.Idioma||'es';
   let lineas=[];try{lineas=JSON.parse(c.Lineas||'[]');}catch{}
-  let log=null;try{log=c.LogisticaData?JSON.parse(c.LogisticaData):null;}catch{}
   const T={
-    es:{title:'COTIZACIÓN',to:'Señores',date:'Fecha',validity:'Válida hasta',delivery:'Condición de venta',place:'Lugar',currency:'Moneda',desc:'Descripción',qty:'Cantidad',unit:'Unidad',unitPrice:'Precio unit.',fleteU:'Flete/U.',pFlete:'P+Flete',subtotal:'Subtotal',total:'TOTAL',notes:'Observaciones',footer:'Cotización válida por el período indicado. Precios no incluyen impuestos locales salvo indicación.',responsible:'Responsable',flete:'Modalidad de flete',units:{unidad:'Unidad',kg:'Kilogramo',ton:'Tonelada',bombona:'Bombona',caja:'Caja',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
-    en:{title:'QUOTATION',to:'Dear',date:'Date',validity:'Valid until',delivery:'Delivery Terms',place:'Location',currency:'Currency',desc:'Description',qty:'Quantity',unit:'Unit',unitPrice:'Unit Price',fleteU:'Freight/U.',pFlete:'P+Freight',subtotal:'Subtotal',total:'TOTAL',notes:'Notes',footer:'This quotation is valid for the indicated period. Prices exclude local taxes unless otherwise stated.',responsible:'Contact',flete:'Freight mode',units:{unidad:'Unit',kg:'Kilogram',ton:'Ton',bombona:'Barrel',caja:'Box',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
-    pt:{title:'COTAÇÃO',to:'Prezados',date:'Data',validity:'Válida até',delivery:'Condição de entrega',place:'Local',currency:'Moeda',desc:'Descrição',qty:'Quantidade',unit:'Unidade',unitPrice:'Preço unit.',fleteU:'Frete/U.',pFlete:'P+Frete',subtotal:'Subtotal',total:'TOTAL',notes:'Observações',footer:'Cotação válida pelo período indicado. Preços excluem impostos locais salvo indicação.',responsible:'Responsável',flete:'Modalidade de frete',units:{unidad:'Unidade',kg:'Quilograma',ton:'Tonelada',bombona:'Bombona',caja:'Caixa',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}}
+    es:{title:'COTIZACIÓN',to:'Señores',date:'Fecha',validity:'Válida hasta',delivery:'Condición de venta',place:'Lugar',currency:'Moneda',desc:'Descripción',qty:'Cantidad',unit:'Unidad',unitPrice:'Precio unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observaciones',footer:'Cotización válida por el período indicado. Precios no incluyen impuestos locales salvo indicación.',responsible:'Responsable',units:{unidad:'Unidad',kg:'Kilogramo',ton:'Tonelada',bombona:'Bombona',caja:'Caja',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
+    en:{title:'QUOTATION',to:'Dear',date:'Date',validity:'Valid until',delivery:'Delivery Terms',place:'Location',currency:'Currency',desc:'Description',qty:'Quantity',unit:'Unit',unitPrice:'Unit Price',subtotal:'Subtotal',total:'TOTAL',notes:'Notes',footer:'This quotation is valid for the indicated period. Prices exclude local taxes unless otherwise stated.',responsible:'Contact',units:{unidad:'Unit',kg:'Kilogram',ton:'Ton',bombona:'Barrel',caja:'Box',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
+    pt:{title:'COTAÇÃO',to:'Prezados',date:'Data',validity:'Válida até',delivery:'Condição de entrega',place:'Local',currency:'Moeda',desc:'Descrição',qty:'Quantidade',unit:'Unidade',unitPrice:'Preço unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observações',footer:'Cotação válida pelo período indicado. Preços excluem impostos locais salvo indicação.',responsible:'Responsável',units:{unidad:'Unidade',kg:'Quilograma',ton:'Tonelada',bombona:'Bombona',caja:'Caixa',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}}
   };
   const t=T[lang]||T.es;
   const validUntil=c.Fecha&&c.ValidezDias?new Date(new Date(c.Fecha).getTime()+parseInt(c.ValidezDias)*86400000).toISOString().slice(0,10):'—';
@@ -2413,66 +2215,12 @@ function generarCotizacionPDF(id){
   <div class="mi"><div class="lbl">${t.place}</div><div class="val">${c.Ubicacion||'—'}</div></div>
   ${c.Responsable?`<div class="mi"><div class="lbl">${t.responsible}</div><div class="val">${c.Responsable}</div></div>`:''}
 </div>
-${(()=>{
-  // Compute per-line flete for PDF
-  const _lc2={'20std':{maxTon:21.7},'40std':{maxTon:26.5},'40hc':{maxTon:26.5}};
-  const pdfLog=log;
-  function _pdfFlete(l){
-    const cp=parseFloat(l.cajasPallet)||0,kc=parseFloat(l.kgCaja)||0;
-    if(!cp||!kc||!pdfLog)return null;
-    const mxKg=(_lc2[pdfLog.contenedor]||_lc2['20std']).maxTon*1000;
-    const plts=Math.floor(mxKg/(kc*cp));
-    const tot=(pdfLog.resultados||{}).totalConMargen||0;
-    if(!plts||!tot)return null;
-    const fpu=tot/plts/cp;
-    return{fpu,pfl:(parseFloat(l.precio)||0)+fpu};
-  }
-  const hasFleteCol=lineas.some(l=>_pdfFlete(l));
-  const fmtM=n=>`${mon} ${n.toLocaleString('es-AR',{minimumFractionDigits:3,maximumFractionDigits:3})}`;
-  const cols=hasFleteCol?7:5;
-  return `<table><thead><tr><th>${t.desc}</th><th style="text-align:center">${t.qty}</th><th style="text-align:center">${t.unit}</th><th style="text-align:right">${t.unitPrice}</th>${hasFleteCol?`<th style="text-align:right">${t.fleteU}</th><th style="text-align:right;background:#5a1428">${t.pFlete}</th>`:''}<th style="text-align:right">${t.subtotal}</th></tr></thead>
+<table><thead><tr><th>${t.desc}</th><th style="text-align:center">${t.qty}</th><th style="text-align:center">${t.unit}</th><th style="text-align:right">${t.unitPrice}</th><th style="text-align:right">${t.subtotal}</th></tr></thead>
 <tbody>
-${lineas.map(l=>{const f=_pdfFlete(l);return`<tr><td>${l.desc||'—'}</td><td class="num">${(l.cantidad||0).toLocaleString('es-AR',{maximumFractionDigits:3})}</td><td style="text-align:center">${t.units[l.unidad]||l.unidad||'—'}</td><td class="num">${mon} ${(l.precio||0).toLocaleString('es-AR',{minimumFractionDigits:3,maximumFractionDigits:3})}</td>${hasFleteCol?`<td class="num" style="color:#888">${f?fmtM(f.fpu):'—'}</td><td class="num" style="font-weight:800">${f?fmtM(f.pfl):'—'}</td>`:''}<td class="num">${mon} ${((l.cantidad||0)*(l.precio||0)).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`;}).join('')}
-<tr class="tr-total"><td colspan="${cols-1}">${t.total}</td><td class="num">${mon} ${total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
-</tbody></table>`;
-})()}
+${lineas.map(l=>`<tr><td>${l.desc||'—'}</td><td class="num">${(l.cantidad||0).toLocaleString('es-AR',{maximumFractionDigits:3})}</td><td style="text-align:center">${t.units[l.unidad]||l.unidad||'—'}</td><td class="num">${mon} ${(l.precio||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="num">${mon} ${((l.cantidad||0)*(l.precio||0)).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join('')}
+<tr class="tr-total"><td colspan="4">${t.total}</td><td class="num">${mon} ${total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
+</tbody></table>
 ${c.Notas?`<div class="notes-box"><strong>${t.notes}:</strong> ${c.Notas}</div>`:''}
-${(()=>{
-  if(!log||!log.resultados||!log.tonelaje)return '';
-  const r=log.resultados;
-  const _lc={'20std':{label:"20' Standard",maxTon:21.7,maxM3:33},'40std':{label:"40' Standard",maxTon:26.5,maxM3:67},'40hc':{label:"40' HC",maxTon:26.5,maxM3:76}};
-  const cont=_lc[log.contenedor]||_lc['20std'];
-  const costosFijos=(log.costos||[]).filter(x=>x.activo&&!x.esPorc);
-  const costosPorc=(log.costos||[]).filter(x=>x.activo&&x.esPorc);
-  const logTitles={es:'Resumen Logístico',en:'Logistics Summary',pt:'Resumo Logístico'};
-  const logCont={es:'Contenedor',en:'Container',pt:'Contêiner'};
-  const logLoad={es:'Carga',en:'Load',pt:'Carga'};
-  const logCosts={es:'Costos',en:'Costs',pt:'Custos'};
-  const logResult={es:'Resultado',en:'Result',pt:'Resultado'};
-  const logTon={es:'USD/tonelada',en:'USD/ton',pt:'USD/tonelada'};
-  const logTotC={es:'Total costos',en:'Total costs',pt:'Total custos'};
-  const logTotM={es:'Total con margen',en:'Total with margin',pt:'Total com margem'};
-  const fmt=n=>n>0?`${mon} ${n.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}`:'—';
-  const costoRows=[...costosFijos.map(x=>`<tr><td>${x.nombre}</td><td style="text-align:right;font-family:monospace">${fmt(x.monto)}</td></tr>`),...costosPorc.map(x=>`<tr><td>${x.nombre}</td><td style="text-align:right;font-family:monospace">${x.monto}%</td></tr>`)].join('');
-  return `<div style="margin-bottom:16px;border:1px solid #e8dfe2;border-radius:6px;overflow:hidden">
-<div style="background:#7b1d3a;color:#fff;padding:8px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">${logTitles[lang]||logTitles.es}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
-<div style="padding:10px 14px;border-right:1px solid #e8dfe2">
-  <div style="font-size:10px;text-transform:uppercase;color:#888;font-weight:600;margin-bottom:6px">${logCont[lang]||logCont.es} / ${logLoad[lang]||logLoad.es}</div>
-  <div style="font-size:12px"><strong>${cont.label}</strong> (${cont.maxTon} t / ${cont.maxM3} m³)</div>
-  <div style="font-size:12px;margin-top:4px">${log.tonelaje} t cargadas — ${r.fillPct?r.fillPct.toFixed(1)+'%':''} ocupación</div>
-  ${log.tipoFlete?`<div style="font-size:11px;margin-top:4px;color:#888">${t.flete||'Modalidad'}: <strong>${log.tipoFlete}</strong></div>`:''}
-</div>
-<div style="padding:10px 14px">
-  <div style="font-size:10px;text-transform:uppercase;color:#888;font-weight:600;margin-bottom:6px">${logResult[lang]||logResult.es}</div>
-  <div style="font-size:12px">${logTotC[lang]||logTotC.es}: <strong style="font-family:monospace">${fmt(r.totalCostosBase)}</strong></div>
-  ${log.margen?`<div style="font-size:12px;margin-top:2px">${logTotM[lang]||logTotM.es}: <strong style="font-family:monospace;color:#7b1d3a">${fmt(r.totalConMargen)}</strong></div>`:''}
-  ${r.usdTon?`<div style="font-size:12px;margin-top:2px">${logTon[lang]||logTon.es}: <strong style="font-family:monospace">${fmt(r.usdTon)}</strong></div>`:''}
-</div>
-</div>
-${costoRows?`<table style="margin:0;font-size:11px"><thead><tr><th style="background:#f3e9ed;color:#7b1d3a;padding:5px 14px;text-align:left">${logCosts[lang]||logCosts.es}</th><th style="background:#f3e9ed;color:#7b1d3a;padding:5px 14px;text-align:right"></th></tr></thead><tbody>${costoRows}</tbody></table>`:''}
-</div>`;
-})()}
 ${c.NotaExtra?`<div class="notes-box" style="font-style:italic">${c.NotaExtra}</div>`:''}
 <div class="footer">${t.footer}</div>
 </div><script>window.onload=()=>window.print();<\/script></body></html>`;
