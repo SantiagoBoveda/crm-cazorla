@@ -1171,6 +1171,29 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <button onclick="closeCotizacionModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
       </div>
       <div id="cotiz-modal-body">
+        <!-- LOGOS -->
+        <div style="display:flex;gap:16px;margin-bottom:14px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Logo propio</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <img id="cz-logo-propio-preview" style="height:38px;max-width:130px;object-fit:contain;display:none;border:1px solid var(--border);border-radius:6px;padding:3px;background:#fff">
+              <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('cz-logo-propio-input').click()">📷 Subir</button>
+              <button type="button" id="cz-logo-propio-clear" class="btn btn-sm" style="display:none;color:var(--red);background:none;border:none;cursor:pointer;font-size:13px" onclick="clearLogoPropio()">✕ quitar</button>
+              <input type="file" id="cz-logo-propio-input" accept="image/*" style="display:none" onchange="handleLogoPropio(this)">
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Se guarda para todas las cotizaciones</div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Logo cliente</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <img id="cz-logo-cliente-preview" style="height:38px;max-width:130px;object-fit:contain;display:none;border:1px solid var(--border);border-radius:6px;padding:3px;background:#fff">
+              <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('cz-logo-cliente-input').click()">📷 Subir</button>
+              <button type="button" id="cz-logo-cliente-clear" class="btn btn-sm" style="display:none;color:var(--red);background:none;border:none;cursor:pointer;font-size:13px" onclick="clearLogoCliente()">✕ quitar</button>
+              <input type="file" id="cz-logo-cliente-input" accept="image/*" style="display:none" onchange="handleLogoCliente(this)">
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Aparece en el PDF de esta cotización</div>
+          </div>
+        </div>
         <div class="form-row">
           <div class="form-group"><label>Nº Cotización</label><input id="cz-num" readonly style="background:var(--surface2);font-family:var(--mono);font-weight:700;color:var(--accent)"></div>
           <div class="form-group"><label>Fecha</label><input id="cz-fecha" type="date"></div>
@@ -1648,7 +1671,7 @@ function getActiveClientId(){
   return DEFAULT_CLIENT_ID;
 }
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null,comisionistas:[],cotizaciones:[]};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null,comisionistas:[],cotizaciones:[],config:{}};
 let currentCRMModal=null;
 
 const LS_KEY = 'crm_cazorla_db';
@@ -2127,6 +2150,43 @@ function renderCotizLineas(){
    CALCULADORA EXW → CFR
 ═══════════════════════════════════════ */
 let _calcMode='envasado';
+let _logoCliente=null;
+
+function handleLogoPropio(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const b=e.target.result;
+    DB.config=DB.config||{};DB.config.logoPropio=b;saveLocal();
+    const img=document.getElementById('cz-logo-propio-preview');
+    img.src=b;img.style.display='';
+    document.getElementById('cz-logo-propio-clear').style.display='';
+  };r.readAsDataURL(file);
+}
+function clearLogoPropio(){
+  DB.config=DB.config||{};DB.config.logoPropio=null;saveLocal();
+  const img=document.getElementById('cz-logo-propio-preview');
+  img.src='';img.style.display='none';
+  document.getElementById('cz-logo-propio-clear').style.display='none';
+  document.getElementById('cz-logo-propio-input').value='';
+}
+function handleLogoCliente(input){
+  const file=input.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    _logoCliente=e.target.result;
+    const img=document.getElementById('cz-logo-cliente-preview');
+    img.src=_logoCliente;img.style.display='';
+    document.getElementById('cz-logo-cliente-clear').style.display='';
+  };r.readAsDataURL(file);
+}
+function clearLogoCliente(){
+  _logoCliente=null;
+  const img=document.getElementById('cz-logo-cliente-preview');
+  img.src='';img.style.display='none';
+  document.getElementById('cz-logo-cliente-clear').style.display='none';
+  document.getElementById('cz-logo-cliente-input').value='';
+}
 function toggleCalcEXW(){
   const body=document.getElementById('calc-exw-body');
   const icon=document.getElementById('calc-exw-icon');
@@ -2238,6 +2298,15 @@ function openCotizacionModal(id){
   if(notaExtraEl)notaExtraEl.value=cotiz?.NotaExtra||'';
   const dl=document.getElementById('cz-client-list');
   if(dl)dl.innerHTML=[...new Set((DB.clientes||[]).map(c=>c.Empresa).filter(Boolean))].map(e=>`<option value="${e}">`).join('');
+  // Logos
+  _logoCliente=cotiz?.LogoCliente||null;
+  const lp=DB.config?.logoPropio||null;
+  const lpImg=document.getElementById('cz-logo-propio-preview');
+  const lcImg=document.getElementById('cz-logo-cliente-preview');
+  if(lp){lpImg.src=lp;lpImg.style.display='';document.getElementById('cz-logo-propio-clear').style.display='';}
+  else{lpImg.src='';lpImg.style.display='none';document.getElementById('cz-logo-propio-clear').style.display='none';}
+  if(_logoCliente){lcImg.src=_logoCliente;lcImg.style.display='';document.getElementById('cz-logo-cliente-clear').style.display='';}
+  else{lcImg.src='';lcImg.style.display='none';document.getElementById('cz-logo-cliente-clear').style.display='none';}
   onCotizPaisChange();
   onCotizIncotermChange();
   renderCotizLineas();
@@ -2266,7 +2335,8 @@ function saveCotizacion(){
     Estado:document.getElementById('cz-estado').value,
     Notas:document.getElementById('cz-notas').value,
     NotaExtra:document.getElementById('cz-nota-extra')?.value||'',
-    Lineas:JSON.stringify(_cotizLineas)
+    Lineas:JSON.stringify(_cotizLineas),
+    LogoCliente:_logoCliente||''
   };
   if(!DB.cotizaciones)DB.cotizaciones=[];
   if(_editingCotizId){
@@ -2329,13 +2399,20 @@ function generarCotizacionPDF(id){
   const t=T[lang]||T.es;
   const validUntil=c.Fecha&&c.ValidezDias?new Date(new Date(c.Fecha).getTime()+parseInt(c.ValidezDias)*86400000).toISOString().slice(0,10):'—';
   const mon=c.Moneda||'USD';
-  const baseDir=window.location.href.replace(/[^/\\]*$/,'');
+  const logoPropioB64=DB.config?.logoPropio||null;
+  const logoClienteB64=c.LogoCliente||null;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t.title} ${c.NroCotizacion||''}</title>
-<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:0}.page{padding:40px 50px;max-width:800px;margin:0 auto}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #7b1d3a}.doc-title{font-size:26px;font-weight:800;color:#7b1d3a;letter-spacing:1px}.doc-num{font-size:14px;color:#555;margin-top:4px;font-weight:600}.to-block{background:#f9f6f7;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:4px solid #7b1d3a}.to-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#7b1d3a;font-weight:700}.to-val{font-size:15px;font-weight:700;margin-top:4px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;background:#f9f6f7;border-radius:8px;padding:14px;margin-bottom:20px}.mi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600}.mi .val{font-size:13px;font-weight:600;color:#222;margin-top:2px}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#7b1d3a;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}tbody tr:nth-child(even){background:#fdf8f9}tbody td{padding:9px 12px;border-bottom:1px solid #e8dfe2}.num{text-align:right;font-family:monospace}.tr-total{background:#7b1d3a!important}.tr-total td{color:#fff;font-weight:800;font-size:14px;padding:12px;font-family:monospace}.notes-box{background:#fff8f4;border:1px solid #e8dfe2;border-radius:6px;padding:12px 16px;font-size:11px;color:#555;margin-bottom:20px}.footer{text-align:center;font-size:10px;color:#999;border-top:1px solid #e8dfe2;padding-top:12px;margin-top:20px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:0}.page{padding:40px 50px;max-width:800px;margin:0 auto}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #7b1d3a}.hdr-left{display:flex;flex-direction:column;gap:4px}.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.doc-title{font-size:26px;font-weight:800;color:#7b1d3a;letter-spacing:1px}.doc-num{font-size:14px;color:#555;font-weight:600}.to-block{background:#f9f6f7;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:4px solid #7b1d3a}.to-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#7b1d3a;font-weight:700}.to-val{font-size:15px;font-weight:700;margin-top:4px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;background:#f9f6f7;border-radius:8px;padding:14px;margin-bottom:20px}.mi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600}.mi .val{font-size:13px;font-weight:600;color:#222;margin-top:2px}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#7b1d3a;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}tbody tr:nth-child(even){background:#fdf8f9}tbody td{padding:9px 12px;border-bottom:1px solid #e8dfe2}.num{text-align:right;font-family:monospace}.notes-box{background:#fff8f4;border:1px solid #e8dfe2;border-radius:6px;padding:12px 16px;font-size:11px;color:#555;margin-bottom:16px}.footer{text-align:center;font-size:10px;color:#999;border-top:1px solid #e8dfe2;padding-top:12px;margin-top:20px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
 </head><body><div class="page">
 <div class="hdr">
-  <div><img src="${baseDir}logo_cazorla.png" height="55" onerror="this.style.display='none'"><div style="font-size:16px;font-weight:800;color:#7b1d3a;margin-top:4px">GRUPO CAZORLA</div></div>
-  <div style="text-align:right"><div class="doc-title">${t.title}</div><div class="doc-num">${c.NroCotizacion||''}</div></div>
+  <div class="hdr-left">
+    ${logoPropioB64?`<img src="${logoPropioB64}" style="height:55px;max-width:160px;object-fit:contain">`:`<div style="font-size:18px;font-weight:800;color:#7b1d3a">GRUPO CAZORLA</div>`}
+  </div>
+  <div class="hdr-right">
+    ${logoClienteB64?`<img src="${logoClienteB64}" style="height:50px;max-width:150px;object-fit:contain">`:''}
+    <div class="doc-title">${t.title}</div>
+    <div class="doc-num">${c.NroCotizacion||''}</div>
+  </div>
 </div>
 <div class="to-block"><div class="to-lbl">${t.to}</div><div class="to-val">${c.Cliente||'—'}</div>${c.Pais?`<div style="color:#666;font-size:12px">${c.Pais}</div>`:''}</div>
 <div class="meta">
