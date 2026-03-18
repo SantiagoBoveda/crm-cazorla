@@ -1226,7 +1226,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <th>País</th>
         <th>Incoterm</th>
         <th>Moneda</th>
-        <th style="white-space:nowrap">Total</th>
         <th>Idioma</th>
         <th>Estado</th>
         <th style="width:90px"></th>
@@ -1268,7 +1267,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Moneda</label><select id="cz-moneda" onchange="updateCotizTotal()"><option value="USD">USD – Dólar</option><option value="EUR">EUR – Euro</option></select></div>
+          <div class="form-group"><label>Moneda</label><select id="cz-moneda"><option value="USD">USD – Dólar</option><option value="EUR">EUR – Euro</option></select></div>
           <div class="form-group"><label>Idioma del PDF</label><select id="cz-idioma"><option value="es">🇦🇷 Español</option><option value="en">🇬🇧 Inglés</option><option value="pt">🇧🇷 Portugués</option></select></div>
           <div class="form-group"><label>Responsable</label><input id="cz-responsable" list="cz-resp-list" autocomplete="off"><datalist id="cz-resp-list"><option value="Santiago"><option value="Alfonso"></datalist></div>
         </div>
@@ -1288,12 +1287,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
               </tr></thead>
               <tbody id="cotiz-lineas-body"></tbody>
             </table>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:2px solid var(--accent)">
-            <div style="text-align:right">
-              <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Total</div>
-              <div id="cotiz-total-display" style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div>
-            </div>
           </div>
         </div>
         <!-- IVA Argentina warning -->
@@ -1927,7 +1920,7 @@ const HEADERS={
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
   Novedades:['ID','Tipo','RefId','Fecha','Texto','Autor'],
-  Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','NotaExtra','Lineas','ValorTotal'],
+  Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','NotaExtra','Lineas'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11'],
   Fermentadores:['id','nombre','variedad','calibre','kg','entamada','notas','tipo'],
   Comisionistas:['Nombre']
@@ -2119,14 +2112,6 @@ function removeCotizLinea(i){_cotizLineas.splice(i,1);renderCotizLineas();}
 function updateCotizLinea(i,field,val){
   if(!_cotizLineas[i])return;
   _cotizLineas[i][field]=(field==='cantidad'||field==='precio')?parseFloat(val)||0:val;
-  updateCotizTotal();
-}
-function updateCotizTotal(){
-  const total=_cotizLineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
-  const mon=document.getElementById('cz-moneda')?.value||'USD';
-  const el=document.getElementById('cotiz-total-display');
-  if(el)el.textContent=mon+' '+total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  return total;
 }
 function renderCotizLineas(){
   const tbody=document.getElementById('cotiz-lineas-body');if(!tbody)return;
@@ -2139,7 +2124,6 @@ function renderCotizLineas(){
       <td><input type="number" value="${l.precio}" min="0" step="0.01" oninput="updateCotizLinea(${i},'precio',this.value)" style="text-align:right"></td>
       <td><button type="button" onclick="removeCotizLinea(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px">✕</button></td>
     </tr>`).join('');
-  updateCotizTotal();
 }
 /* ═══════════════════════════════════════
    CALCULADORA EXW → CFR
@@ -2269,7 +2253,6 @@ function saveCotizacion(){
   const num=document.getElementById('cz-num').value;
   const cliente=document.getElementById('cz-cliente').value.trim();
   if(!cliente){document.getElementById('cz-cliente').focus();alert('Ingresá el nombre del cliente.');return;}
-  const total=_cotizLineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
   const row={
     ID:_editingCotizId||genId(),
     NroCotizacion:num,
@@ -2285,8 +2268,7 @@ function saveCotizacion(){
     Estado:document.getElementById('cz-estado').value,
     Notas:document.getElementById('cz-notas').value,
     NotaExtra:document.getElementById('cz-nota-extra')?.value||'',
-    Lineas:JSON.stringify(_cotizLineas),
-    ValorTotal:total
+    Lineas:JSON.stringify(_cotizLineas)
   };
   if(!DB.cotizaciones)DB.cotizaciones=[];
   if(_editingCotizId){
@@ -2313,12 +2295,10 @@ function renderCotizaciones(){
   const stats=document.getElementById('cotiz-stats');
   if(stats){
     const env=data.filter(c=>c.Estado==='Enviada').length,ace=data.filter(c=>c.Estado==='Aceptada').length;
-    const totalAce=data.filter(c=>c.Estado==='Aceptada').reduce((s,c)=>s+(parseFloat(c.ValorTotal)||0),0);
     stats.innerHTML=`
       <div class="stat-card"><div class="label">Total cotizaciones</div><div class="value">${data.length}</div></div>
       <div class="stat-card"><div class="label">Enviadas</div><div class="value">${env}</div></div>
-      <div class="stat-card"><div class="label">Aceptadas</div><div class="value">${ace}</div></div>
-      <div class="stat-card"><div class="label">USD aceptado</div><div class="value">$${totalAce.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>`;
+      <div class="stat-card"><div class="label">Aceptadas</div><div class="value">${ace}</div></div>`;
   }
   if(!data.length){tb.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="icon">📝</div><p>Sin cotizaciones</p></div></td></tr>';return;}
   const eB=e=>({Borrador:'badge-blue',Enviada:'badge-yellow',Aceptada:'badge-green',Rechazada:'badge-red',Vencida:'badge-red'}[e]||'badge-blue');
@@ -2373,7 +2353,6 @@ function generarCotizacionPDF(id){
 <table><thead><tr><th>${t.desc}</th><th style="text-align:center">${t.qty}</th><th style="text-align:center">${t.unit}</th><th style="text-align:right">${t.unitPrice}</th></tr></thead>
 <tbody>
 ${lineas.map(l=>`<tr><td>${l.desc||'—'}</td><td class="num">${(l.cantidad||0).toLocaleString('es-AR',{maximumFractionDigits:3})}</td><td style="text-align:center">${t.units[l.unidad]||l.unidad||'—'}</td><td class="num">${mon} ${(l.precio||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`).join('')}
-<tr class="tr-total"><td colspan="3">${t.total}</td><td class="num">${mon} ${total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>
 </tbody></table>
 ${c.Notas?`<div class="notes-box"><strong>${t.notes}:</strong> ${c.Notas}</div>`:''}
 ${c.NotaExtra?`<div class="notes-box" style="font-style:italic">${c.NotaExtra}</div>`:''}
