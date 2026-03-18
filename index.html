@@ -1147,77 +1147,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="cards-grid" id="cotiz-stats"></div>
 
-    <!-- ══ CALCULADORA EXW → CFR ══ -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:20px">
-      <div onclick="toggleCalcEXW()" style="cursor:pointer;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:14px;user-select:none">
-        <div>
-          <span style="font-size:15px;font-weight:700;color:var(--accent)">🧮 Calculadora </span><em style="font-size:15px;font-weight:700;color:var(--green)">EXW → CFR</em>
-          <span style="font-size:11px;color:var(--muted);margin-left:10px">Costos logísticos · La Rioja → Destino</span>
-        </div>
-        <span id="calc-exw-icon" style="font-size:11px;color:var(--muted)">▼ mostrar</span>
-      </div>
-      <div id="calc-exw-body" style="display:none;padding:0 20px 20px">
-        <!-- Mode tabs -->
-        <div style="display:flex;gap:8px;margin-bottom:16px;padding-top:4px;border-top:1px solid var(--border)">
-          <button id="calc-tab-env" class="btn btn-primary btn-sm" onclick="setCalcMode('envasado')">ENVASADO</button>
-          <button id="calc-tab-gran" class="btn btn-outline btn-sm" onclick="setCalcMode('granel')">GRANEL</button>
-        </div>
-        <!-- PRODUCTO -->
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px">Producto</div>
-        <div class="form-row">
-          <div class="form-group"><label>PRECIO EXW / CAJA (USD)</label><input id="calc-precio-caja" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcEXW()"></div>
-          <div class="form-group"><label>PRECIO EXW / KG (USD)</label><input id="calc-precio-kg" type="number" min="0" step="0.001" placeholder="0.000" oninput="calcEXW()"></div>
-        </div>
-        <div class="form-row" id="calc-peso-row">
-          <div class="form-group" style="max-width:280px"><label>PESO NETO / CAJA (G)</label><input id="calc-peso-caja" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
-        </div>
-        <!-- ESTRUCTURA CONTENEDOR -->
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px;margin-top:4px">Estructura del contenedor</div>
-        <div class="form-row">
-          <div class="form-group"><label>TIPO CONTENEDOR</label><select id="calc-tipo-cont" onchange="calcEXW()"><option value="20std">20' Standard (21.7 t)</option><option value="40std">40' Standard (26.5 t)</option><option value="40hc" selected>40' HC (26.5 t)</option></select></div>
-          <div class="form-group"><label>PALLETS</label><input id="calc-pallets" type="number" min="0" step="1" placeholder="20" oninput="calcEXW()"></div>
-          <div class="form-group"><label>CAJAS / PALLET</label><input id="calc-cajas-pallet" type="number" min="0" step="1" placeholder="55" oninput="calcEXW()"></div>
-        </div>
-        <!-- COSTOS LOGÍSTICOS -->
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px;margin-top:4px">Costos logísticos (USD · por contenedor)</div>
-        <div class="form-row">
-          <div class="form-group"><label>TRANSPORTE TERRESTRE</label><input id="calc-transp" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
-          <div class="form-group"><label>GASTOS PUERTO / GATE</label><input id="calc-puerto" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label>DESPACHO ADUANA EXPORT</label><input id="calc-aduana" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
-          <div class="form-group"><label>OTROS GASTOS INTERNOS</label><input id="calc-otros" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
-        </div>
-        <!-- SEGURO Y FLETE -->
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:12px;margin-top:4px">Seguro y flete marítimo</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>SEGURO INTERNACIONAL (%)</label>
-            <input id="calc-seguro" type="number" min="0" step="0.01" placeholder="0.4" oninput="calcEXW()">
-            <small style="color:var(--muted);font-size:11px">% sobre valor EXW total</small>
-          </div>
-          <div class="form-group">
-            <label>FLETE MARÍTIMO (USD)</label>
-            <input id="calc-flete" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()">
-            <small style="color:var(--muted);font-size:11px">opcional · dejar en 0 para solo CFR inland</small>
-          </div>
-        </div>
-        <!-- RESULTADO -->
-        <div id="calc-resultado" style="background:#1c1c1c;border-radius:12px;padding:20px 24px;margin-top:12px;font-family:var(--mono);color:#e5e5e5">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#8aab6a;margin-bottom:4px;text-transform:uppercase">Resultado — Cadena de valor</div>
-          <div id="calc-res-rows"></div>
-          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid #333;flex-wrap:wrap">
-            <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888">Margen obj.</span>
-            <input id="calc-margen" type="number" min="0" step="0.1" placeholder="0" oninput="calcEXW()" style="width:70px;background:#2a2a2a;border:1px solid #444;border-radius:6px;color:#e5e5e5;padding:5px 8px;font-family:var(--mono);font-size:13px">
-            <span style="color:#888;font-size:12px">%</span>
-            <span style="margin-left:auto;font-size:11px;color:#888">Precio venta sugerido</span>
-            <span id="calc-precio-sugerido" style="font-size:20px;font-weight:800;color:#8aab6a;font-family:var(--mono)">—</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- ══ FIN CALCULADORA ══ -->
-
     <div class="table-container" style="overflow-x:auto">
       <table><thead><tr>
         <th style="white-space:nowrap">Nº Cotiz.</th>
@@ -1236,7 +1165,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 
   <!-- MODAL COTIZACION -->
   <div class="modal-overlay" id="cotiz-modal-overlay" onclick="if(event.target===this)closeCotizacionModal()">
-    <div class="modal" style="max-width:720px;width:95%" id="cotiz-modal-box">
+    <div class="modal" style="max-width:900px;width:95%" id="cotiz-modal-box">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
         <h2 id="cotiz-modal-title" style="font-size:18px;font-weight:700">Nueva Cotización</h2>
         <button onclick="closeCotizacionModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
@@ -1289,6 +1218,75 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
             </table>
           </div>
         </div>
+        <!-- ══ CALCULADORA EXW → CFR ══ -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:14px">
+          <div onclick="toggleCalcEXW()" style="cursor:pointer;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-radius:12px;user-select:none">
+            <div>
+              <span style="font-size:13px;font-weight:700;color:var(--accent)">🧮 Calculadora </span><em style="font-size:13px;font-weight:700;color:var(--green)">EXW → CFR</em>
+              <span style="font-size:11px;color:var(--muted);margin-left:8px">Costos logísticos · La Rioja → Destino</span>
+            </div>
+            <span id="calc-exw-icon" style="font-size:11px;color:var(--muted)">▼ mostrar</span>
+          </div>
+          <div id="calc-exw-body" style="display:none;padding:0 16px 16px">
+            <!-- Mode tabs -->
+            <div style="display:flex;gap:8px;margin-bottom:14px;padding-top:4px;border-top:1px solid var(--border)">
+              <button id="calc-tab-env" class="btn btn-primary btn-sm" onclick="setCalcMode('envasado')">ENVASADO</button>
+              <button id="calc-tab-gran" class="btn btn-outline btn-sm" onclick="setCalcMode('granel')">GRANEL</button>
+            </div>
+            <!-- PRODUCTO -->
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:10px">Producto</div>
+            <div class="form-row">
+              <div class="form-group"><label>PRECIO EXW / CAJA (USD)</label><input id="calc-precio-caja" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcEXW()"></div>
+              <div class="form-group"><label>PRECIO EXW / KG (USD)</label><input id="calc-precio-kg" type="number" min="0" step="0.001" placeholder="0.000" oninput="calcEXW()"></div>
+            </div>
+            <div class="form-row" id="calc-peso-row">
+              <div class="form-group" style="max-width:260px"><label>PESO NETO / CAJA (G)</label><input id="calc-peso-caja" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+            </div>
+            <!-- ESTRUCTURA CONTENEDOR -->
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:10px;margin-top:4px">Estructura del contenedor</div>
+            <div class="form-row">
+              <div class="form-group"><label>TIPO CONTENEDOR</label><select id="calc-tipo-cont" onchange="calcEXW()"><option value="20std">20' Standard (21.7 t)</option><option value="40std">40' Standard (26.5 t)</option><option value="40hc" selected>40' HC (26.5 t)</option></select></div>
+              <div class="form-group"><label>PALLETS</label><input id="calc-pallets" type="number" min="0" step="1" placeholder="20" oninput="calcEXW()"></div>
+              <div class="form-group"><label>CAJAS / PALLET</label><input id="calc-cajas-pallet" type="number" min="0" step="1" placeholder="55" oninput="calcEXW()"></div>
+            </div>
+            <!-- COSTOS LOGÍSTICOS -->
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:10px;margin-top:4px">Costos logísticos (USD · por contenedor)</div>
+            <div class="form-row">
+              <div class="form-group"><label>TRANSPORTE TERRESTRE</label><input id="calc-transp" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+              <div class="form-group"><label>GASTOS PUERTO / GATE</label><input id="calc-puerto" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+              <div class="form-group"><label>DESPACHO ADUANA EXPORT</label><input id="calc-aduana" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+              <div class="form-group"><label>OTROS GASTOS INTERNOS</label><input id="calc-otros" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()"></div>
+            </div>
+            <!-- SEGURO Y FLETE -->
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:10px;margin-top:4px">Seguro y flete marítimo</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>SEGURO INTERNACIONAL (%)</label>
+                <input id="calc-seguro" type="number" min="0" step="0.01" placeholder="0.4" oninput="calcEXW()">
+                <small style="color:var(--muted);font-size:11px">% sobre valor EXW total</small>
+              </div>
+              <div class="form-group">
+                <label>FLETE MARÍTIMO (USD)</label>
+                <input id="calc-flete" type="number" min="0" step="1" placeholder="0" oninput="calcEXW()">
+                <small style="color:var(--muted);font-size:11px">dejar en 0 para solo FOB</small>
+              </div>
+            </div>
+            <!-- RESULTADO -->
+            <div id="calc-resultado" style="background:#1c1c1c;border-radius:10px;padding:16px 20px;margin-top:8px;font-family:var(--mono);color:#e5e5e5">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#8aab6a;margin-bottom:4px;text-transform:uppercase">Resultado — Cadena de valor</div>
+              <div id="calc-res-rows"></div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid #333;flex-wrap:wrap">
+                <span style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888">Margen obj.</span>
+                <input id="calc-margen" type="number" min="0" step="0.1" placeholder="0" oninput="calcEXW()" style="width:64px;background:#2a2a2a;border:1px solid #444;border-radius:6px;color:#e5e5e5;padding:4px 8px;font-family:var(--mono);font-size:13px">
+                <span style="color:#888;font-size:12px">%</span>
+                <span style="margin-left:auto;font-size:11px;color:#888">Precio venta sugerido</span>
+                <span id="calc-precio-sugerido" style="font-size:18px;font-weight:800;color:#8aab6a;font-family:var(--mono)">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ══ FIN CALCULADORA ══ -->
+
         <!-- IVA Argentina warning -->
         <div id="cz-iva-warn" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#856404;font-weight:600;font-size:13px">⚠️ Precios sin IVA – mercado Argentina</div>
 
@@ -2300,7 +2298,7 @@ function renderCotizaciones(){
       <div class="stat-card"><div class="label">Enviadas</div><div class="value">${env}</div></div>
       <div class="stat-card"><div class="label">Aceptadas</div><div class="value">${ace}</div></div>`;
   }
-  if(!data.length){tb.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="icon">📝</div><p>Sin cotizaciones</p></div></td></tr>';return;}
+  if(!data.length){tb.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="icon">📝</div><p>Sin cotizaciones</p></div></td></tr>';return;}
   const eB=e=>({Borrador:'badge-blue',Enviada:'badge-yellow',Aceptada:'badge-green',Rechazada:'badge-red',Vencida:'badge-red'}[e]||'badge-blue');
   const lF=l=>({es:'🇦🇷',en:'🇬🇧',pt:'🇧🇷'}[l]||'🌐');
   tb.innerHTML=[...data].sort((a,b)=>(b.Fecha||'').localeCompare(a.Fecha||'')).map(c=>`<tr>
@@ -2310,7 +2308,6 @@ function renderCotizaciones(){
     <td style="font-size:12px;color:var(--muted)">${c.Pais||'—'}</td>
     <td style="font-size:12px;white-space:nowrap"><strong>${c.Condicion||'—'}</strong>${c.Ubicacion?` <span style="color:var(--muted);font-size:11px">· ${c.Ubicacion}</span>`:''}</td>
     <td style="font-family:var(--mono);font-size:11px">${c.Moneda||'USD'}</td>
-    <td style="font-family:var(--mono);font-weight:700;white-space:nowrap">${c.Moneda||'USD'} ${(parseFloat(c.ValorTotal)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
     <td style="font-size:14px;text-align:center">${lF(c.Idioma)}</td>
     <td><span class="badge ${eB(c.Estado)}">${c.Estado||'—'}</span></td>
     <td class="row-actions">
@@ -2331,7 +2328,6 @@ function generarCotizacionPDF(id){
   };
   const t=T[lang]||T.es;
   const validUntil=c.Fecha&&c.ValidezDias?new Date(new Date(c.Fecha).getTime()+parseInt(c.ValidezDias)*86400000).toISOString().slice(0,10):'—';
-  const total=lineas.reduce((s,l)=>s+(l.cantidad*l.precio),0);
   const mon=c.Moneda||'USD';
   const baseDir=window.location.href.replace(/[^/\\]*$/,'');
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t.title} ${c.NroCotizacion||''}</title>
