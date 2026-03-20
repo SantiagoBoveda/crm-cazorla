@@ -2976,11 +2976,13 @@ function openCRMModal(type){
 let _vl=[];
 function initVentaLineas(lineasJson){
   try{_vl=lineasJson?JSON.parse(lineasJson):[];}catch{_vl=[];}
-  if(!_vl.length)_vl=[{producto:'',cantidadTon:'',precioUSD:''}];
+  if(!_vl.length)_vl=[{producto:'',cantidadTon:'',unidad:'kg',precioUSD:''}];
+  // Migrar líneas viejas sin campo unidad
+  _vl.forEach(l=>{if(!l.unidad)l.unidad='kg';});
   renderVentaLineasUI();
 }
 function addVentaLinea(){
-  _vl.push({producto:'',cantidadTon:'',precioUSD:''});
+  _vl.push({producto:'',cantidadTon:'',unidad:'kg',precioUSD:''});
   renderVentaLineasUI();
 }
 function removeVentaLinea(i){
@@ -2991,9 +2993,9 @@ function removeVentaLinea(i){
 function updateVentaLinea(i,field,val){
   if(!_vl[i])return;
   _vl[i][field]=val;
-  if(field==='producto'){
-    // Select change: just recalculate, no full re-render needed
-    calcVentaLineasTotal();
+  if(field==='producto'||field==='unidad'){
+    if(field==='unidad') renderVentaLineasUI();
+    else calcVentaLineasTotal();
   } else {
     // Numeric input: update only this row's total cell to preserve focus
     const tot=(parseFloat(_vl[i].cantidadTon)||0)*(parseFloat(_vl[i].precioUSD)||0);
@@ -3004,13 +3006,19 @@ function updateVentaLinea(i,field,val){
 }
 function renderVentaLineasUI(){
   const wrap=document.getElementById('ventas-lineas-ui');if(!wrap)return;
-  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (kg)</th><th>USD/kg</th><th>Total</th><th></th></tr></thead><tbody>${
+  const UNIDADES=['kg','unidades','cajas','bolsas','pallets','litros','toneladas'];
+  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad</th><th>USD/unidad</th><th>Total</th><th></th></tr></thead><tbody>${
     _vl.map((l,i)=>{
+      const u=l.unidad||'kg';
       const tot=(parseFloat(l.cantidadTon)||0)*(parseFloat(l.precioUSD)||0);
+      const uOpts=UNIDADES.map(x=>`<option${x===u?' selected':''}>${x}</option>`).join('');
       return`<tr>
         <td><input type="text" value="${(l.producto||'').replace(/"/g,'&quot;')}" placeholder="Escribir producto…" oninput="updateVentaLinea(${i},'producto',this.value)" autocomplete="off"></td>
-        <td><input type="number" step="1" min="0" value="${l.cantidadTon||''}" placeholder="kg" oninput="updateVentaLinea(${i},'cantidadTon',this.value)"></td>
-        <td><input type="number" step="0.001" min="0" value="${l.precioUSD||''}" placeholder="$/kg" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
+        <td style="white-space:nowrap;display:flex;gap:4px;align-items:center">
+          <input type="number" step="any" min="0" value="${l.cantidadTon||''}" placeholder="0" style="width:80px" oninput="updateVentaLinea(${i},'cantidadTon',this.value)">
+          <select style="font-size:12px;padding:4px 2px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)" onchange="updateVentaLinea(${i},'unidad',this.value)">${uOpts}</select>
+        </td>
+        <td><input type="number" step="0.001" min="0" value="${l.precioUSD||''}" placeholder="USD/${u}" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
         <td class="vl-total-cell">${tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):''}</td>
         <td><button class="vl-remove" onclick="removeVentaLinea(${i})" title="Quitar línea" ${_vl.length<=1?'disabled':''}>✕</button></td>
       </tr>`;
@@ -3041,7 +3049,8 @@ function calcVentaLineasTotal(){
     if(totUSD>0){
       box.style.display='block';
       valEl.textContent='USD '+totUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-      detEl.textContent=totKg.toLocaleString('es-AR')+' kg · '+_vl.filter(l=>l.producto).map(l=>l.producto).join(' + ');
+      const cantResumen=_vl.filter(l=>l.cantidadTon).map(l=>l.cantidadTon+' '+(l.unidad||'kg')).join(' + ');
+      detEl.textContent=(cantResumen||totKg.toLocaleString('es-AR')+' kg')+' · '+_vl.filter(l=>l.producto).map(l=>l.producto).join(' + ');
     }else{box.style.display='none';}
   }
 }
