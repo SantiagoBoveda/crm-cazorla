@@ -1744,7 +1744,7 @@ function updateStorageStatus(){
   try{
     const raw = localStorage.getItem(LS_KEY);
     const size = raw ? (new Blob([raw]).size/1024).toFixed(1) : 0;
-    const total = Object.values(DB).reduce((s,a)=>s+a.length,0);
+    const total = Object.values(DB).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0);
     const dot = document.getElementById('storage-dot');
     const lbl = document.getElementById('storage-label');
     if(!dot||!lbl) return;
@@ -2808,6 +2808,7 @@ function ventaInlineEdit(id, field, value){
     }catch{}
   }
   saveLocal();
+  renderVentas();
   renderDashboard();
 }
 function _ventaProductLabel(v){
@@ -3003,15 +3004,11 @@ function updateVentaLinea(i,field,val){
 }
 function renderVentaLineasUI(){
   const wrap=document.getElementById('ventas-lineas-ui');if(!wrap)return;
-  // Rebuild product options from SMART_LIST
-  const prods=[...new Set([...((typeof SMART_LISTS!=='undefined'?SMART_LISTS.Producto:[])||[]),...(DB.inventario||[]).map(i=>i.Producto).filter(Boolean),...(typeof PRODUCTS!=='undefined'?PRODUCTS.map(p=>p.label):[])].filter(Boolean))];
-  const dlId='vl-prod-dl';
-  const dlHtml=`<datalist id="${dlId}">${prods.map(p=>`<option value="${p}">`).join('')}</datalist>`;
-  wrap.innerHTML=dlHtml+`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (kg)</th><th>USD/kg</th><th>Total</th><th></th></tr></thead><tbody>${
+  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (kg)</th><th>USD/kg</th><th>Total</th><th></th></tr></thead><tbody>${
     _vl.map((l,i)=>{
       const tot=(parseFloat(l.cantidadTon)||0)*(parseFloat(l.precioUSD)||0);
       return`<tr>
-        <td><input type="text" list="${dlId}" value="${(l.producto||'').replace(/"/g,'&quot;')}" placeholder="Escribir producto…" oninput="updateVentaLinea(${i},'producto',this.value)" autocomplete="off"></td>
+        <td><input type="text" value="${(l.producto||'').replace(/"/g,'&quot;')}" placeholder="Escribir producto…" oninput="updateVentaLinea(${i},'producto',this.value)" autocomplete="off"></td>
         <td><input type="number" step="1" min="0" value="${l.cantidadTon||''}" placeholder="kg" oninput="updateVentaLinea(${i},'cantidadTon',this.value)"></td>
         <td><input type="number" step="0.001" min="0" value="${l.precioUSD||''}" placeholder="$/kg" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
         <td class="vl-total-cell">${tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):''}</td>
@@ -3046,29 +3043,6 @@ function calcVentaLineasTotal(){
       valEl.textContent='USD '+totUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
       detEl.textContent=totKg.toLocaleString('es-AR')+' kg · '+_vl.filter(l=>l.producto).map(l=>l.producto).join(' + ');
     }else{box.style.display='none';}
-  }
-}
-function calcVentaTotal(){
-  const ton=parseFloat(document.getElementById('f-CantidadTon')?.value)||0;
-  const precioEl=document.getElementById('f-PrecioUSD');
-  const totalEl=document.getElementById('f-ValorUSD');
-  const box=document.getElementById('venta-total-display');
-  if(!box||!totalEl) return;
-  const precio=parseFloat(precioEl?.value)||0;
-  // Auto-fill total when ton × precio are both provided
-  if(ton>0 && precio>0){
-    totalEl.value=(ton*precio).toFixed(2);
-  }
-  const total=parseFloat(totalEl.value)||0;
-  if(total>0){
-    box.style.display='block';
-    document.getElementById('venta-total-value').textContent='USD '+total.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-    const detail=ton>0&&precio>0
-      ? ton.toLocaleString('es-AR')+' ton × USD '+precio.toLocaleString('es-AR')+'/ton'
-      : ton>0 ? ton.toLocaleString('es-AR')+' ton' : '';
-    document.getElementById('venta-total-detail').textContent=detail;
-  } else {
-    box.style.display='none';
   }
 }
 function closeCRMModal(){
@@ -3338,11 +3312,12 @@ function onClienteSaved(row){
       Notas: `Auto desde cliente ${empresa}`
     };
     // Evitar duplicados (comparar ignorando mayúsculas)
-    const existe = DB.contactos.find(c=>
-      c.Nombre.toLowerCase()===nombreContacto.toLowerCase() &&
-      c.Empresa.toLowerCase()===empresa.toLowerCase()
+    const existe = (DB.contactos||[]).find(c=>
+      (c.Nombre||'').toLowerCase()===nombreContacto.toLowerCase() &&
+      (c.Empresa||'').toLowerCase()===empresa.toLowerCase()
     );
     if(!existe){
+      if(!DB.contactos) DB.contactos=[];
       DB.contactos.push(contacto);
       // Refrescar contactos si esa sección está activa
       if(document.getElementById('section-contactos').classList.contains('active'))
@@ -3869,8 +3844,8 @@ function renderContactos(filter){
   if(!grid) return;
   const q = (filter !== undefined ? filter : (document.getElementById('contactos-search')?.value||'')).toLowerCase();
   const data = q
-    ? DB.contactos.filter(c=>[c.Nombre,c.Empresa,c.Cargo,c.Email1,c.Tel1,c.Pais].join(' ').toLowerCase().includes(q))
-    : DB.contactos;
+    ? (DB.contactos||[]).filter(c=>[c.Nombre,c.Empresa,c.Cargo,c.Email1,c.Tel1,c.Pais].join(' ').toLowerCase().includes(q))
+    : (DB.contactos||[]);
 
   if(!data.length){
     grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="icon">📇</div><p>'+(q?'Sin resultados para "'+q+'"':'Sin contactos aún. Se crean automáticamente al agregar un cliente con responsable.')+'</p></div>';
