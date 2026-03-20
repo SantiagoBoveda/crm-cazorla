@@ -3005,12 +3005,13 @@ function renderVentaLineasUI(){
   const wrap=document.getElementById('ventas-lineas-ui');if(!wrap)return;
   // Rebuild product options from SMART_LIST
   const prods=[...new Set([...((typeof SMART_LISTS!=='undefined'?SMART_LISTS.Producto:[])||[]),...(DB.inventario||[]).map(i=>i.Producto).filter(Boolean),...(typeof PRODUCTS!=='undefined'?PRODUCTS.map(p=>p.label):[])].filter(Boolean))];
-  const opts=prods.map(p=>`<option value="${p}">${p}</option>`).join('');
-  wrap.innerHTML=`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (kg)</th><th>USD/kg</th><th>Total</th><th></th></tr></thead><tbody>${
+  const dlId='vl-prod-dl';
+  const dlHtml=`<datalist id="${dlId}">${prods.map(p=>`<option value="${p}">`).join('')}</datalist>`;
+  wrap.innerHTML=dlHtml+`<table class="vl-table"><thead><tr><th>Producto</th><th>Cantidad (kg)</th><th>USD/kg</th><th>Total</th><th></th></tr></thead><tbody>${
     _vl.map((l,i)=>{
       const tot=(parseFloat(l.cantidadTon)||0)*(parseFloat(l.precioUSD)||0);
       return`<tr>
-        <td><select onchange="updateVentaLinea(${i},'producto',this.value)"><option value="">— Seleccionar —</option>${opts.replace(`value="${l.producto}"`,`value="${l.producto}" selected`)}</select></td>
+        <td><input type="text" list="${dlId}" value="${(l.producto||'').replace(/"/g,'&quot;')}" placeholder="Escribir producto…" oninput="updateVentaLinea(${i},'producto',this.value)" autocomplete="off"></td>
         <td><input type="number" step="1" min="0" value="${l.cantidadTon||''}" placeholder="kg" oninput="updateVentaLinea(${i},'cantidadTon',this.value)"></td>
         <td><input type="number" step="0.001" min="0" value="${l.precioUSD||''}" placeholder="$/kg" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
         <td class="vl-total-cell">${tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):''}</td>
