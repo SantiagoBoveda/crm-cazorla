@@ -101,6 +101,10 @@ body.warm .theme-thumb{left:15px}
 .ventas-grupo-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;border-bottom:none;font-size:14px;font-weight:700;color:var(--accent)}
 .ventas-grupo .table-container{border-radius:0 0 var(--radius) var(--radius)}
 .ventas-grupo-kpi{font-size:12px;font-weight:600;color:var(--muted);font-family:var(--mono)}
+.venta-inline-input{background:transparent;border:none;border-bottom:1px dashed transparent;outline:none;font:inherit;color:inherit;width:100%;min-width:60px;padding:0;cursor:text}
+.venta-inline-input:hover,.venta-inline-input:focus{border-bottom-color:var(--accent);background:var(--surface2);padding:2px 4px;border-radius:4px 4px 0 0}
+.venta-inline-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap;max-width:110px}
+.venta-inline-prod{font-size:13px;max-width:180px}
 .factura-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent) var(--surface2);border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 4px rgba(123,29,58,.06)}
 .factura-scroll-wrap::-webkit-scrollbar{height:7px}
 .factura-scroll-wrap::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
@@ -2785,6 +2789,27 @@ function renderOtrosInv(){
       <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('producto','${i.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('producto','${i.ID}')">🗑</button></td></tr>`;
   }).join('');
 }
+function _ventaProductText(v){
+  try{
+    const ls=v.Lineas?JSON.parse(v.Lineas):null;
+    if(ls&&ls.length>1) return ls.map(l=>l.producto||'').filter(Boolean).join(', ');
+    if(ls&&ls.length===1&&ls[0].producto) return ls[0].producto;
+  }catch{}
+  return v.Producto||'';
+}
+function ventaInlineEdit(id, field, value){
+  const v=(DB.ventas||[]).find(r=>r.ID===id);
+  if(!v) return;
+  v[field]=value;
+  if(field==='Producto'){
+    try{
+      const ls=v.Lineas?JSON.parse(v.Lineas):null;
+      if(ls&&ls.length===1){ls[0].producto=value;v.Lineas=JSON.stringify(ls);}
+    }catch{}
+  }
+  saveLocal();
+  renderDashboard();
+}
 function _ventaProductLabel(v){
   try{
     const ls=v.Lineas?JSON.parse(v.Lineas):null;
@@ -2824,10 +2849,10 @@ function _ventaRowHtml(v){
      ,flete>0?`−flete $${flete.toLocaleString('es-AR',{maximumFractionDigits:0})}`:''].filter(Boolean).join(' ')}</div>`
     :`<span style="color:var(--muted)">—</span>`;
   return`<tr>
-    <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap">${v.NumOrden||'—'}</td>
+    <td style="white-space:nowrap"><input class="venta-inline-input venta-inline-num" value="${(v.NumOrden||'').replace(/"/g,'&quot;')}" onchange="ventaInlineEdit('${v.ID}','NumOrden',this.value)" placeholder="—" title="Editar Nº Orden"></td>
     <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${v.Fecha||'—'}</td>
     <td><strong>${v.Cliente||'—'}</strong></td>
-    <td>${_ventaProductLabel(v)}</td>
+    <td><input class="venta-inline-input venta-inline-prod" value="${_ventaProductText(v).replace(/"/g,'&quot;')}" onchange="ventaInlineEdit('${v.ID}','Producto',this.value)" placeholder="—" title="Editar producto/concepto"></td>
     <td style="font-family:var(--mono);white-space:nowrap">${v.CantidadTon||'—'} kg</td>
     <td style="font-family:var(--mono);white-space:nowrap">$${bruto.toLocaleString()}</td>
     <td>${netaHtml}</td>
