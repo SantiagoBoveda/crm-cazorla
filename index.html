@@ -727,6 +727,8 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .cal-event-pill.cliente{background:rgba(22,163,74,.1);color:#16a34a}
 .cal-event-pill.reclamo{background:rgba(220,38,38,.1);color:#dc2626}
 .cal-event-pill.factura{background:rgba(217,119,6,.1);color:#d97706}
+.cal-event-pill.vencimiento{background:rgba(225,29,72,.12);color:#e11d48;font-weight:700}
+.cal-filter-chip[data-type=vencimiento].active{background:#e11d48;border-color:#e11d48}
 .cal-more{font-size:10px;color:var(--muted);font-weight:600;cursor:pointer;margin-top:1px}
 /* Popover */
 .cal-popover{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:0 8px 32px rgba(44,13,28,.18);z-index:500;min-width:220px;max-width:280px}
@@ -1614,6 +1616,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <span class="cal-filter-chip active" data-type="cliente" onclick="toggleCalFilter(this)">👥 Clientes</span>
     <span class="cal-filter-chip active" data-type="reclamo" onclick="toggleCalFilter(this)">⚠️ Reclamos</span>
     <span class="cal-filter-chip active" data-type="factura" onclick="toggleCalFilter(this)">🧾 Facturas</span>
+    <span class="cal-filter-chip active" data-type="vencimiento" onclick="toggleCalFilter(this)">🔔 Vencimientos</span>
   </div>
   <div class="cal-wrap">
     <div class="cal-main">
@@ -2856,7 +2859,7 @@ function _ventaRowHtml(v){
     <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${v.Fecha||'—'}</td>
     <td><strong>${v.Cliente||'—'}</strong></td>
     <td><input class="venta-inline-input venta-inline-prod" value="${_ventaProductText(v).replace(/"/g,'&quot;')}" onchange="ventaInlineEdit('${v.ID}','Producto',this.value)" placeholder="—" title="Editar producto/concepto"></td>
-    <td style="font-family:var(--mono);white-space:nowrap">${v.CantidadTon||'—'} kg</td>
+    <td style="font-family:var(--mono);white-space:nowrap">${v.CantidadTon||'—'} ${(()=>{try{const ls=v.Lineas?JSON.parse(v.Lineas):null;if(ls&&ls.length&&ls[0].unidad)return ls[0].unidad;}catch{}return 'kg';})()}</td>
     <td style="font-family:var(--mono);white-space:nowrap">$${bruto.toLocaleString()}</td>
     <td>${netaHtml}</td>
     <td style="font-size:11px;white-space:nowrap">${fpLabel}${plazoLabel}</td>
@@ -4909,12 +4912,12 @@ function hideConnectButton(){
 ═══════════════════════════════════════ */
 let _calYear  = new Date().getFullYear();
 let _calMonth = new Date().getMonth(); // 0-based
-let _calActiveFilters = new Set(['tarea','venta','cliente','reclamo','factura']);
+let _calActiveFilters = new Set(['tarea','venta','cliente','reclamo','factura','vencimiento']);
 let _calPopoverEvent  = null; // evento activo en popover
 
 const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const CAL_COLORS = {tarea:'#7b1d3a',venta:'#2563eb',cliente:'#16a34a',reclamo:'#dc2626',factura:'#d97706'};
-const CAL_SECTIONS = {tarea:'tareas',venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion'};
+const CAL_COLORS = {tarea:'#7b1d3a',venta:'#2563eb',cliente:'#16a34a',reclamo:'#dc2626',factura:'#d97706',vencimiento:'#e11d48'};
+const CAL_SECTIONS = {tarea:'tareas',venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion',vencimiento:'ventas'};
 
 /* Recolectar todos los eventos desde las secciones de la app */
 function getCalEvents(){
@@ -4979,6 +4982,34 @@ function getCalEvents(){
       meta: `${f.Cliente||''} · ${f.Moneda||'USD'} ${f.Monto||''} · ${f.Estado||''}`,
       ref: f.ID
     });
+  });
+
+  // Ventas — vencimientos de cobro (alarma)
+  DB.ventas.forEach(v=>{
+    if(['Cobrada','Cancelada'].includes(v.Etapa)) return;
+    // Múltiples cuotas
+    let cuotas=[];
+    try{cuotas=v.Vencimientos?JSON.parse(v.Vencimientos):[];}catch{}
+    if(cuotas.length>1){
+      cuotas.forEach((vc,idx)=>{
+        const d=vc._fecha||'';
+        if(!d)return;
+        const monto=v.ValorUSD&&vc.pct?(parseFloat(v.ValorUSD)*vc.pct/100).toLocaleString('es-AR',{maximumFractionDigits:0}):'';
+        events.push({
+          type:'vencimiento', date:d,
+          title:`🔔 ${v.NumOrden||v.Cliente||'Venta'} — Cuota ${idx+1}`,
+          meta:`${v.Cliente||''} · USD ${monto||v.ValorUSD||''} · ${v.Etapa||''}`,
+          ref:v.ID
+        });
+      });
+    } else if(v.FechaVencimiento){
+      events.push({
+        type:'vencimiento', date:v.FechaVencimiento,
+        title:`🔔 ${v.NumOrden||v.Cliente||'Venta'}`,
+        meta:`${v.Cliente||''} · USD ${parseFloat(v.ValorUSD||0).toLocaleString('es-AR',{maximumFractionDigits:0})} · ${v.Etapa||''}`,
+        ref:v.ID
+      });
+    }
   });
 
   return events;
@@ -5853,12 +5884,13 @@ function onClienteVentaChange(){
 }
 function generateNumOrden(categoria){
   const year=new Date().getFullYear();
+  const prefix='ORD-'+year+'-';
   const cat=(categoria||'').toLowerCase();
-  let prefix;
-  if(cat==='tomate') prefix='TOM-'+year+'-';
-  else if(cat==='aceitunas') prefix='ACE-'+year+'-';
-  else prefix='ORD-'+year+'-';
-  const nums=(DB.ventas||[]).map(v=>(v.NumOrden||'')).filter(n=>n.startsWith(prefix)).map(n=>parseInt(n.slice(prefix.length))||0);
+  // Contador independiente por categoría
+  const nums=(DB.ventas||[])
+    .filter(v=>((v.Categoria||'').toLowerCase())===cat)
+    .map(v=>(v.NumOrden||'')).filter(n=>n.startsWith(prefix))
+    .map(n=>parseInt(n.slice(prefix.length))||0);
   const next=nums.length?Math.max(...nums)+1:1;
   return prefix+String(next).padStart(2,'0');
 }
@@ -5971,6 +6003,9 @@ function generarOrdenPedido(ventaId){
   let vencimientos=[];try{vencimientos=v.Vencimientos?JSON.parse(v.Vencimientos):[];}catch{}
   const totalUSD=parseFloat(v.ValorUSD)||0;
   const totKg=parseFloat(v.CantidadTon)||0;
+  // Unidad dominante en las líneas
+  const _uCount=lineas.reduce((a,l)=>{const u=l.unidad||'kg';a[u]=(a[u]||0)+1;return a;},{});
+  const totUnit=Object.entries(_uCount).sort((a,b)=>b[1]-a[1])[0]?.[0]||'kg';
   const logoPropioB64=DB.config?.logoPropio||null;
   const baseDir=window.location.href.replace(/[^/\\]*$/,'');
 
@@ -6055,7 +6090,7 @@ table.info td.lbl{font-weight:700;background:#fafafa;width:140px;color:#555;font
     <td class="lbl">Total</td><td></td>
   </tr></thead>
   <tbody>${lineasHTML}</tbody>
-  ${lineas.length>1?`<tr><td class="lbl">TOTALES</td><td></td><td class="lbl">Total kg</td><td><strong>${totKg.toLocaleString('es-AR')} kg</strong></td><td></td><td></td><td class="lbl">Total USD</td><td><strong style="color:#7b1d3a">USD ${totalUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td></tr>`:''}
+  ${lineas.length>1?`<tr><td class="lbl">TOTALES</td><td></td><td class="lbl">Total ${totUnit}</td><td><strong>${totKg.toLocaleString('es-AR')} ${totUnit}</strong></td><td></td><td></td><td class="lbl">Total USD</td><td><strong style="color:#7b1d3a">USD ${totalUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td></tr>`:''}
   ${comisionInfo?`<tr><td class="lbl">Comisionista</td><td colspan="7">${comisionInfo}</td></tr>`:''}
   ${v.GastoFlete?`<tr><td class="lbl">Gasto flete</td><td colspan="7">USD ${parseFloat(v.GastoFlete).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`:''}
   ${v.Notas?`<tr><td class="lbl">Notas</td><td colspan="7">${v.Notas}</td></tr>`:''}
