@@ -3,34 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM Interno - Cazorla</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
-/* ══ TEMA CLARO BORRAVINO (default) ══ */
+/* ══ TEMA CLARO CAZORLA (default) ══ */
 :root{
-  --bg:#f5f4f2;--surface:#ffffff;--surface2:#f0eeed;--surface3:#ede9e8;
-  --accent:#7b1d3a;--accent2:#9e2a4a;--green:#16a34a;--yellow:#b45309;
-  --red:#dc2626;--text:#1a1014;--muted:#7a6272;--border:#ddd0d5;
-  --border2:#c9b8bf;--text2:#5c4455;--text3:#a0889a;
-  --purple:#7b1d3a;--radius:12px;
-  --mono:'DM Mono',monospace;--sans:'Segoe UI',sans-serif;
-  --sidebar-bg:#2c0d1c;
-  --sidebar-text:#f0e4ea;--sidebar-muted:#b08090;--sidebar-border:#4a1a2e;
-  --sidebar-active-bg:#4a1a2e;--sidebar-active-text:#f8c8d8;
+  --bg:#f5f0e6;--surface:#ffffff;--surface2:#f0ebe0;--surface3:#ebe4d8;
+  --accent:#a7001d;--accent2:#c8001f;--green:#6b7215;--yellow:#b45309;
+  --red:#db473c;--text:#1a0f09;--muted:#6e5f4e;--border:#dad0be;
+  --border2:#c4b8a5;--text2:#5c4e3a;--text3:#9e8e78;
+  --purple:#a7001d;--radius:12px;
+  --mono:'DM Mono',monospace;--sans:'Instrument Sans','Segoe UI',sans-serif;
+  --sidebar-bg:#22080e;
+  --sidebar-text:#f0e2d8;--sidebar-muted:#9e7870;--sidebar-border:#48141e;
+  --sidebar-active-bg:#48141e;--sidebar-active-text:#f8ccc0;
 }
-/* ══ TEMA OSCURO (toggle) ══ */
+/* ══ TEMA OSCURO CAZORLA (toggle) ══ */
 body.warm{
-  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--surface3:#1f2435;
-  --accent:#c9536e;--accent2:#a8334f;--green:#10b981;--yellow:#f59e0b;
-  --red:#ef4444;--text:#e2e8f0;--muted:#64748b;--border:#2d3148;
-  --border2:#2e3450;--text2:#8892b0;--text3:#4a5270;
-  --purple:#c084fc;--sidebar-bg:#1e0a14;
-  --sidebar-text:#f0e4ea;--sidebar-muted:#8a6070;--sidebar-border:#3a1225;
-  --sidebar-active-bg:#3a1225;--sidebar-active-text:#f8c8d8;
+  --bg:#0f1008;--surface:#191b0d;--surface2:#212410;--surface3:#1e210e;
+  --accent:#e05040;--accent2:#b83028;--green:#8a9830;--yellow:#f59e0b;
+  --red:#ef5540;--text:#e5e0d0;--muted:#707558;--border:#2e3018;
+  --border2:#3a3e20;--text2:#8a9060;--text3:#4c5230;
+  --purple:#e05040;--sidebar-bg:#160308;
+  --sidebar-text:#f0e0d8;--sidebar-muted:#8a7080;--sidebar-border:#3a1218;
+  --sidebar-active-bg:#3a1218;--sidebar-active-text:#f8c8c0;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;transition:background .3s,color .3s}
@@ -40,19 +41,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .sidebar::-webkit-scrollbar{width:4px}
 .sidebar::-webkit-scrollbar-track{background:transparent}
 .sidebar::-webkit-scrollbar-thumb{background:var(--sidebar-border);border-radius:4px}
-.sidebar::-webkit-scrollbar-thumb:hover{background:#4a1a2e}
+.sidebar::-webkit-scrollbar-thumb:hover{background:#48141e}
 .logo{padding:0 20px 24px;border-bottom:1px solid var(--sidebar-border);margin-bottom:16px}
-.logo h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,#f8c8d8,#e88aa8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo h2{font-size:18px;font-weight:700;background:linear-gradient(135deg,#f8d8c0,#db473c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .logo p{font-size:11px;color:var(--sidebar-muted);margin-top:2px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;font-size:13px;color:var(--sidebar-muted);border-left:3px solid transparent}
 .nav-item:hover{background:var(--sidebar-active-bg);color:var(--sidebar-text)}
-.nav-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);border-left-color:#e88aa8}
+.nav-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);border-left-color:#db473c}
 .nav-item .icon{font-size:16px;width:20px;text-align:center}
 .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--sidebar-border)}
 
 /* ══ THEME TOGGLE ══ */
 .theme-toggle{display:flex;align-items:center;gap:8px;padding:7px 12px;margin:0 12px 10px;border-radius:8px;border:1px solid var(--sidebar-border);background:var(--sidebar-active-bg);cursor:pointer;font-size:11px;color:var(--sidebar-muted);transition:all .2s;user-select:none}
-.theme-toggle:hover{border-color:#e88aa8;color:#f8c8d8}
+.theme-toggle:hover{border-color:#db473c;color:#f8ccc0}
 .theme-track{width:28px;height:15px;border-radius:8px;background:var(--sidebar-border);position:relative;transition:background .3s;flex-shrink:0}
 body.warm .theme-track{background:var(--accent)}
 .theme-thumb{width:11px;height:11px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
@@ -90,11 +91,11 @@ body.warm .theme-thumb{left:15px}
 
 /* ══ CARDS / TABLES ══ */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 4px rgba(123,29,58,.06)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 1px 4px rgba(167,0,29,.06)}
 .stat-card .label{font-size:12px;color:var(--muted);margin-bottom:8px}
 .stat-card .value{font-size:28px;font-weight:700;color:var(--accent)}
 .stat-card .sub{font-size:12px;color:var(--green);margin-top:4px}
-.table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(123,29,58,.06)}
+.table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:0 1px 4px rgba(167,0,29,.06)}
 #section-facturacion .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 #section-ventas .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .ventas-grupo{margin-bottom:28px}
@@ -105,10 +106,10 @@ body.warm .theme-thumb{left:15px}
 .venta-inline-input:hover,.venta-inline-input:focus{border-bottom-color:var(--accent);background:var(--surface2);padding:2px 4px;border-radius:4px 4px 0 0}
 .venta-inline-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap;max-width:110px}
 .venta-inline-prod{font-size:13px;max-width:180px}
-.factura-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent) var(--surface2);border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 4px rgba(123,29,58,.06)}
+.factura-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:var(--accent) var(--surface2);border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 4px rgba(167,0,29,.06)}
 .factura-scroll-wrap::-webkit-scrollbar{height:7px}
 .factura-scroll-wrap::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
-.factura-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(123,29,58,.4);border-radius:4px}
+.factura-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(167,0,29,.4);border-radius:4px}
 .factura-scroll-wrap::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 .factura-scroll-wrap table thead th{position:sticky;top:0;background:var(--surface);z-index:1}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
@@ -116,13 +117,13 @@ body.warm .theme-thumb{left:15px}
 table{width:100%;border-collapse:collapse}
 th{background:var(--surface2);padding:10px 16px;text-align:left;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
 td{padding:12px 16px;font-size:13px;border-top:1px solid var(--border);color:var(--text)}
-tr:hover td{background:rgba(123,29,58,.04)}
+tr:hover td{background:rgba(167,0,29,.04)}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.badge-green{background:rgba(22,163,74,.12);color:#15803d}
+.badge-green{background:rgba(107,114,21,.13);color:#5a6012}
 .badge-yellow{background:rgba(180,83,9,.12);color:#b45309}
-.badge-red{background:rgba(220,38,38,.12);color:#dc2626}
-.badge-blue{background:rgba(123,29,58,.1);color:var(--accent2)}
-.badge-purple{background:rgba(123,29,58,.12);color:var(--accent)}
+.badge-red{background:rgba(219,71,60,.14);color:#c03828}
+.badge-blue{background:rgba(167,0,29,.1);color:var(--accent2)}
+.badge-purple{background:rgba(167,0,29,.12);color:var(--accent)}
 .btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
 .btn-primary{background:var(--accent);color:white}
 .btn-primary:hover{background:var(--accent2)}
@@ -230,9 +231,9 @@ body.warm .table-wrap tr:hover td{background:rgba(217,119,6,.04)}
 .cumpl-badge.mid{background:rgba(245,183,49,.15);color:var(--yellow)}
 .cumpl-badge.low{background:rgba(242,87,87,.15);color:var(--red)}
 .cumpl-badge.none{background:rgba(74,82,112,.2);color:var(--text3)}
-.table-wrap tr.subtotal-row td{background:rgba(123,29,58,.05);font-weight:700;border-top:1px solid var(--border2);font-size:11px;color:var(--text2)}
+.table-wrap tr.subtotal-row td{background:rgba(167,0,29,.05);font-weight:700;border-top:1px solid var(--border2);font-size:11px;color:var(--text2)}
 .table-wrap tr.subtotal-row td:first-child{color:var(--accent);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
-.table-wrap tr.total-row td{background:rgba(123,29,58,.08);font-weight:800;border-top:2px solid var(--border2);color:var(--accent);font-size:12px}
+.table-wrap tr.total-row td{background:rgba(167,0,29,.08);font-weight:800;border-top:2px solid var(--border2);color:var(--accent);font-size:12px}
 body.warm .table-wrap tr.total-row td{background:rgba(217,119,6,.07)}
 .table-wrap tr.total-row td:first-child{color:var(--accent);font-family:var(--sans)}
 .btn-export{padding:8px 18px;background:rgba(0,201,141,.12);border:1px solid rgba(0,201,141,.35);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:7px}
@@ -416,8 +417,8 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 
 /* ══ CONTACTOS ══ */
 .contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:4px}
-.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;transition:box-shadow .2s;box-shadow:0 1px 4px rgba(123,29,58,.06)}
-.contact-card:hover{box-shadow:0 4px 16px rgba(123,29,58,.12);border-color:var(--border2)}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;transition:box-shadow .2s;box-shadow:0 1px 4px rgba(167,0,29,.06)}
+.contact-card:hover{box-shadow:0 4px 16px rgba(167,0,29,.12);border-color:var(--border2)}
 .contact-card-header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .contact-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0}
 .contact-name{font-size:15px;font-weight:700;color:var(--text)}
@@ -441,7 +442,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 
 /* ══ MOBILE HAMBURGER ══ */
 .hamburger{display:none;position:fixed;top:12px;left:12px;z-index:400;width:42px;height:42px;border-radius:10px;background:var(--sidebar-bg);border:1px solid var(--sidebar-border);align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:5px;padding:11px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.hamburger span{display:block;width:20px;height:2px;background:#f8c8d8;border-radius:2px;transition:all .25s}
+.hamburger span{display:block;width:20px;height:2px;background:#f8ccc0;border-radius:2px;transition:all .25s}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:198;backdrop-filter:blur(2px)}
 
 /* ══ DESKTOP (≥769px): layout normal ══ */
@@ -596,7 +597,7 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 .inv-subtabs{display:flex;gap:6px}
 .inv-stab{padding:6px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
 .inv-stab:hover{border-color:var(--border2);color:var(--text)}
-.inv-stab.active{background:rgba(123,29,58,.1);border-color:var(--accent);color:var(--accent)}
+.inv-stab.active{background:rgba(167,0,29,.1);border-color:var(--accent);color:var(--accent)}
 .inv-subpanel{display:none}.inv-subpanel.active{display:block}
 .inv-tomsub-panel{display:none}.inv-tomsub-panel.active{display:block}
 #cotiz-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
@@ -686,8 +687,8 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .rubro-picker{border:1px solid var(--border);border-radius:8px;background:var(--surface2);overflow:hidden;margin-top:0}
 .rubro-picker-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--text);user-select:none}
 .rubro-picker-item:not(:last-child){border-bottom:1px solid var(--border)}
-.rubro-picker-item:hover{background:rgba(123,29,58,.06)}
-.rubro-picker-item.checked{background:rgba(123,29,58,.1)}
+.rubro-picker-item:hover{background:rgba(167,0,29,.06)}
+.rubro-picker-item.checked{background:rgba(167,0,29,.1)}
 .rubro-picker-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
 .rubro-picker-item .rubro-emoji{font-size:15px;width:22px;text-align:center;flex-shrink:0}
 .rubro-picker-empty{padding:10px 12px;font-size:12px;color:var(--muted);font-style:italic}
@@ -705,9 +706,9 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .cal-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .cal-filter-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--muted);background:var(--surface2)}
 .cal-filter-chip.active{color:#fff}
-.cal-filter-chip[data-type=tarea].active{background:#7b1d3a;border-color:#7b1d3a}
-.cal-filter-chip[data-type=venta].active{background:#2563eb;border-color:#2563eb}
-.cal-filter-chip[data-type=cliente].active{background:#16a34a;border-color:#16a34a}
+.cal-filter-chip[data-type=tarea].active{background:#a7001d;border-color:#a7001d}
+.cal-filter-chip[data-type=venta].active{background:#a7001d;border-color:#a7001d}
+.cal-filter-chip[data-type=cliente].active{background:#6b7215;border-color:#6b7215}
 .cal-filter-chip[data-type=reclamo].active{background:#dc2626;border-color:#dc2626}
 .cal-filter-chip[data-type=factura].active{background:#d97706;border-color:#d97706}
 .cal-grid{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;width:100%}
@@ -715,16 +716,16 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .cal-dow{padding:8px 4px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr)}
 .cal-day{min-height:90px;padding:6px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;position:relative;vertical-align:top}
-.cal-day:hover{background:rgba(123,29,58,.04)}
+.cal-day:hover{background:rgba(167,0,29,.04)}
 .cal-day.other-month{background:var(--surface2);opacity:.5}
 .cal-day.today .cal-day-num{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
 .cal-day-num{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
 .cal-event-pill{display:flex;align-items:center;gap:4px;padding:2px 5px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;transition:opacity .1s}
 .cal-event-pill:hover{opacity:.8}
 .cal-event-pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.cal-event-pill.tarea{background:rgba(123,29,58,.12);color:#7b1d3a}
-.cal-event-pill.venta{background:rgba(37,99,235,.1);color:#2563eb}
-.cal-event-pill.cliente{background:rgba(22,163,74,.1);color:#16a34a}
+.cal-event-pill.tarea{background:rgba(167,0,29,.12);color:#a7001d}
+.cal-event-pill.venta{background:rgba(167,0,29,.1);color:#a7001d}
+.cal-event-pill.cliente{background:rgba(107,114,21,.1);color:#6b7215}
 .cal-event-pill.reclamo{background:rgba(220,38,38,.1);color:#dc2626}
 .cal-event-pill.factura{background:rgba(217,119,6,.1);color:#d97706}
 .cal-event-pill.vencimiento{background:rgba(225,29,72,.12);color:#e11d48;font-weight:700}
@@ -756,7 +757,7 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .historial-add button:hover{opacity:.85}
 .historial-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .historial-entry{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative}
-.historial-entry:first-child{border-color:var(--accent);background:rgba(123,29,58,.04)}
+.historial-entry:first-child{border-color:var(--accent);background:rgba(167,0,29,.04)}
 .historial-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px}
 .historial-fecha{font-size:10px;font-weight:700;font-family:var(--mono);color:var(--accent)}
 .historial-autor{font-size:10px;color:var(--muted)}
@@ -771,12 +772,12 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .storage-dot.warn{background:var(--yellow)}
 .backup-btns{display:flex;gap:5px}
 .btn-backup{flex:1;padding:6px 4px;border-radius:7px;border:1px solid var(--sidebar-border);background:var(--sidebar-active-bg);color:var(--sidebar-muted);font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;white-space:nowrap}
-.btn-backup:hover{border-color:#e88aa8;color:#f8c8d8}
+.btn-backup:hover{border-color:#db473c;color:#f8ccc0}
 .btn-backup.sheets-btn{border-color:rgba(22,163,74,.3);color:#16a34a}
 .btn-backup.sheets-btn:hover{background:rgba(22,163,74,.1);border-color:#16a34a}
 .row-actions{white-space:nowrap;text-align:right;padding-right:12px!important}
 .btn-row-edit,.btn-row-del{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;font-size:13px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
-.btn-row-edit:hover{background:rgba(123,29,58,.08);border-color:var(--border);color:var(--accent)}
+.btn-row-edit:hover{background:rgba(167,0,29,.08);border-color:var(--border);color:var(--accent)}
 .btn-row-del:hover{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red)}
 tr:not(:hover) .btn-row-edit, tr:not(:hover) .btn-row-del{opacity:0}
 tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
@@ -969,7 +970,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <button id="btn-connect-google" onclick="connectGoogleFromSidebar()"
       style="margin-top:10px;width:100%;padding:8px;background:rgba(255,255,255,.06);border:1px solid var(--sidebar-border);border-radius:8px;color:var(--sidebar-muted);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s"
-      onmouseover="this.style.borderColor='#e88aa8';this.style.color='#f8c8d8'"
+      onmouseover="this.style.borderColor='#db473c';this.style.color='#f8ccc0'"
       onmouseout="this.style.borderColor='var(--sidebar-border)';this.style.color='var(--sidebar-muted)'">
       <svg width="13" height="13" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       Conectar Google
@@ -1938,11 +1939,11 @@ function continueOffline(){
 }
 
 const HEADERS={
-  Clientes:['ID','Empresa','Contacto','Cargo','Telefono','Telefono2','Email','Email2','Pais','Direccion','Rubro','Estado','UltimaInteraccion','Notas'],
+  Clientes:['ID','Empresa','Contacto','Cargo','Telefono','Telefono2','Email','Email2','Pais','Direccion','DomicilioReal','DomicilioLegal','CUIT','Rubro','Estado','UltimaInteraccion','Notas'],
   Proyectos:['ID','Nombre','Cliente','Producto','ValorUSD','Etapa','Responsable','FechaInicio','FechaEstimada','Notas'],
   Tareas:['ID','Titulo','Descripcion','Asignado','Prioridad','Estado','FechaVenc'],
   Inventario:['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],
-  Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Categoria','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Vencimientos','DireccionCliente','FechaRetiro','LugarEntrega','EstadoCuenta','NombreTransporte','DatosTractor','DatosSemiremolque','DatoChofer','Comisionista','PorcentajeComision','GastoFlete','Etapa','Responsable','Notas','Lineas'],
+  Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Categoria','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Vencimientos','DireccionCliente','DomicilioRealCliente','DomicilioLegalCliente','CUITCliente','Adquirente','DomicilioRealAdquirente','DomicilioLegalAdquirente','CUITAdquirente','FechaRetiro','LugarEntrega','EstadoCuenta','NombreTransporte','DatosTractor','DatosSemiremolque','DatoChofer','Comisionista','PorcentajeComision','GastoFlete','Etapa','Responsable','Notas','Lineas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
   Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','DiasVenc','EstadoFactura','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','FacturaFileId','FacturaFileName','FacturaTransFileId','FacturaTransFileName','Notas'],
   Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
@@ -2399,21 +2400,23 @@ function generarCotizacionPDF(id){
   const lang=c.Idioma||'es';
   let lineas=[];try{lineas=JSON.parse(c.Lineas||'[]');}catch{}
   const T={
-    es:{title:'COTIZACIÓN',to:'Señores',date:'Fecha',validity:'Válida hasta',delivery:'Condición de venta',place:'Lugar',currency:'Moneda',desc:'Descripción',qty:'Cantidad',unit:'Unidad',unitPrice:'Precio unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observaciones',footer:'Cotización válida por el período indicado. Precios no incluyen impuestos locales salvo indicación.',responsible:'Responsable',units:{unidad:'Unidad',kg:'Kilogramo',ton:'Tonelada',bombona:'Bombona',caja:'Caja',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
-    en:{title:'QUOTATION',to:'Dear',date:'Date',validity:'Valid until',delivery:'Delivery Terms',place:'Location',currency:'Currency',desc:'Description',qty:'Quantity',unit:'Unit',unitPrice:'Unit Price',subtotal:'Subtotal',total:'TOTAL',notes:'Notes',footer:'This quotation is valid for the indicated period. Prices exclude local taxes unless otherwise stated.',responsible:'Contact',units:{unidad:'Unit',kg:'Kilogram',ton:'Ton',bombona:'Barrel',caja:'Box',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
-    pt:{title:'COTAÇÃO',to:'Prezados',date:'Data',validity:'Válida até',delivery:'Condição de entrega',place:'Local',currency:'Moeda',desc:'Descrição',qty:'Quantidade',unit:'Unidade',unitPrice:'Preço unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observações',footer:'Cotação válida pelo período indicado. Preços excluem impostos locais salvo indicação.',responsible:'Responsável',units:{unidad:'Unidade',kg:'Quilograma',ton:'Tonelada',bombona:'Bombona',caja:'Caixa',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}}
+    es:{title:'COTIZACIÓN',to:'Señores',date:'Fecha',validity:'Válida hasta',delivery:'Condición de venta',place:'Lugar',currency:'Moneda',desc:'Descripción',qty:'Cantidad',unit:'Unidad',unitPrice:'Precio unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observaciones',footer:'Cotización válida por el período indicado. Precios no incluyen impuestos locales salvo indicación.',responsible:'Responsable',taxId:'CUIT / Id. tributaria',domReal:'Domicilio real',domLegal:'Domicilio legal',fiscalTitle:'Datos fiscales',units:{unidad:'Unidad',kg:'Kilogramo',ton:'Tonelada',bombona:'Bombona',caja:'Caja',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
+    en:{title:'QUOTATION',to:'Dear',date:'Date',validity:'Valid until',delivery:'Delivery Terms',place:'Location',currency:'Currency',desc:'Description',qty:'Quantity',unit:'Unit',unitPrice:'Unit Price',subtotal:'Subtotal',total:'TOTAL',notes:'Notes',footer:'This quotation is valid for the indicated period. Prices exclude local taxes unless otherwise stated.',responsible:'Contact',taxId:'Tax ID',domReal:'Real address',domLegal:'Legal domicile',fiscalTitle:'Tax information',units:{unidad:'Unit',kg:'Kilogram',ton:'Ton',bombona:'Barrel',caja:'Box',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}},
+    pt:{title:'COTAÇÃO',to:'Prezados',date:'Data',validity:'Válida até',delivery:'Condição de entrega',place:'Local',currency:'Moeda',desc:'Descrição',qty:'Quantidade',unit:'Unidade',unitPrice:'Preço unit.',subtotal:'Subtotal',total:'TOTAL',notes:'Observações',footer:'Cotação válida pelo período indicado. Preços excluem impostos locais salvo indicação.',responsible:'Responsável',taxId:'CNPJ / Id. fiscal',domReal:'Endereço real',domLegal:'Domicílio legal',fiscalTitle:'Dados fiscais',units:{unidad:'Unidade',kg:'Quilograma',ton:'Tonelada',bombona:'Bombona',caja:'Caixa',pallet:'Pallet'},inco:{FCA:'FCA – Free Carrier',FOB:'FOB – Free On Board',CFR:'CFR – Cost & Freight',DDP:'DDP – Delivered Duty Paid'}}
   };
   const t=T[lang]||T.es;
   const validUntil=c.Fecha&&c.ValidezDias?new Date(new Date(c.Fecha).getTime()+parseInt(c.ValidezDias)*86400000).toISOString().slice(0,10):'—';
   const mon=c.Moneda||'USD';
   const logoPropioB64=DB.config?.logoPropio||null;
   const logoClienteB64=c.LogoCliente||null;
+  const cliData=(DB.clientes||[]).find(x=>(x.Empresa||'').toLowerCase()===(c.Cliente||'').toLowerCase());
+  const hasFiscal=cliData?.CUIT||cliData?.DomicilioReal||cliData?.DomicilioLegal;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t.title} ${c.NroCotizacion||''}</title>
-<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:0}.page{padding:40px 50px;max-width:800px;margin:0 auto}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #7b1d3a}.hdr-left{display:flex;flex-direction:column;gap:4px}.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.doc-title{font-size:26px;font-weight:800;color:#7b1d3a;letter-spacing:1px}.doc-num{font-size:14px;color:#555;font-weight:600}.to-block{background:#f9f6f7;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:4px solid #7b1d3a}.to-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#7b1d3a;font-weight:700}.to-val{font-size:15px;font-weight:700;margin-top:4px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;background:#f9f6f7;border-radius:8px;padding:14px;margin-bottom:20px}.mi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600}.mi .val{font-size:13px;font-weight:600;color:#222;margin-top:2px}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#7b1d3a;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}tbody tr:nth-child(even){background:#fdf8f9}tbody td{padding:9px 12px;border-bottom:1px solid #e8dfe2}.num{text-align:right;font-family:monospace}.notes-box{background:#fff8f4;border:1px solid #e8dfe2;border-radius:6px;padding:12px 16px;font-size:11px;color:#555;margin-bottom:16px}.footer{text-align:center;font-size:10px;color:#999;border-top:1px solid #e8dfe2;padding-top:12px;margin-top:20px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:0}.page{padding:40px 50px;max-width:800px;margin:0 auto}.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:3px solid #a7001d}.hdr-left{display:flex;flex-direction:column;gap:4px}.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.doc-title{font-size:26px;font-weight:800;color:#a7001d;letter-spacing:1px}.doc-num{font-size:14px;color:#555;font-weight:600}.to-block{background:#f9f5ee;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:4px solid #a7001d}.to-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#a7001d;font-weight:700}.to-val{font-size:15px;font-weight:700;margin-top:4px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 24px;background:#f9f5ee;border-radius:8px;padding:14px;margin-bottom:20px}.mi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:600}.mi .val{font-size:13px;font-weight:600;color:#222;margin-top:2px}table{width:100%;border-collapse:collapse;margin-bottom:16px}thead th{background:#a7001d;color:#fff;padding:9px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}tbody tr:nth-child(even){background:#fdf9f0}tbody td{padding:9px 12px;border-bottom:1px solid #e8dfe2}.num{text-align:right;font-family:monospace}.notes-box{background:#fff8f4;border:1px solid #e8dfe2;border-radius:6px;padding:12px 16px;font-size:11px;color:#555;margin-bottom:16px}.footer{text-align:center;font-size:10px;color:#999;border-top:1px solid #e8dfe2;padding-top:12px;margin-top:20px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
 </head><body><div class="page">
 <div class="hdr">
   <div class="hdr-left">
-    ${logoPropioB64?`<img src="${logoPropioB64}" style="height:55px;max-width:160px;object-fit:contain">`:`<div style="font-size:18px;font-weight:800;color:#7b1d3a">GRUPO CAZORLA</div>`}
+    ${logoPropioB64?`<img src="${logoPropioB64}" style="height:55px;max-width:160px;object-fit:contain">`:`<div style="font-size:18px;font-weight:800;color:#a7001d">GRUPO CAZORLA</div>`}
   </div>
   <div class="hdr-right">
     ${logoClienteB64?`<img src="${logoClienteB64}" style="height:50px;max-width:150px;object-fit:contain">`:''}
@@ -2422,6 +2425,7 @@ function generarCotizacionPDF(id){
   </div>
 </div>
 <div class="to-block"><div class="to-lbl">${t.to}</div><div class="to-val">${c.Cliente||'—'}</div>${c.Pais?`<div style="color:#666;font-size:12px">${c.Pais}</div>`:''}</div>
+${hasFiscal?`<div class="to-block" style="margin-top:-10px;padding-top:10px;border-left-color:#bbb"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a7001d;margin-bottom:8px">${t.fiscalTitle}</div>${cliData.CUIT?`<div style="display:flex;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:#888;min-width:140px;flex-shrink:0">${t.taxId}</span><span>${cliData.CUIT}</span></div>`:''}${cliData.DomicilioReal?`<div style="display:flex;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:#888;min-width:140px;flex-shrink:0">${t.domReal}</span><span>${cliData.DomicilioReal}</span></div>`:''}${cliData.DomicilioLegal?`<div style="display:flex;gap:8px"><span style="font-size:10px;color:#888;min-width:140px;flex-shrink:0">${t.domLegal}</span><span>${cliData.DomicilioLegal}</span></div>`:''}</div>`:''}
 <div class="meta">
   <div class="mi"><div class="lbl">${t.date}</div><div class="val">${c.Fecha||'—'}</div></div>
   <div class="mi"><div class="lbl">${t.validity}</div><div class="val">${validUntil}</div></div>
@@ -2554,7 +2558,7 @@ function _renderDashCharts(stocks,ventas){
   const cv=document.getElementById('chart-ventas');
   if(cv){
     if(window._dChV)window._dChV.destroy();
-    window._dChV=new Chart(cv,{type:'bar',data:{labels:sortedM.length?mLabels:['Sin datos'],datasets:[{label:'USD',data:sortedM.length?sortedM.map(m=>monthMap[m]):[0],backgroundColor:'rgba(123,29,58,.75)',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#94a3b8',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(255,255,255,.05)'}}}}});
+    window._dChV=new Chart(cv,{type:'bar',data:{labels:sortedM.length?mLabels:['Sin datos'],datasets:[{label:'USD',data:sortedM.length?sortedM.map(m=>monthMap[m]):[0],backgroundColor:'rgba(167,0,29,.75)',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#94a3b8',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(255,255,255,.05)'}}}}});
   }
   // Chart 2: Stock aceitunas apilado
   const cc=document.getElementById('chart-clientes');
@@ -2579,7 +2583,7 @@ function renderClientes(){
       <td><strong>${c.Empresa||'—'}</strong></td>
       <td>${c.Contacto||'—'}${c.Cargo?`<div style="font-size:11px;color:var(--muted)">${c.Cargo}</div>`:''}</td>
       <td>${c.Pais||'—'}</td>
-      <td>${(c.Rubro||'').split(',').filter(Boolean).map(r=>`<span style="display:inline-block;background:rgba(123,29,58,.08);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:11px;margin:1px">${r.trim()}</span>`).join('')||'—'}</td>
+      <td>${(c.Rubro||'').split(',').filter(Boolean).map(r=>`<span style="display:inline-block;background:rgba(167,0,29,.08);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:11px;margin:1px">${r.trim()}</span>`).join('')||'—'}</td>
       <td>${telHtml}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${emailHtml}</td>
       <td><span class="badge badge-${estadoBadge}">${c.Estado||'—'}</span></td>
@@ -2595,7 +2599,7 @@ function renderProyectos(){
   if(!DB.proyectos.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📁</div><p>Sin proyectos</p></div></td></tr>';return;}
   tb.innerHTML=DB.proyectos.map(p=>{
     const novCount=(DB.novedades||[]).filter(n=>n.Tipo==='proyecto'&&n.RefId===p.ID).length;
-    const novBadge=novCount?`<span style="margin-left:6px;background:rgba(123,29,58,.12);color:var(--accent);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${novCount} 📋</span>`:'';
+    const novBadge=novCount?`<span style="margin-left:6px;background:rgba(167,0,29,.12);color:var(--accent);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">${novCount} 📋</span>`:'';
     return`<tr>
       <td><strong>${p.Nombre||'—'}</strong>${novBadge}</td><td>${p.Cliente||'—'}</td><td>${p.Producto||'—'}</td>
       <td><span class="badge badge-blue">${p.Etapa||'—'}</span></td>
@@ -2934,11 +2938,11 @@ function filterVentasSearch(q){
    CRM BASE MODAL (renamed to avoid conflict)
 ═══════════════════════════════════════ */
 const FORMS={
-  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro / Productos</label><input type="hidden" id="f-Rubro"><div class="rubro-picker" id="rubro-picker"></div></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-group"><label>Dirección</label><input id="f-Direccion" placeholder="Calle, ciudad, código postal, provincia…"></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro / Productos</label><input type="hidden" id="f-Rubro"><div class="rubro-picker" id="rubro-picker"></div></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-group"><label>Dirección</label><input id="f-Direccion" placeholder="Calle, ciudad, código postal, provincia…"></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🏢 Datos fiscales / Tributarios</div><div class="form-group"><label>Domicilio real</label><input id="f-DomicilioReal" placeholder="Domicilio real o comercial"></div><div class="form-group"><label>Domicilio legal</label><input id="f-DomicilioLegal" placeholder="Domicilio legal / fiscal"></div><div class="form-group"><label>CUIT / N° identificación tributaria</label><input id="f-CUIT" placeholder="Ej: 30-12345678-9 o equivalente"></div></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
   producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto" placeholder="Ej: Passata Extra" autocomplete="off" list="inv-prod-dl"><datalist id="inv-prod-dl"></datalist></div><div class="form-group"><label>Categoría</label><input id="f-Categoria" placeholder="Ej: Pasta de Tomate" autocomplete="off" list="inv-cat-dl"><datalist id="inv-cat-dl"></datalist></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad" placeholder="kg / ton / unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
-  venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><input type="hidden" id="f-DiasPlayzo"><input type="hidden" id="f-FechaVencimiento"><input type="hidden" id="f-Vencimientos"><input type="hidden" id="f-DireccionCliente"><div style="display:flex;gap:10px;margin-bottom:14px"><button type="button" id="cat-btn-aceitunas" onclick="selectCategoriaVenta(\'aceitunas\')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;font-weight:700;transition:all .15s">🫒 Aceitunas</button><button type="button" id="cat-btn-tomate" onclick="selectCategoriaVenta(\'tomate\')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;font-weight:700;transition:all .15s">🍅 Tomate</button></div><input type="hidden" id="f-Categoria"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="recalcVencimientos()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente" onchange="onClienteVentaChange()"><option value="">— Seleccionar —</option></select></div></div><div id="venta-addr-row" style="display:none;margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Dirección del cliente</div><div id="venta-addr-display" style="background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:12px;border:1px solid var(--border)">—</div></div><div class="form-row"><div class="form-group"><label>Estado de cuenta</label><input id="f-EstadoCuenta" placeholder="Al día / Con saldo pendiente…"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-venc-section" style="display:none;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Vencimientos de pago</div><button type="button" class="btn btn-outline btn-sm" onclick="addVencimiento()">＋ Cuota</button></div><div id="vencimientos-ui"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0" oninput="calcVentaNeta()"></div></div><div class="form-row"><div class="form-group"><label>Gastos de flete (USD)</label><input id="f-GastoFlete" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcVentaNeta()"></div><div class="form-group" id="venta-neta-group" style="display:none"><label>Venta neta</label><div id="venta-neta-display" style="padding:6px 0"></div></div></div><div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🚛 Retiro y transporte</div><div class="form-row"><div class="form-group"><label>Fecha de retiro</label><input id="f-FechaRetiro" type="date"></div><div class="form-group"><label>Lugar de entrega</label><input id="f-LugarEntrega" placeholder="Ej: Puerto de Cádiz"></div></div><div class="form-group"><label>Empresa transportista</label><input id="f-NombreTransporte" placeholder="Nombre de la empresa"></div><div class="form-row"><div class="form-group"><label>Datos del tractor</label><input id="f-DatosTractor" placeholder="Marca / Patente / Nº interno"></div><div class="form-group"><label>Datos del semirremolque</label><input id="f-DatosSemiremolque" placeholder="Patente / Capacidad"></div></div><div class="form-group"><label>Datos del chofer</label><input id="f-DatoChofer" placeholder="Nombre / DNI / Licencia"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
+  venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><input type="hidden" id="f-DiasPlayzo"><input type="hidden" id="f-FechaVencimiento"><input type="hidden" id="f-Vencimientos"><input type="hidden" id="f-DireccionCliente"><input type="hidden" id="f-DomicilioRealCliente"><input type="hidden" id="f-DomicilioLegalCliente"><input type="hidden" id="f-CUITCliente"><div style="display:flex;gap:10px;margin-bottom:14px"><button type="button" id="cat-btn-aceitunas" onclick="selectCategoriaVenta(\'aceitunas\')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;font-weight:700;transition:all .15s">🫒 Aceitunas</button><button type="button" id="cat-btn-tomate" onclick="selectCategoriaVenta(\'tomate\')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;font-weight:700;transition:all .15s">🍅 Tomate</button></div><input type="hidden" id="f-Categoria"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="recalcVencimientos()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente" onchange="onClienteVentaChange()"><option value="">— Seleccionar —</option></select></div></div><div id="venta-addr-row" style="display:none;margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Dirección del cliente</div><div id="venta-addr-display" style="background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:12px;border:1px solid var(--border)">—</div></div><div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🏢 Adquirente</div><div class="form-group"><label>Adquirente</label><input id="f-Adquirente" list="adquirente-list" autocomplete="off" placeholder="Empresa adquirente (si difiere del cliente)…" oninput="onAdquirenteVentaChange()"><datalist id="adquirente-list"></datalist></div><div class="form-group"><label>CUIT / N° identificación tributaria</label><input id="f-CUITAdquirente" placeholder="Ej: 30-12345678-9"></div><div class="form-group"><label>Domicilio real</label><input id="f-DomicilioRealAdquirente" placeholder="Domicilio real o comercial"></div><div class="form-group"><label>Domicilio legal</label><input id="f-DomicilioLegalAdquirente" placeholder="Domicilio legal / fiscal"></div></div><div class="form-row"><div class="form-group"><label>Estado de cuenta</label><input id="f-EstadoCuenta" placeholder="Al día / Con saldo pendiente…"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-venc-section" style="display:none;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Vencimientos de pago</div><button type="button" class="btn btn-outline btn-sm" onclick="addVencimiento()">＋ Cuota</button></div><div id="vencimientos-ui"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0" oninput="calcVentaNeta()"></div></div><div class="form-row"><div class="form-group"><label>Gastos de flete (USD)</label><input id="f-GastoFlete" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcVentaNeta()"></div><div class="form-group" id="venta-neta-group" style="display:none"><label>Venta neta</label><div id="venta-neta-display" style="padding:6px 0"></div></div></div><div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🚛 Retiro y transporte</div><div class="form-row"><div class="form-group"><label>Fecha de retiro</label><input id="f-FechaRetiro" type="date"></div><div class="form-group"><label>Lugar de entrega</label><input id="f-LugarEntrega" placeholder="Ej: Puerto de Cádiz"></div></div><div class="form-group"><label>Empresa transportista</label><input id="f-NombreTransporte" placeholder="Nombre de la empresa"></div><div class="form-row"><div class="form-group"><label>Datos del tractor</label><input id="f-DatosTractor" placeholder="Marca / Patente / Nº interno"></div><div class="form-group"><label>Datos del semirremolque</label><input id="f-DatosSemiremolque" placeholder="Patente / Capacidad"></div></div><div class="form-group"><label>Datos del chofer</label><input id="f-DatoChofer" placeholder="Nombre / DNI / Licencia"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (kg)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Días de plazo</label><input id="f-DiasVenc" type="number" min="1" step="1" placeholder="ej: 60" oninput="calcFacturaVencimiento()"></div></div><div class="form-row"><div class="form-group"><label>Estado facturación</label><select id="f-EstadoFactura"><option value="">— Seleccionar —</option><option>No facturado</option><option>Facturado</option><option>Cobro en prueba</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date" oninput="calcFacturaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📎 Documentos</div><input type="hidden" id="f-FacturaFileId"><input type="hidden" id="f-FacturaFileName"><input type="hidden" id="f-FacturaTransFileId"><input type="hidden" id="f-FacturaTransFileName"><div class="form-row"><div class="form-group"><label>Factura (PDF / imagen)</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-file-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-file-input\',\'f-FacturaFileId\',\'f-FacturaFileName\',\'factura-file-status\')">☁️ Drive</button></div><div id="factura-file-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div><div class="form-group"><label>Factura de transporte</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-trans-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-trans-input\',\'f-FacturaTransFileId\',\'f-FacturaTransFileName\',\'factura-trans-status\')">☁️ Drive</button></div><div id="factura-trans-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
@@ -2969,7 +2973,7 @@ function openCRMModal(type){
       <div class="historial-empty">Guardá el registro primero para poder agregar novedades.</div>`;
     document.getElementById('modal-body').appendChild(panel);
   }
-  if(type==='venta') setTimeout(()=>{initVentaLineas('');_vencimientos=[];onFormaPagoChange();populateComisionistas();}, 30);
+  if(type==='venta') setTimeout(()=>{initVentaLineas('');_vencimientos=[];onFormaPagoChange();populateComisionistas();const adqList=document.getElementById('adquirente-list');if(adqList)adqList.innerHTML=(DB.clientes||[]).map(c=>`<option value="${(c.Empresa||'').replace(/"/g,'&quot;')}">`).join('');}, 30);
   if(type==='producto') setTimeout(()=>{
     const dlProd=document.getElementById('inv-prod-dl');
     const dlCat=document.getElementById('inv-cat-dl');
@@ -3124,6 +3128,8 @@ function editRecord(type, id){
     if(addrDisp)addrDisp.textContent=dir||'—';
     const hidDir=document.getElementById('f-DireccionCliente');
     if(hidDir)hidDir.value=dir;
+    const adqList=document.getElementById('adquirente-list');
+    if(adqList)adqList.innerHTML=(DB.clientes||[]).map(c=>`<option value="${(c.Empresa||'').replace(/"/g,'&quot;')}">`).join('');
   }, 30);
 }
 
@@ -4916,7 +4922,7 @@ let _calActiveFilters = new Set(['tarea','venta','cliente','reclamo','factura','
 let _calPopoverEvent  = null; // evento activo en popover
 
 const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const CAL_COLORS = {tarea:'#7b1d3a',venta:'#2563eb',cliente:'#16a34a',reclamo:'#dc2626',factura:'#d97706',vencimiento:'#e11d48'};
+const CAL_COLORS = {tarea:'#a7001d',venta:'#96983e',cliente:'#404626',reclamo:'#db473c',factura:'#b45309',vencimiento:'#c8001f'};
 const CAL_SECTIONS = {tarea:'tareas',venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion',vencimiento:'ventas'};
 
 /* Recolectar todos los eventos desde las secciones de la app */
@@ -5881,6 +5887,24 @@ function onClienteVentaChange(){
   if(row)row.style.display=dir?'block':'none';
   if(disp)disp.textContent=dir||'—';
   if(hid)hid.value=dir;
+  const hidDomReal=document.getElementById('f-DomicilioRealCliente');
+  const hidDomLegal=document.getElementById('f-DomicilioLegalCliente');
+  const hidCUIT=document.getElementById('f-CUITCliente');
+  if(hidDomReal)hidDomReal.value=cli?.DomicilioReal||'';
+  if(hidDomLegal)hidDomLegal.value=cli?.DomicilioLegal||'';
+  if(hidCUIT)hidCUIT.value=cli?.CUIT||'';
+}
+function onAdquirenteVentaChange(){
+  const input=document.getElementById('f-Adquirente');
+  const empresa=input?.value||'';
+  const cli=(DB.clientes||[]).find(c=>c.Empresa===empresa);
+  if(!cli)return;
+  const cuitEl=document.getElementById('f-CUITAdquirente');
+  const domRealEl=document.getElementById('f-DomicilioRealAdquirente');
+  const domLegalEl=document.getElementById('f-DomicilioLegalAdquirente');
+  if(cuitEl&&!cuitEl.value)cuitEl.value=cli.CUIT||'';
+  if(domRealEl&&!domRealEl.value)domRealEl.value=cli.DomicilioReal||'';
+  if(domLegalEl&&!domLegalEl.value)domLegalEl.value=cli.DomicilioLegal||'';
 }
 function generateNumOrden(categoria){
   const year=new Date().getFullYear();
@@ -6018,13 +6042,13 @@ function generarOrdenPedido(ventaId){
       <td><strong>${l.producto||'—'}</strong></td>
       <td class="lbl">Cantidad</td><td><strong>${kg?kg.toLocaleString('es-AR'):' —'} ${l.unidad||'kg'}</strong></td>
       <td class="lbl">Precio/${l.unidad||'kg'}</td><td><strong>USD ${pu?pu.toLocaleString('es-AR',{minimumFractionDigits:3,maximumFractionDigits:3}):'—'}</strong></td>
-      <td class="lbl">Total</td><td><strong style="color:#7b1d3a">USD ${sub}</strong></td>
+      <td class="lbl">Total</td><td><strong style="color:#a7001d">USD ${sub}</strong></td>
     </tr>`;
   }).join('');
 
   const pagoHTML=vencimientos.length>1
     ?`<table style="width:100%;border-collapse:collapse;margin-top:4px;font-size:11px">
-        <thead><tr style="background:#f9f0f5"><th style="padding:5px 8px;text-align:left;color:#7b1d3a;font-size:10px">Cuota</th><th style="padding:5px 8px;text-align:center;color:#7b1d3a;font-size:10px">Días</th><th style="padding:5px 8px;text-align:center;color:#7b1d3a;font-size:10px">%</th><th style="padding:5px 8px;text-align:right;color:#7b1d3a;font-size:10px">Monto USD</th><th style="padding:5px 8px;text-align:center;color:#7b1d3a;font-size:10px">Fecha venc.</th></tr></thead>
+        <thead><tr style="background:#fff2ee"><th style="padding:5px 8px;text-align:left;color:#a7001d;font-size:10px">Cuota</th><th style="padding:5px 8px;text-align:center;color:#a7001d;font-size:10px">Días</th><th style="padding:5px 8px;text-align:center;color:#a7001d;font-size:10px">%</th><th style="padding:5px 8px;text-align:right;color:#a7001d;font-size:10px">Monto USD</th><th style="padding:5px 8px;text-align:center;color:#a7001d;font-size:10px">Fecha venc.</th></tr></thead>
         <tbody>${vencimientos.map((vc,i)=>{
           const m=totalUSD&&vc.pct?(totalUSD*vc.pct/100).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
           return`<tr style="border-top:1px solid #ebebeb"><td style="padding:5px 8px">Cuota ${i+1}</td><td style="padding:5px 8px;text-align:center">${vc.dias||'—'} días</td><td style="padding:5px 8px;text-align:center">${vc.pct||'—'}%</td><td style="padding:5px 8px;text-align:right;font-family:monospace">USD ${m}</td><td style="padding:5px 8px;text-align:center;font-weight:700">${vc._fecha||'—'}</td></tr>`;
@@ -6035,15 +6059,18 @@ function generarOrdenPedido(ventaId){
       :`${v.FormaPago||'—'}`;
 
   const dir=v.DireccionCliente||cli?.Direccion||'';
+  const domReal=v.DomicilioRealCliente||cli?.DomicilioReal||'';
+  const domLegal=v.DomicilioLegalCliente||cli?.DomicilioLegal||'';
+  const cuitCli=v.CUITCliente||cli?.CUIT||'';
   const comisionInfo=v.Comisionista?`${v.Comisionista}${v.PorcentajeComision?' — '+v.PorcentajeComision+'%':''}`:null;
 
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <title>Orden de Pedido — ${v.NumOrden||'N/A'}</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1a1a1a;padding:28px 36px}
-.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:3px solid #7b1d3a;margin-bottom:20px}
-.ord-badge{font-size:16px;font-weight:800;font-family:monospace;color:#7b1d3a;background:#fdf0f5;padding:8px 16px;border-radius:8px;border:2px solid #e8b4c8;text-align:center}
+.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:3px solid #a7001d;margin-bottom:20px}
+.ord-badge{font-size:16px;font-weight:800;font-family:monospace;color:#a7001d;background:#fff5f0;padding:8px 16px;border-radius:8px;border:2px solid #f0b8a8;text-align:center}
 .ord-badge .sub{font-size:10px;font-weight:400;color:#aaa;display:block;text-align:center;margin-top:2px}
-.sect{margin-bottom:16px}.sect-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#7b1d3a;margin-bottom:7px;border-bottom:1px solid #f0d0db;padding-bottom:4px}
+.sect{margin-bottom:16px}.sect-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#a7001d;margin-bottom:7px;border-bottom:1px solid #f0d0c8;padding-bottom:4px}
 table.info{width:100%;border-collapse:collapse}
 table.info td{padding:6px 9px;border:1px solid #ebebeb;font-size:12px;vertical-align:top}
 table.info td.lbl{font-weight:700;background:#fafafa;width:140px;color:#555;font-size:10px;white-space:nowrap}
@@ -6077,20 +6104,32 @@ table.info td.lbl{font-weight:700;background:#fafafa;width:140px;color:#555;font
 <div class="sect"><div class="sect-title">Cliente</div>
 <table class="info">
   <tr><td class="lbl">Empresa</td><td><strong>${v.Cliente||'—'}</strong></td><td class="lbl">País</td><td>${cli?.Pais||'—'}</td></tr>
+  ${cuitCli?`<tr><td class="lbl">CUIT / Id. trib.</td><td colspan="3">${cuitCli}</td></tr>`:''}
+  ${domReal?`<tr><td class="lbl">Domicilio real</td><td colspan="3">${domReal}</td></tr>`:''}
+  ${domLegal?`<tr><td class="lbl">Domicilio legal</td><td colspan="3">${domLegal}</td></tr>`:''}
   ${dir?`<tr><td class="lbl">Dirección</td><td colspan="3">${dir}</td></tr>`:''}
   ${cli?.Contacto?`<tr><td class="lbl">Contacto</td><td>${cli.Contacto}</td><td class="lbl">Cargo</td><td>${cli.Cargo||'—'}</td></tr>`:''}
 </table></div>
 
+${v.Adquirente?`<div class="sect"><div class="sect-title">Adquirente</div>
+<table class="info">
+  <tr><td class="lbl">Empresa</td><td colspan="3"><strong>${v.Adquirente}</strong></td></tr>
+  ${v.CUITAdquirente?`<tr><td class="lbl">CUIT / Id. trib.</td><td colspan="3">${v.CUITAdquirente}</td></tr>`:''}
+  ${v.DomicilioRealAdquirente?`<tr><td class="lbl">Domicilio real</td><td colspan="3">${v.DomicilioRealAdquirente}</td></tr>`:''}
+  ${v.DomicilioLegalAdquirente?`<tr><td class="lbl">Domicilio legal</td><td colspan="3">${v.DomicilioLegalAdquirente}</td></tr>`:''}
+</table></div>`:''}
+
+
 <div class="sect"><div class="sect-title">Producto${lineas.length>1?'s':''}</div>
 <table class="info">
-  <thead style="background:#f9f0f5"><tr>
+  <thead style="background:#fff2ee"><tr>
     <td class="lbl" style="width:80px">Ítem</td><td style="font-weight:700;color:#555;font-size:10px">Producto</td>
     <td class="lbl">Cantidad</td><td></td>
     <td class="lbl">Precio/kg</td><td></td>
     <td class="lbl">Total</td><td></td>
   </tr></thead>
   <tbody>${lineasHTML}</tbody>
-  ${lineas.length>1?`<tr><td class="lbl">TOTALES</td><td></td><td class="lbl">Total ${totUnit}</td><td><strong>${totKg.toLocaleString('es-AR')} ${totUnit}</strong></td><td></td><td></td><td class="lbl">Total USD</td><td><strong style="color:#7b1d3a">USD ${totalUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td></tr>`:''}
+  ${lineas.length>1?`<tr><td class="lbl">TOTALES</td><td></td><td class="lbl">Total ${totUnit}</td><td><strong>${totKg.toLocaleString('es-AR')} ${totUnit}</strong></td><td></td><td></td><td class="lbl">Total USD</td><td><strong style="color:#a7001d">USD ${totalUSD.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></td></tr>`:''}
   ${comisionInfo?`<tr><td class="lbl">Comisionista</td><td colspan="7">${comisionInfo}</td></tr>`:''}
   ${v.GastoFlete?`<tr><td class="lbl">Gasto flete</td><td colspan="7">USD ${parseFloat(v.GastoFlete).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`:''}
   ${v.Notas?`<tr><td class="lbl">Notas</td><td colspan="7">${v.Notas}</td></tr>`:''}
@@ -6110,7 +6149,7 @@ ${(v.FechaRetiro||v.LugarEntrega||v.NombreTransporte||v.DatosTractor||v.DatosSem
   <div class="sign-box">Recibido por Producción<br><br><br>_____________________</div>
   <div class="sign-box">Aprobado<br><br><br>_____________________</div>
 </div>
-<div class="footer"><span style="color:#e8b4c8;font-weight:700">⚠ USO INTERNO — CONFIDENCIAL</span><span>Generado: ${new Date().toLocaleString('es-AR')}</span></div>
+<div class="footer"><span style="color:#f0b8a8;font-weight:700">⚠ USO INTERNO — CONFIDENCIAL</span><span>Generado: ${new Date().toLocaleString('es-AR')}</span></div>
 </body></html>`;
   const w=window.open('','_blank','width=900,height=760,scrollbars=yes');
   if(!w){alert('Permitir ventanas emergentes para generar el PDF.');return;}
