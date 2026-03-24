@@ -131,6 +131,7 @@ tr:hover td{background:rgba(167,0,29,.04)}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.active-tab{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
 .search-bar{position:relative}
 .search-bar input{padding:8px 12px 8px 34px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;width:220px}
 .search-bar::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px}
@@ -931,6 +932,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
   <div class="nav-item" onclick="showSection('inventario',this)"><span class="icon">📦</span><span>Inventario</span></div>
   <div class="nav-item" onclick="showSection('ventas',this)"><span class="icon">💰</span><span>Ventas</span></div>
+  <div class="nav-item" onclick="showSection('cargas',this)"><span class="icon">🚛</span><span>Cargas</span></div>
   <div class="nav-item" onclick="showSection('prevision',this)"><span class="icon">📈</span><span>Previsión</span></div>
   <div class="nav-item" onclick="showSection('proveedores',this)"><span class="icon">🚢</span><span>Proveedores</span></div>
   <div class="nav-item" onclick="showSection('reclamos',this)"><span class="icon">🚨</span><span>Reclamos</span></div>
@@ -1599,6 +1601,35 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
   </div>
 
+<!-- CARGAS -->
+<div class="section" id="section-cargas">
+  <div class="ph-row page-header">
+    <div><h1>🚛 Cargas</h1><p>Seguimiento de despachos y entregas vinculados a ventas</p></div>
+    <div class="ph-right">
+      <input type="text" placeholder="🔍 Buscar…" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;width:180px" oninput="renderCargas(this.value)">
+      <button class="btn btn-primary" onclick="openNuevaCarga()">＋ Nueva carga</button>
+    </div>
+  </div>
+  <div id="cargas-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="cargas-filter-tabs">
+    <button class="btn btn-outline btn-sm carga-tab active-tab" onclick="setCargaTab('todas',this)">Todas</button>
+    <button class="btn btn-outline btn-sm carga-tab" onclick="setCargaTab('Pendiente',this)">⏳ Pendiente</button>
+    <button class="btn btn-outline btn-sm carga-tab" onclick="setCargaTab('En tránsito',this)">🚛 En tránsito</button>
+    <button class="btn btn-outline btn-sm carga-tab" onclick="setCargaTab('Entregada',this)">✅ Entregada</button>
+    <button class="btn btn-outline btn-sm carga-tab" onclick="setCargaTab('Cancelada',this)">❌ Cancelada</button>
+  </div>
+  <div class="table-container">
+    <table class="data-table" id="cargas-table">
+      <thead><tr>
+        <th>Orden</th><th>Cliente</th><th>Cat.</th>
+        <th>Fecha carga</th><th>Fecha entrega</th>
+        <th>Transportista</th><th>Estado</th><th>Notas</th><th></th>
+      </tr></thead>
+      <tbody id="cargas-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
 <!-- CALENDARIO -->
 <div class="section" id="section-calendario">
   <div class="ph-row page-header">
@@ -1700,7 +1731,7 @@ function getActiveClientId(){
   return DEFAULT_CLIENT_ID;
 }
 let tokenClient=null,token=null,spreadsheetId=null,userData={name:'Usuario'};
-let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null,comisionistas:[],cotizaciones:[],config:{}};
+let DB={clientes:[],proyectos:[],tareas:[],inventario:[],ventas:[],reclamos:[],facturas:[],calidad:[],prevision:[],contactos:[],novedades:[],bombonas:[],fermentadores:[],bombonas_config:null,comisionistas:[],cotizaciones:[],cargas:[],config:{}};
 let currentCRMModal=null;
 
 const LS_KEY = 'crm_cazorla_db';
@@ -1973,7 +2004,8 @@ const HEADERS={
   Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','NotaExtra','Lineas'],
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11'],
   Fermentadores:['id','nombre','variedad','calibre','kg','entamada','notas','tipo'],
-  Comisionistas:['Nombre']
+  Comisionistas:['Nombre'],
+  Cargas:['ID','VentaID','NumOrden','Cliente','Categoria','FechaCarga','FechaEntrega','Transportista','Estado','Notas']
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 
@@ -2111,6 +2143,7 @@ function showSection(id,el){
   else if(id==='inventario')renderInventario();
   else if(id==='cotizaciones')renderCotizaciones();
   else if(id==='ventas')renderVentas();
+  else if(id==='cargas')renderCargas();
   else if(id==='prevision'){renderTabs();renderAll();}
   else if(id==='proveedores')renderProvGrid();
   else if(id==='reclamos')renderReclamos();
@@ -2893,6 +2926,7 @@ function _ventaRowHtml(v){
     <td class="row-actions">
       <button class="btn-row-edit" onclick="editRecord('venta','${v.ID}')">✏️</button>
       <button class="btn-row-edit" onclick="generarOrdenPedido('${v.ID}')" title="PDF">📄</button>
+      <button class="btn-row-edit" onclick="openNuevaCarga('${v.ID}')" title="Nueva carga">🚛</button>
       <button class="btn-row-del" onclick="deleteRecord('venta','${v.ID}')">🗑</button>
     </td></tr>`;
 }
@@ -4953,9 +4987,184 @@ let _calMonth = new Date().getMonth(); // 0-based
 let _calActiveFilters = new Set(['tarea','venta','cliente','reclamo','factura','vencimiento']);
 let _calPopoverEvent  = null; // evento activo en popover
 
+/* ═══════════════════════════════════════
+   CARGAS
+═══════════════════════════════════════ */
+let _cargaTab='todas';
+
+function setCargaTab(tab,el){
+  _cargaTab=tab;
+  document.querySelectorAll('.carga-tab').forEach(b=>b.classList.remove('active-tab'));
+  if(el)el.classList.add('active-tab');
+  renderCargas();
+}
+
+function openNuevaCarga(ventaId){
+  const ventas=DB.ventas||[];
+  const opts=ventas.map(v=>`<option value="${v.ID}" ${v.ID===ventaId?'selected':''}>${v.NumOrden||v.ID} — ${v.Cliente||''}</option>`).join('');
+  const hoy=new Date().toISOString().slice(0,10);
+  const html=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group"><label>Venta vinculada</label>
+        <select id="nc-venta" onchange="onNuevaCargaVentaChange()" style="width:100%">
+          <option value="">— Seleccionar venta —</option>${opts}
+        </select>
+      </div>
+      <div id="nc-venta-info" style="display:none;background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--muted)"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha de carga</label><input id="nc-fechaCarga" type="date" value="${hoy}"></div>
+        <div class="form-group"><label>Fecha de entrega estimada</label><input id="nc-fechaEntrega" type="date"></div>
+      </div>
+      <div class="form-group"><label>Transportista</label><input id="nc-transportista" placeholder="Empresa de transporte…"></div>
+      <div class="form-group"><label>Estado</label>
+        <select id="nc-estado">
+          <option>Pendiente</option><option>En tránsito</option><option>Entregada</option><option>Cancelada</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notas de carga</label><textarea id="nc-notas" rows="3" placeholder="Instrucciones, observaciones, incidencias…"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="document.getElementById('modal-carga').remove()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveNuevaCarga()">Guardar carga</button>
+      </div>
+    </div>`;
+  let m=document.createElement('div');
+  m.id='modal-carga';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML=`<div style="background:var(--surface);border-radius:14px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;border:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="margin:0;font-size:18px">🚛 Nueva carga</h2>
+      <button onclick="this.closest('#modal-carga').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>${html}</div>`;
+  document.body.appendChild(m);
+  if(ventaId) setTimeout(()=>onNuevaCargaVentaChange(),50);
+}
+
+function onNuevaCargaVentaChange(){
+  const vid=document.getElementById('nc-venta')?.value;
+  const info=document.getElementById('nc-venta-info');
+  if(!vid||!info){if(info)info.style.display='none';return;}
+  const v=(DB.ventas||[]).find(x=>x.ID===vid);
+  if(!v){info.style.display='none';return;}
+  const cat=(v.Categoria||'').toLowerCase()==='aceitunas'?'🫒 Aceitunas':(v.Categoria||'').toLowerCase()==='tomate'?'🍅 Tomate':'';
+  info.style.display='block';
+  info.innerHTML=`<strong>${v.NumOrden||'—'}</strong> · ${v.Cliente||'—'} · ${cat} · USD ${parseFloat(v.ValorUSD||0).toLocaleString('en-US',{maximumFractionDigits:0})} · <em>${v.Etapa||'—'}</em>`;
+}
+
+function saveNuevaCarga(){
+  const vid=document.getElementById('nc-venta')?.value;
+  if(!vid){alert('Seleccioná una venta');return;}
+  const v=(DB.ventas||[]).find(x=>x.ID===vid);
+  if(!DB.cargas)DB.cargas=[];
+  const c={
+    ID:genId(),
+    VentaID:vid,
+    NumOrden:v?.NumOrden||'',
+    Cliente:v?.Cliente||'',
+    Categoria:v?.Categoria||'',
+    FechaCarga:document.getElementById('nc-fechaCarga')?.value||'',
+    FechaEntrega:document.getElementById('nc-fechaEntrega')?.value||'',
+    Transportista:document.getElementById('nc-transportista')?.value||'',
+    Estado:document.getElementById('nc-estado')?.value||'Pendiente',
+    Notas:document.getElementById('nc-notas')?.value||''
+  };
+  DB.cargas.push(c);
+  saveLocal();
+  document.getElementById('modal-carga')?.remove();
+  renderCargas();
+}
+
+function cargaInlineEdit(id,field,value){
+  if(!DB.cargas)return;
+  const c=DB.cargas.find(x=>x.ID===id);
+  if(!c)return;
+  c[field]=value;
+  saveLocal();
+  // Para estado, actualizar solo el badge sin perder el foco
+  if(field==='Estado'){
+    const badge=document.getElementById('carga-badge-'+id);
+    if(badge)badge.innerHTML=_cargaBadge(value);
+  }
+}
+
+function deleteCarga(id){
+  if(!confirm('¿Eliminar esta carga?'))return;
+  DB.cargas=(DB.cargas||[]).filter(c=>c.ID!==id);
+  saveLocal();
+  renderCargas();
+}
+
+function _cargaBadge(estado){
+  const map={
+    'Pendiente':'background:#fef3c7;color:#92400e',
+    'En tránsito':'background:#dbeafe;color:#1e40af',
+    'Entregada':'background:#d1fae5;color:#065f46',
+    'Cancelada':'background:#fee2e2;color:#991b1b'
+  };
+  const s=map[estado]||'background:var(--surface2);color:var(--muted)';
+  return `<span style="${s};padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${estado||'—'}</span>`;
+}
+
+function renderCargas(q){
+  if(!DB.cargas)DB.cargas=[];
+  const all=DB.cargas;
+  const hoy=new Date().toISOString().slice(0,10);
+
+  // Stats
+  const statsEl=document.getElementById('cargas-stats');
+  if(statsEl){
+    const pend=all.filter(c=>c.Estado==='Pendiente').length;
+    const transit=all.filter(c=>c.Estado==='En tránsito').length;
+    const entregadas=all.filter(c=>c.Estado==='Entregada').length;
+    const vencidas=all.filter(c=>c.FechaEntrega&&c.FechaEntrega<hoy&&!['Entregada','Cancelada'].includes(c.Estado)).length;
+    statsEl.innerHTML=`
+      <div class="stat-card"><div class="label">Total cargas</div><div class="value">${all.length}</div></div>
+      <div class="stat-card"><div class="label">Pendientes</div><div class="value" style="color:#92400e">${pend}</div></div>
+      <div class="stat-card"><div class="label">En tránsito</div><div class="value" style="color:#1e40af">${transit}</div></div>
+      <div class="stat-card"><div class="label">Entregadas</div><div class="value" style="color:var(--green)">${entregadas}</div></div>
+      ${vencidas?`<div class="stat-card" style="border-color:var(--red)"><div class="label">Entregas vencidas</div><div class="value" style="color:var(--red)">${vencidas}</div></div>`:''}`;
+  }
+
+  let list=[...all];
+  if(_cargaTab!=='todas') list=list.filter(c=>c.Estado===_cargaTab);
+  if(q) list=list.filter(c=>JSON.stringify(c).toLowerCase().includes(q.toLowerCase()));
+  list.sort((a,b)=>(b.FechaCarga||'').localeCompare(a.FechaCarga||''));
+
+  const tbody=document.getElementById('cargas-tbody');
+  if(!tbody)return;
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">Sin cargas registradas</td></tr>`;return;}
+
+  const ESTADOS=['Pendiente','En tránsito','Entregada','Cancelada'];
+  tbody.innerHTML=list.map(c=>{
+    const vencida=c.FechaEntrega&&c.FechaEntrega<hoy&&!['Entregada','Cancelada'].includes(c.Estado);
+    const catIcon=(c.Categoria||'').toLowerCase()==='aceitunas'?'🫒':(c.Categoria||'').toLowerCase()==='tomate'?'🍅':'📦';
+    const estadoOpts=ESTADOS.map(e=>`<option ${e===c.Estado?'selected':''}>${e}</option>`).join('');
+    return `<tr style="${vencida?'background:rgba(220,38,38,.06)':''}">
+      <td><a href="#" onclick="openVentaFromCarga('${c.VentaID}');return false" style="color:var(--accent);font-weight:700;font-family:var(--mono);font-size:12px">${c.NumOrden||'—'}</a></td>
+      <td style="font-weight:600">${c.Cliente||'—'}</td>
+      <td style="text-align:center;font-size:16px" title="${c.Categoria||''}">${catIcon}</td>
+      <td><input type="date" value="${c.FechaCarga||''}" onchange="cargaInlineEdit('${c.ID}','FechaCarga',this.value)" style="border:none;background:transparent;color:var(--text);font-size:13px;cursor:pointer;width:130px"></td>
+      <td><input type="date" value="${c.FechaEntrega||''}" onchange="cargaInlineEdit('${c.ID}','FechaEntrega',this.value)" style="border:none;background:transparent;color:${vencida?'var(--red)':'var(--text)'};font-size:13px;cursor:pointer;width:130px"></td>
+      <td><input value="${(c.Transportista||'').replace(/"/g,'&quot;')}" onchange="cargaInlineEdit('${c.ID}','Transportista',this.value)" placeholder="—" style="border:none;background:transparent;color:var(--text);font-size:13px;width:140px"></td>
+      <td><div id="carga-badge-${c.ID}" style="display:inline-block">
+        <select onchange="cargaInlineEdit('${c.ID}','Estado',this.value)" style="border:none;background:transparent;font-size:12px;font-weight:700;cursor:pointer;color:inherit">
+          ${estadoOpts}
+        </select>
+      </div></td>
+      <td style="max-width:220px"><input value="${(c.Notas||'').replace(/"/g,'&quot;')}" onchange="cargaInlineEdit('${c.ID}','Notas',this.value)" placeholder="Notas de carga…" style="border:none;background:transparent;color:var(--text);font-size:12px;width:100%"></td>
+      <td><button onclick="deleteCarga('${c.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openVentaFromCarga(ventaId){
+  if(!ventaId)return;
+  showSection('ventas',document.querySelector('.nav-item[onclick*="ventas"]'));
+  setTimeout(()=>openCRMModal('venta',ventaId),100);
+}
+
 const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const CAL_COLORS = {tarea:'#a7001d',venta:'#96983e',cliente:'#404626',reclamo:'#db473c',factura:'#b45309',vencimiento:'#c8001f'};
-const CAL_SECTIONS = {tarea:'tareas',venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion',vencimiento:'ventas'};
+const CAL_COLORS = {tarea:'#a7001d',venta:'#96983e',cliente:'#404626',reclamo:'#db473c',factura:'#b45309',vencimiento:'#c8001f',carga:'#0369a1'};
+const CAL_SECTIONS = {tarea:'tareas',venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion',vencimiento:'ventas',carga:'cargas'};
 
 /* Recolectar todos los eventos desde las secciones de la app */
 function getCalEvents(){
@@ -5048,6 +5257,23 @@ function getCalEvents(){
         ref:v.ID
       });
     }
+  });
+
+  // Cargas — fecha de carga y fecha de entrega
+  (DB.cargas||[]).forEach(c=>{
+    if(['Cancelada'].includes(c.Estado)) return;
+    if(c.FechaCarga) events.push({
+      type:'carga', date:c.FechaCarga,
+      title:`🚛 ${c.NumOrden||c.Cliente||'Carga'} — despacho`,
+      meta:`${c.Cliente||''} · ${c.Transportista||''} · ${c.Estado||''}`,
+      ref:c.ID
+    });
+    if(c.FechaEntrega&&c.FechaEntrega!==c.FechaCarga) events.push({
+      type:'carga', date:c.FechaEntrega,
+      title:`📦 ${c.NumOrden||c.Cliente||'Carga'} — entrega`,
+      meta:`${c.Cliente||''} · ${c.Transportista||''} · ${c.Estado||''}`,
+      ref:c.ID
+    });
   });
 
   return events;
