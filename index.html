@@ -4992,6 +4992,32 @@ let _calPopoverEvent  = null; // evento activo en popover
 ═══════════════════════════════════════ */
 let _cargaTab='todas';
 
+/* Auto-sincroniza: crea entradas en DB.cargas para ventas que tienen FechaCarga
+   pero no tienen carga registrada. Se ejecuta silenciosamente al abrir la sección. */
+function _syncCargasFromVentas(){
+  if(!DB.cargas) DB.cargas=[];
+  let changed=false;
+  (DB.ventas||[]).forEach(v=>{
+    if(!v.FechaCarga) return;
+    const existe=DB.cargas.find(c=>c.VentaID===v.ID);
+    if(existe) return;
+    DB.cargas.push({
+      ID: genId(),
+      VentaID: v.ID,
+      NumOrden: v.NumOrden||'',
+      Cliente: v.Cliente||'',
+      Categoria: v.Categoria||'',
+      FechaCarga: v.FechaCarga||'',
+      FechaEntrega: v.FechaRetiro||'',
+      Transportista: v.NombreTransporte||'',
+      Estado: ['Cobrada','Cancelada'].includes(v.Etapa)?'Entregada':'Pendiente',
+      Notas: ''
+    });
+    changed=true;
+  });
+  if(changed) saveLocal();
+}
+
 function setCargaTab(tab,el){
   _cargaTab=tab;
   document.querySelectorAll('.carga-tab').forEach(b=>b.classList.remove('active-tab'));
@@ -5105,7 +5131,18 @@ function _cargaBadge(estado){
 }
 
 function renderCargas(q){
+  _syncCargasFromVentas();
   if(!DB.cargas)DB.cargas=[];
+  // Actualizar datos en vivo desde la venta vinculada
+  DB.cargas.forEach(c=>{
+    const v=(DB.ventas||[]).find(x=>x.ID===c.VentaID);
+    if(v){
+      c.NumOrden=v.NumOrden||c.NumOrden;
+      c.Cliente=v.Cliente||c.Cliente;
+      c.Categoria=v.Categoria||c.Categoria;
+      if(!c.Transportista&&v.NombreTransporte) c.Transportista=v.NombreTransporte;
+    }
+  });
   const all=DB.cargas;
   const hoy=new Date().toISOString().slice(0,10);
 
