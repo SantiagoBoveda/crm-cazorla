@@ -1602,8 +1602,30 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 <!-- CALENDARIO -->
 <div class="section" id="section-calendario">
   <div class="ph-row page-header">
-    <div><h1>📅 Calendario</h1><p>Vista integrada de toda la actividad</p></div>
+  <div><h1>📅 Calendario</h1><p>Vista integrada de toda la actividad</p></div>
+  <div class="ph-right" style="align-items:center;gap:8px;flex-wrap:wrap">
+    <button id="btn-gcal-export" class="btn btn-outline btn-sm"
+      onclick="syncCalendarToGoogle()"
+      style="border-color:#4285F4;color:#4285F4;display:flex;align-items:center;gap:5px;white-space:nowrap">
+      <svg width="13" height="13" viewBox="0 0 48 48" style="flex-shrink:0">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      ↑ Exportar a GCal
+    </button>
+    <button id="btn-gcal-import" class="btn btn-outline btn-sm"
+      onclick="syncCalendarFromGoogle()"
+      style="border-color:#34A853;color:#34A853;white-space:nowrap">
+      ↓ Importar de GCal
+    </button>
+    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+      <span id="gcal-sync-status" style="font-size:11px;font-family:var(--mono);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <span id="gcal-last-sync"></span>
+    </div>
   </div>
+</div>
   <div class="cal-nav">
     <button onclick="calPrev()">‹</button>
     <h2 id="cal-title"></h2>
@@ -1665,7 +1687,7 @@ function toggleTheme() {
 /* ═══════════════════════════════════════
    GOOGLE AUTH + SHEETS API
 ═══════════════════════════════════════ */
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar';
 const DEFAULT_CLIENT_ID = ''; // Ingresá tu propio Client ID
 
 function getActiveClientId(){
@@ -2094,7 +2116,7 @@ function showSection(id,el){
   else if(id==='reclamos')renderReclamos();
   else if(id==='facturacion')renderFacturacion();
   else if(id==='calidad')renderCalidad();
-  else if(id==='calendario')renderCalendario();
+  else if(id==='calendario'){renderCalendario();updateGCalSyncInfo();}
 }
 
 /* ═══════════════════════════════════════
@@ -3022,9 +3044,11 @@ function renderVentaLineasUI(){
       const uOpts=UNIDADES.map(x=>`<option${x===u?' selected':''}>${x}</option>`).join('');
       return`<tr>
         <td><input type="text" value="${(l.producto||'').replace(/"/g,'&quot;')}" placeholder="Escribir producto…" oninput="updateVentaLinea(${i},'producto',this.value)" autocomplete="off"></td>
-        <td style="white-space:nowrap;display:flex;gap:4px;align-items:center">
-          <input type="number" step="any" min="0" value="${l.cantidadTon||''}" placeholder="0" style="width:80px" oninput="updateVentaLinea(${i},'cantidadTon',this.value)">
-          <select style="font-size:12px;padding:4px 2px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)" onchange="updateVentaLinea(${i},'unidad',this.value)">${uOpts}</select>
+        <td style="white-space:nowrap">
+          <div style="display:flex;gap:4px;align-items:center">
+            <input type="number" step="any" min="0" value="${l.cantidadTon||''}" placeholder="0" style="width:80px" oninput="updateVentaLinea(${i},'cantidadTon',this.value)">
+            <select style="font-size:12px;padding:4px 2px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text)" onchange="updateVentaLinea(${i},'unidad',this.value)">${uOpts}</select>
+          </div>
         </td>
         <td><input type="number" step="0.001" min="0" value="${l.precioUSD||''}" placeholder="USD/${u}" oninput="updateVentaLinea(${i},'precioUSD',this.value)"></td>
         <td class="vl-total-cell">${tot>0?'$'+tot.toLocaleString('es-AR',{maximumFractionDigits:2}):''}</td>
@@ -3237,6 +3261,15 @@ async function saveModal(){
 
   // Guardar en localStorage (instantáneo)
   saveLocal();
+
+  // Auto-push tarea nueva a Google Calendar
+  if(currentCRMModal === 'tarea' && !_editingId && row.FechaVenc){
+    autoPushTaskToGCal(row);
+  }
+  // Auto-push vencimientos de venta a Google Calendar
+  if(currentCRMModal === 'venta' && !_editingId){
+    autoPushVencimientoToGCal(row);
+  }
 
   closeCRMModal();
   // Re-render relevant section
@@ -5354,6 +5387,338 @@ function toggleSidebar(){
   const open=sb.classList.toggle('mobile-open');
   ov.classList.toggle('open',open);
 }
+/* ═══════════════════════════════════════
+   GOOGLE CALENDAR — INTEGRACIÓN BIDIRECCIONAL
+   CRM Cazorla · Sincronización con GCal
+═══════════════════════════════════════ */
+
+const GCAL_CAZORLA_TAG = 'crm_cazorla_v1';
+
+/* ── Mapa de colores GCal por tipo de evento ── */
+const GCAL_COLOR = {
+  tarea:       '11', // rojo tomate
+  vencimiento: '6',  // mandarina
+  factura:     '5',  // banana
+  cliente:     '2',  // salvia
+  venta:       '9',  // arándano
+  reclamo:     '4',  // flamingo
+};
+
+/* ── Construir objeto evento en formato Google Calendar ── */
+function buildGCalEvent(ev) {
+  const dateStr = (ev.date || '').slice(0, 10);
+  // Calcular fecha fin = mismo día (evento de día completo)
+  const endDate = (() => {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  })();
+
+  return {
+    summary: `[CRM] ${ev.title}`,
+    description: [
+      ev.meta || '',
+      '',
+      `Tipo: ${ev.type}`,
+      `ID en CRM: ${ev.ref}`,
+      `Generado por CRM Cazorla`
+    ].join('\n').trim(),
+    start: { date: dateStr },
+    end:   { date: endDate },
+    colorId: GCAL_COLOR[ev.type] || '11',
+    extendedProperties: {
+      private: {
+        crmId:   ev.ref,
+        crmType: ev.type,
+        source:  GCAL_CAZORLA_TAG
+      }
+    },
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: 'email', minutes: 1440 },  // 24 hs antes
+        { method: 'popup', minutes: 60 }     // 1 hora antes
+      ]
+    }
+  };
+}
+
+/* ── Traer eventos existentes en GCal con nuestro tag (evitar duplicados) ── */
+async function fetchExistingGCalEvents() {
+  try {
+    const now  = new Date();
+    const past = new Date(now.getTime() - 365 * 24 * 3600 * 1000);
+    const fut  = new Date(now.getTime() + 365 * 24 * 3600 * 1000);
+    const url  = `https://www.googleapis.com/calendar/v3/calendars/primary/events`
+      + `?timeMin=${encodeURIComponent(past.toISOString())}`
+      + `&timeMax=${encodeURIComponent(fut.toISOString())}`
+      + `&privateExtendedProperty=source%3D${GCAL_CAZORLA_TAG}`
+      + `&singleEvents=true&maxResults=2500`;
+    const res  = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+    return data.items || [];
+  } catch(e) {
+    console.warn('fetchExistingGCalEvents error:', e);
+    return [];
+  }
+}
+
+/* ── Setear texto de status en la UI ── */
+function setGCalStatus(msg, color) {
+  const el = document.getElementById('gcal-sync-status');
+  if (el) {
+    el.textContent = msg;
+    el.style.color = color || 'var(--muted)';
+  }
+}
+
+/* ══════════════════════════════════════════
+   EXPORTAR: CRM → Google Calendar
+══════════════════════════════════════════ */
+async function syncCalendarToGoogle() {
+  if (!token) {
+    requestGoogleAuth(() => setTimeout(syncCalendarToGoogle, 1500));
+    return;
+  }
+  const btn = document.getElementById('btn-gcal-export');
+  if (btn) { btn.disabled = true; btn.textContent = '↻ Subiendo...'; }
+  setGCalStatus('Conectando con Google Calendar...', 'var(--yellow)');
+
+  try {
+    // 1. Recolectar TODOS los eventos del CRM
+    const allCRMEvents = getCalEvents().filter(e =>
+      ['tarea', 'vencimiento', 'factura', 'cliente', 'venta', 'reclamo'].includes(e.type)
+      && e.date
+    );
+
+    if (!allCRMEvents.length) {
+      setGCalStatus('Sin eventos para sincronizar.', 'var(--muted)');
+      return;
+    }
+
+    // 2. Traer los que ya existen en GCal con nuestro tag
+    setGCalStatus(`Verificando ${allCRMEvents.length} eventos...`, 'var(--yellow)');
+    const existing    = await fetchExistingGCalEvents();
+    const existingMap = {};
+    existing.forEach(e => {
+      const id = e.extendedProperties?.private?.crmId;
+      if (id) existingMap[id] = e.id; // crmId → gcalEventId
+    });
+
+    // 3. Crear los nuevos / actualizar los modificados
+    let created = 0, updated = 0, errors = 0;
+    for (const ev of allCRMEvents) {
+      const gcalBody = buildGCalEvent(ev);
+      try {
+        if (existingMap[ev.ref]) {
+          // Actualizar evento existente (PATCH)
+          await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/primary/events/${existingMap[ev.ref]}`,
+            {
+              method: 'PATCH',
+              headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+              body: JSON.stringify(gcalBody)
+            }
+          );
+          updated++;
+        } else {
+          // Crear evento nuevo
+          const res = await fetch(
+            'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+            {
+              method: 'POST',
+              headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+              body: JSON.stringify(gcalBody)
+            }
+          );
+          if (res.ok) created++;
+          else errors++;
+        }
+      } catch(e) { errors++; }
+    }
+
+    // 4. Guardar timestamp de último sync
+    localStorage.setItem('gcal_last_export', new Date().toISOString());
+    const ts = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    setGCalStatus(
+      `✅ ${created} creados · ${updated} actualizados${errors ? ' · ⚠ ' + errors + ' errores' : ''} · ${ts}`,
+      'var(--green)'
+    );
+  } catch(e) {
+    setGCalStatus('❌ Error: ' + e.message, 'var(--red)');
+    console.error('syncCalendarToGoogle error:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '↑ Exportar a GCal'; }
+  }
+}
+
+/* ══════════════════════════════════════════
+   IMPORTAR: Google Calendar → CRM (como tareas)
+══════════════════════════════════════════ */
+async function syncCalendarFromGoogle() {
+  if (!token) {
+    requestGoogleAuth(() => setTimeout(syncCalendarFromGoogle, 1500));
+    return;
+  }
+  const btn = document.getElementById('btn-gcal-import');
+  if (btn) { btn.disabled = true; btn.textContent = '↻ Importando...'; }
+  setGCalStatus('Leyendo Google Calendar...', 'var(--yellow)');
+
+  try {
+    // Rango: hoy - 7 días hasta + 180 días
+    const from = new Date(Date.now() - 7  * 24 * 3600 * 1000);
+    const to   = new Date(Date.now() + 180 * 24 * 3600 * 1000);
+    const url  = `https://www.googleapis.com/calendar/v3/calendars/primary/events`
+      + `?timeMin=${encodeURIComponent(from.toISOString())}`
+      + `&timeMax=${encodeURIComponent(to.toISOString())}`
+      + `&singleEvents=true&orderBy=startTime&maxResults=500`;
+
+    const res  = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+    const items = data.items || [];
+
+    // Solo eventos externos (no los que generó el propio CRM)
+    const externos = items.filter(e =>
+      e.extendedProperties?.private?.source !== GCAL_CAZORLA_TAG
+      && e.status !== 'cancelled'
+    );
+
+    if (!DB.tareas) DB.tareas = [];
+    let imported = 0, skipped = 0;
+
+    for (const gev of externos) {
+      const gcalId = gev.id;
+      const fecha  = (gev.start?.date || gev.start?.dateTime || '').slice(0, 10);
+      const titulo = (gev.summary || 'Reunión sin título')
+                       .replace(/^\[CRM\]\s*/i, '')
+                       .trim();
+      const desc   = gev.description || '';
+
+      // Evitar duplicados: buscar por gcalId en el campo Notas
+      const yaExiste = DB.tareas.some(t =>
+        (t.Notas || '').includes('gcalId:' + gcalId)
+      );
+      if (yaExiste) { skipped++; continue; }
+
+      // Detectar si es invitación a reunión (tiene attendees)
+      const esReunion  = !!(gev.attendees && gev.attendees.length);
+      const organizador = gev.organizer?.displayName || gev.organizer?.email || '';
+
+      const nuevaTarea = {
+        ID:          genId(),
+        Titulo:      titulo,
+        Descripcion: [
+          desc,
+          esReunion ? `Organizador: ${organizador}` : '',
+          gev.location ? `Lugar: ${gev.location}` : ''
+        ].filter(Boolean).join('\n'),
+        Asignado:    userData?.name || '',
+        Prioridad:   esReunion ? 'Alta' : 'Media',
+        Estado:      'Pendiente',
+        FechaVenc:   fecha,
+        Notas:       `Importado desde Google Calendar\ngcalId:${gcalId}\nFuente: ${gev.htmlLink || ''}`
+      };
+
+      DB.tareas.push(nuevaTarea);
+      imported++;
+    }
+
+    if (imported > 0) {
+      saveLocal();
+      if (document.getElementById('section-tareas').classList.contains('active'))
+        renderTareas();
+      renderCalendario();
+    }
+
+    const ts = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    localStorage.setItem('gcal_last_import', new Date().toISOString());
+    setGCalStatus(
+      `✅ ${imported} importados · ${skipped} ya existían · ${ts}`,
+      imported > 0 ? 'var(--green)' : 'var(--muted)'
+    );
+  } catch(e) {
+    setGCalStatus('❌ Error: ' + e.message, 'var(--red)');
+    console.error('syncCalendarFromGoogle error:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '↓ Importar de GCal'; }
+  }
+}
+
+/* ══════════════════════════════════════════
+   AUTO-PUSH: cuando se guarda una tarea con fecha → GCal
+══════════════════════════════════════════ */
+function autoPushTaskToGCal(tarea) {
+  if (!token || !tarea.FechaVenc) return;
+  const ev = {
+    type:  'tarea',
+    date:  tarea.FechaVenc,
+    title: tarea.Titulo || 'Tarea sin título',
+    meta:  `${tarea.Estado || ''} · ${tarea.Asignado || ''}`,
+    ref:   tarea.ID
+  };
+  // Fire-and-forget — no bloquea el guardado del CRM
+  fetch(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    {
+      method:  'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body:    JSON.stringify(buildGCalEvent(ev))
+    }
+  ).then(r => {
+    if (r.ok) console.log('GCal: tarea pushada OK →', tarea.Titulo);
+  }).catch(() => {}); // silencioso
+}
+
+/* ══════════════════════════════════════════
+   AUTO-PUSH: vencimiento de cobro → GCal
+══════════════════════════════════════════ */
+function autoPushVencimientoToGCal(venta) {
+  if (!token) return;
+  let cuotas = [];
+  try { cuotas = venta.Vencimientos ? JSON.parse(venta.Vencimientos) : []; } catch {}
+  if (!cuotas.length && venta.FechaVencimiento) {
+    cuotas = [{ _fecha: venta.FechaVencimiento, dias: venta.DiasPlayzo, pct: 100 }];
+  }
+  cuotas.forEach((vc, idx) => {
+    const fecha = vc._fecha || '';
+    if (!fecha) return;
+    const monto = venta.ValorUSD && vc.pct
+      ? (parseFloat(venta.ValorUSD) * vc.pct / 100).toLocaleString('es-AR', { maximumFractionDigits: 0 })
+      : venta.ValorUSD || '';
+    const ev = {
+      type:  'vencimiento',
+      date:  fecha,
+      title: `🔔 ${venta.NumOrden || venta.Cliente || 'Venta'}${cuotas.length > 1 ? ' — Cuota ' + (idx + 1) : ''}`,
+      meta:  `${venta.Cliente || ''} · USD ${monto} · ${venta.Etapa || ''}`,
+      ref:   venta.ID + (cuotas.length > 1 ? '_c' + idx : '')
+    };
+    fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+      {
+        method:  'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body:    JSON.stringify(buildGCalEvent(ev))
+      }
+    ).catch(() => {});
+  });
+}
+
+/* ══════════════════════════════════════════
+   MOSTRAR INFO DE ÚLTIMO SYNC EN UI
+══════════════════════════════════════════ */
+function updateGCalSyncInfo() {
+  const expTs = localStorage.getItem('gcal_last_export');
+  const impTs = localStorage.getItem('gcal_last_import');
+  const el    = document.getElementById('gcal-last-sync');
+  if (!el) return;
+  const fmt = iso => iso
+    ? new Date(iso).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    : 'Nunca';
+  el.innerHTML =
+    `<span style="color:var(--muted);font-size:10px;font-family:var(--mono)">` +
+    `↑ ${fmt(expTs)} &nbsp;·&nbsp; ↓ ${fmt(impTs)}</span>`;
+}
+
 function closeSidebar(){
   document.getElementById('main-sidebar').classList.remove('mobile-open');
   document.getElementById('sidebar-overlay').classList.remove('open');
@@ -5818,7 +6183,7 @@ function addVencimiento(){_vencimientos.push({dias:'',pct:''});renderVencimiento
 function removeVencimiento(i){if(_vencimientos.length<=1)return;_vencimientos.splice(i,1);renderVencimientosUI();}
 function updateVencimiento(i,field,val){
   if(!_vencimientos[i])return;
-  _vencimientos[i][field]=field==='dias'||field==='pct'?parseFloat(val)||'':val;
+  _vencimientos[i][field]=(field==='dias'||field==='pct')?(isNaN(parseFloat(val))?'':parseFloat(val)):val;
   // Recalc _fecha for this row without re-rendering
   const fecha=document.getElementById('f-Fecha')?.value||'';
   const v=_vencimientos[i];
