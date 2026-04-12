@@ -5,8 +5,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM Interno - Cazorla</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CRM Cazorla</title>
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#a7001d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CRM Cazorla">
+<link rel="apple-touch-icon" href="./icon-512.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -512,9 +520,6 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
   .mod-toolbar{width:100%;overflow-x:auto}
   .state-pills{display:flex;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;gap:6px;-webkit-overflow-scrolling:touch}
   .state-pill{white-space:nowrap;flex-shrink:0}
-  /* Calidad */
-  .cal-charts{grid-template-columns:1fr!important}
-  .cal-params{grid-template-columns:1fr 1fr}
   /* Proveedores */
   .prov-grid{grid-template-columns:1fr!important}
   .prov-toolbar{flex-direction:column;align-items:flex-start}
@@ -544,7 +549,6 @@ tr.overdue td:first-child{border-left:2px solid var(--red)}
 @media(max-width:480px){
   .cards-grid{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr!important}
-  .cal-params{grid-template-columns:1fr}
   .page-header h1{font-size:18px}
   /* Evitar zoom automático en iOS al hacer focus en inputs */
   input,select,textarea{font-size:16px!important}
@@ -746,19 +750,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 .cal-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
 .cal-toolbar input[type=date]{padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:var(--mono)}
 .cal-toolbar label{font-size:11px;color:var(--muted);margin-right:2px}
-.cal-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
-.cal-chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
-.cal-chart-card h4{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
-.cal-params{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px}
-.cal-param{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden}
-.cal-param .cp-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);margin-bottom:6px}
-.cal-param .cp-value{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1}
-.cal-param .cp-range{font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
-.cal-param .cp-bar{height:3px;border-radius:2px;margin-top:8px;background:var(--surface2)}
-.cal-param .cp-fill{height:100%;border-radius:2px;transition:width .4s}
-.cal-param.ok{border-color:rgba(16,185,129,.3)}.cal-param.ok .cp-value{color:var(--green)}.cal-param.ok .cp-fill{background:var(--green)}
-.cal-param.warn{border-color:rgba(245,158,11,.3)}.cal-param.warn .cp-value{color:var(--yellow)}.cal-param.warn .cp-fill{background:var(--yellow)}
-.cal-param.alert{border-color:rgba(239,68,68,.4);box-shadow:0 0 12px rgba(239,68,68,.1)}.cal-param.alert .cp-value{color:var(--red)}.cal-param.alert .cp-fill{background:var(--red)}
 .cal-table td.out-of-range{color:var(--red);font-weight:700}
 .cal-table td.near-limit{color:var(--yellow)}
 .cal-table td.in-range{color:var(--green)}
@@ -889,7 +880,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="nav-item" onclick="showSection('proveedores',this)"><span class="icon">🚢</span><span>Proveedores</span></div>
   <div class="nav-item" onclick="showSection('reclamos',this)"><span class="icon">🚨</span><span>Reclamos</span></div>
   <div class="nav-item" onclick="showSection('facturacion',this)"><span class="icon">🧾</span><span>Facturación</span></div>
-  <div class="nav-item" onclick="showSection('calidad',this)"><span class="icon">🔬</span><span>Calidad</span></div>
   <div class="nav-item" onclick="showSection('calendario',this)"><span class="icon">📅</span><span>Calendario</span></div>
   <!-- THEME TOGGLE -->
   <div class="theme-toggle" onclick="toggleTheme()" title="Cambiar entre tema frío y cálido">
@@ -1526,41 +1516,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
   </div>
   <!-- CALIDAD -->
-  <div class="section" id="section-calidad">
-    <div class="ph-row">
-      <div><h1>🔬 Seguimiento de Calidad</h1><p>Pasta de tomate · Parámetros físico-químicos y organolépticos</p></div>
-      <button class="btn btn-primary" onclick="openCRMModal('calidad')">+ Nuevo análisis</button>
-    </div>
-    <div class="cal-params" id="cal-params"></div>
-    <div class="cal-toolbar">
-      <label>Desde</label><input type="date" id="cal-desde" onchange="renderCalidad()">
-      <label>Hasta</label><input type="date" id="cal-hasta" onchange="renderCalidad()">
-      <button class="limits-toggle" onclick="document.getElementById('limits-panel').classList.toggle('open')">⚙️ Límites</button>
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('cal-desde').value='';document.getElementById('cal-hasta').value='';renderCalidad()">× Limpiar filtro</button>
-    </div>
-    <div class="limits-panel" id="limits-panel">
-      <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--muted)">LÍMITES ACEPTABLES (mín – máx)</div>
-      <div class="limits-grid">
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Brix</div><div class="limit-row"><input id="lim-brix-min" value="28" oninput="renderCalidad()"><span class="limit-sep">—</span><input id="lim-brix-max" value="35" oninput="renderCalidad()"></div></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Bostwick</div><div class="limit-row"><input id="lim-bostw-min" value="3" oninput="renderCalidad()"><span class="limit-sep">—</span><input id="lim-bostw-max" value="6" oninput="renderCalidad()"></div></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Color</div><div class="limit-row"><input id="lim-color-min" value="1.5" oninput="renderCalidad()"><span class="limit-sep">—</span><input id="lim-color-max" value="2.5" oninput="renderCalidad()"></div></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Acidez</div><div class="limit-row"><input id="lim-acidez-min" value="1.2" oninput="renderCalidad()"><span class="limit-sep">—</span><input id="lim-acidez-max" value="2.5" oninput="renderCalidad()"></div></div>
-        <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Tamiz</div><div class="limit-row"><input id="lim-tamiz-min" value="0.5" oninput="renderCalidad()"><span class="limit-sep">—</span><input id="lim-tamiz-max" value="1.2" oninput="renderCalidad()"></div></div>
-      </div>
-    </div>
-    <div class="cal-charts" id="cal-charts-grid">
-      <div class="cal-chart-card"><h4>Brix</h4><canvas id="chart-brix" height="140"></canvas></div>
-      <div class="cal-chart-card"><h4>Acidez</h4><canvas id="chart-acidez" height="140"></canvas></div>
-      <div class="cal-chart-card"><h4>Bostwick</h4><canvas id="chart-bostwick" height="140"></canvas></div>
-      <div class="cal-chart-card"><h4>Color</h4><canvas id="chart-color" height="140"></canvas></div>
-    </div>
-    <div class="table-container">
-      <table class="cal-table" id="cal-table">
-        <thead><tr><th>Fecha</th><th>Hora</th><th>Lote</th><th>Operador</th><th>Brix</th><th>Tamiz</th><th>Bostwick</th><th>Color</th><th>Acidez</th><th>Sabor</th><th>Olor</th><th>Foto</th><th>Observaciones</th></tr></thead>
-        <tbody id="cal-tbody"></tbody>
-      </table>
-    </div>
-  </div>
 <!-- CARGAS -->
 <div class="section" id="section-cargas">
   <div class="ph-row page-header">
@@ -1774,7 +1729,7 @@ function scheduleAutoBackup(){
 async function silentSyncToSheets(){
   if(!_dirty || !token || !spreadsheetId) return;
   try{
-    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',tareas:'Tareas',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',calidad:'Calidad',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores'};
+    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',tareas:'Tareas',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores'};
     for(const [dbKey, sheetName] of Object.entries(sheetMap)){
       if(!DB[dbKey]?.length) continue;
       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:Z:clear`,
@@ -1935,7 +1890,6 @@ const HEADERS={
   Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Categoria','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Vencimientos','DireccionCliente','DomicilioRealCliente','DomicilioLegalCliente','CUITCliente','Adquirente','DomicilioRealAdquirente','DomicilioLegalAdquirente','CUITAdquirente','FechaRetiro','LugarEntrega','EstadoCuenta','NombreTransporte','DatosTractor','DatosSemiremolque','DatoChofer','Comisionista','PorcentajeComision','GastoFlete','Etapa','Responsable','Notas','Lineas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
   Facturas:['ID','NumFactura','Cliente','Pais','NroPedido','Producto','Cantidad','Monto','Moneda','CondPago','DiasVenc','EstadoFactura','Estado','FechaEmision','FechaVencimiento','NotaCredito','NotaDebito','FacturaFileId','FacturaFileName','FacturaTransFileId','FacturaTransFileName','Notas'],
-  Calidad:['ID','Fecha','Hora','Lote','Operador','Brix','Tamiz','Bostwick','Color','Acidez','Sabor','Olor','FotoCristal','Observaciones'],
   Contactos:['ID','Nombre','Cargo','Empresa','Tel1','Tel2','Email1','Email2','Pais','WhatsApp','Notas'],
   Novedades:['ID','Tipo','RefId','Fecha','Texto','Autor'],
   Cotizaciones:['ID','NroCotizacion','Fecha','ValidezDias','Cliente','Pais','Condicion','Ubicacion','Moneda','Idioma','Responsable','Estado','Notas','NotaExtra','Lineas'],
@@ -1974,7 +1928,7 @@ async function syncFromSheetsIfNewer(){
   try{
     document.getElementById('sync-status-text').textContent = 'Verificando Sheets...';
     const sheetsDB = {};
-    const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
+    const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
     for(const[sheet,key]of Object.entries(map)){
       try{
         const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
@@ -2035,7 +1989,7 @@ async function syncFromSheetsIfNewer(){
 }
 async function loadAllData(){
   if(!spreadsheetId||!token)return;
-  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
+  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
   for(const[sheet,key]of Object.entries(map)){
     try{
       const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
@@ -2078,7 +2032,6 @@ function showSection(id,el){
   else if(id==='proveedores')renderProvGrid();
   else if(id==='reclamos')renderReclamos();
   else if(id==='facturacion')renderFacturacion();
-  else if(id==='calidad')renderCalidad();
   else if(id==='calendario'){renderCalendario();updateGCalSyncInfo();}
 }
 /* ═══════════════════════════════════════
@@ -3007,7 +2960,7 @@ const FORMS={
   factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (kg)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Días de plazo</label><input id="f-DiasVenc" type="number" min="1" step="1" placeholder="ej: 60" oninput="calcFacturaVencimiento()"></div></div><div class="form-row"><div class="form-group"><label>Estado facturación</label><select id="f-EstadoFactura"><option value="">— Seleccionar —</option><option>No facturado</option><option>Facturado</option><option>Cobro en prueba</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date" oninput="calcFacturaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📎 Documentos</div><input type="hidden" id="f-FacturaFileId"><input type="hidden" id="f-FacturaFileName"><input type="hidden" id="f-FacturaTransFileId"><input type="hidden" id="f-FacturaTransFileName"><div class="form-row"><div class="form-group"><label>Factura (PDF / imagen)</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-file-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-file-input\',\'f-FacturaFileId\',\'f-FacturaFileName\',\'factura-file-status\')">☁️ Drive</button></div><div id="factura-file-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div><div class="form-group"><label>Factura de transporte</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-trans-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-trans-input\',\'f-FacturaTransFileId\',\'f-FacturaTransFileName\',\'factura-trans-status\')">☁️ Drive</button></div><div id="factura-trans-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
 };
-const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas',calidad:'Calidad'};
+const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas'};
 function openCRMModal(type){
   currentCRMModal=type;
   _editingId=null;
@@ -3193,7 +3146,7 @@ function editRecord(type, id){
 /* Eliminar registro — borra en DB local Y en Google Sheets */
 async function deleteRecord(type, id){
   const sheetKey = {cliente:'clientes',proyecto:'proyectos',tarea:'tareas',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
-  const sheetName = {cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas',calidad:'Calidad'};
+  const sheetName = {cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas'};
   const dbKey = sheetKey[type];
   if(!DB[dbKey]) return;
   const rec = DB[dbKey]?.find(r=>r.ID===id);
@@ -3207,7 +3160,7 @@ async function deleteRecord(type, id){
   // 2. Guardar en localStorage (instantáneo)
   saveLocal();
   // 3. Re-renderizar
-  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
+  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion};
   if(renders[type]) renders[type]();
   if(type==='producto') syncProductsFromInventory();
   renderDashboard();
@@ -3232,7 +3185,7 @@ async function saveModal(){
   }
   if(!currentCRMModal) return;
   const sheet = MODAL_SHEET[currentCRMModal];
-  const dbKey = {Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Calidad:'calidad'}[sheet];
+  const dbKey = {Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas'}[sheet];
   // Collect values — skip any select still showing __new__
   const row = {ID: _editingId || genId()};
   let invalid = false;
@@ -3294,7 +3247,7 @@ async function saveModal(){
   }
   closeCRMModal();
   // Re-render relevant section
-  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion,calidad:renderCalidad};
+  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion};
   if(renders[currentCRMModal]) renders[currentCRMModal]();
   renderDashboard();
 }
@@ -4150,6 +4103,26 @@ function resetPrevisionProducts(){
   savePrevisionYears();renderModalList();renderTabs();renderAll();
 }
 function ensureDefaultProducts(){
+  // ── Migración única: eliminar productos no-default (ej: subproductos acumulados) ──
+  const CLEANUP_FLAG='crm_prevision_cleanup_v2';
+  if(!localStorage.getItem(CLEANUP_FLAG)){
+    const defaultIds=new Set(_DEFAULT_PRODUCTS.map(d=>d.id));
+    const hadExtras=PRODUCTS.some(p=>!defaultIds.has(p.id));
+    if(hadExtras){
+      const kept=_DEFAULT_PRODUCTS.map(d=>{
+        const ex=PRODUCTS.find(p=>p.id===d.id);
+        return{id:d.id,emoji:d.emoji,label:d.label,
+          subtitle:d.label+' · '+(_previsionYear||2026)+' · Toneladas',
+          data:ex?ex.data:buildEmptyData()};
+      });
+      PRODUCTS.length=0;
+      kept.forEach(p=>PRODUCTS.push(p));
+      if(!PRODUCTS.find(p=>p.id===currentProductId)) currentProductId=PRODUCTS[0]?.id||'';
+      savePrevisionYears();
+    }
+    localStorage.setItem(CLEANUP_FLAG,'1');
+    return;
+  }
   // Si ya existe una lista guardada en localStorage, respetarla completamente.
   // loadPrevisionYears() ya la restauró — no volver a agregar los eliminados.
   try{
@@ -4670,52 +4643,7 @@ function renderFacturacion(){
 function stat(label,value,sub,accent){return`<div class="mod-stat ${accent}"><div class="ms-label">${label}</div><div class="ms-value">${value}</div><div class="ms-sub">${sub}</div></div>`;}
 /* ═══════════════════════════════════════
    CALIDAD
-═══════════════════════════════════════ */
-const CAL_CHARTS={};
-const CAL_SEED=[
-  {ID:'seed1',Fecha:'2026-01-06',Hora:'11:35',Lote:'',Operador:'',Brix:'31.02',Tamiz:'0.8',Bostwick:'5',Color:'1.9',Acidez:'1.53',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-  {ID:'seed2',Fecha:'2026-01-08',Hora:'15:23',Lote:'',Operador:'',Brix:'30.36',Tamiz:'0.8',Bostwick:'3.5',Color:'2',Acidez:'1.4',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-  {ID:'seed3',Fecha:'2026-01-15',Hora:'17:32',Lote:'',Operador:'',Brix:'31.3',Tamiz:'0.8',Bostwick:'4',Color:'2.2',Acidez:'1.85',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-  {ID:'seed4',Fecha:'2026-01-17',Hora:'12:15',Lote:'',Operador:'',Brix:'30.91',Tamiz:'0.8',Bostwick:'4',Color:'2.1',Acidez:'1.69',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-  {ID:'seed5',Fecha:'2026-01-26',Hora:'08:12',Lote:'',Operador:'',Brix:'30.31',Tamiz:'0.8',Bostwick:'4.67',Color:'1.87',Acidez:'1.75',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-  {ID:'seed6',Fecha:'2026-01-28',Hora:'16:55',Lote:'',Operador:'',Brix:'31.42',Tamiz:'0.8',Bostwick:'4',Color:'1.98',Acidez:'2.04',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-  {ID:'seed7',Fecha:'2026-02-02',Hora:'14:52',Lote:'',Operador:'',Brix:'32.45',Tamiz:'0.8',Bostwick:'4',Color:'1.66',Acidez:'3.13',Sabor:'Característico',Olor:'Característico',FotoCristal:'',Observaciones:''},
-];
-function getLimits(){const g=id=>parseFloat(document.getElementById(id)?.value)||0;return{brix:{min:g('lim-brix-min'),max:g('lim-brix-max')},bostw:{min:g('lim-bostw-min'),max:g('lim-bostw-max')},color:{min:g('lim-color-min'),max:g('lim-color-max')},acidez:{min:g('lim-acidez-min'),max:g('lim-acidez-max')},tamiz:{min:g('lim-tamiz-min'),max:g('lim-tamiz-max')}};}
-function checkVal(v,min,max){if(isNaN(v))return'neutral';const range=max-min,margin=range*0.1;if(v<min||v>max)return'alert';if(v<min+margin||v>max-margin)return'warn';return'ok';}
-function cellClass(v,min,max){const s=checkVal(v,min,max);return s==='alert'?'out-of-range':s==='warn'?'near-limit':'in-range';}
-function renderCalidad(){
-  const dbIds=new Set(DB.calidad.map(r=>r.ID));
-  const all=[...CAL_SEED.filter(r=>!dbIds.has(r.ID)),...DB.calidad];
-  const desde=document.getElementById('cal-desde')?.value,hasta=document.getElementById('cal-hasta')?.value;
-  const data=all.filter(r=>{if(desde&&r.Fecha<desde)return false;if(hasta&&r.Fecha>hasta)return false;return true;}).sort((a,b)=>a.Fecha.localeCompare(b.Fecha)||a.Hora.localeCompare(b.Hora));
-  const lims=getLimits();
-  const last=data[data.length-1];
-  const params=last?[
-    {key:'Brix',val:parseFloat(last.Brix),lim:lims.brix,unit:'°Bx'},
-    {key:'Tamiz',val:parseFloat(last.Tamiz),lim:lims.tamiz,unit:'mm'},
-    {key:'Bostwick',val:parseFloat(last.Bostwick),lim:lims.bostw,unit:'cm'},
-    {key:'Color',val:parseFloat(last.Color),lim:lims.color,unit:''},
-    {key:'Acidez',val:parseFloat(last.Acidez),lim:lims.acidez,unit:'%'},
-  ]:[];
-  document.getElementById('cal-params').innerHTML=params.map(p=>{const status=checkVal(p.val,p.lim.min,p.lim.max);const pct=Math.min(100,Math.max(0,((p.val-p.lim.min)/(p.lim.max-p.lim.min))*100));return`<div class="cal-param ${status}"><div class="cp-label">${p.key}</div><div class="cp-value">${isNaN(p.val)?'—':p.val.toFixed(2)} <span style="font-size:12px;font-weight:400">${p.unit}</span></div><div class="cp-range">Límite: ${p.lim.min} – ${p.lim.max}</div><div class="cp-bar"><div class="cp-fill" style="width:${pct}%"></div></div></div>`;}).join('')+(last?`<div class="cal-param" style="border-color:rgba(79,110,247,.2)"><div class="cp-label">Último análisis</div><div class="cp-value" style="font-size:14px;color:var(--accent)">${last.Fecha||'—'}</div><div class="cp-range">${last.Hora||''} · Lote: ${last.Lote||'—'}</div><div class="cp-range" style="margin-top:4px">Analista: ${last.Operador||'—'}</div></div>`:'');
-  const labels=data.map(r=>r.Fecha?r.Fecha.slice(5):'');
-  const chartDefs=[{id:'chart-brix',key:'Brix',lim:lims.brix,color:'#b3a7e8'},{id:'chart-acidez',key:'Acidez',lim:lims.acidez,color:'#f97066'},{id:'chart-bostwick',key:'Bostwick',lim:lims.bostw,color:'#38bdf8'},{id:'chart-color',key:'Color',lim:lims.color,color:'#fb923c'}];
-  chartDefs.forEach(def=>{
-    if(CAL_CHARTS[def.id])CAL_CHARTS[def.id].destroy();
-    const vals=data.map(r=>parseFloat(r[def.key])||null);
-    CAL_CHARTS[def.id]=new Chart(document.getElementById(def.id),{type:'line',data:{labels,datasets:[{label:def.key,data:vals,borderColor:def.color,backgroundColor:def.color+'22',borderWidth:2,pointRadius:4,pointHoverRadius:6,tension:0.3,fill:true},{label:'Mín',data:data.map(()=>def.lim.min),borderColor:'#ef444466',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false},{label:'Máx',data:data.map(()=>def.lim.max),borderColor:'#ef444466',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'#2d3148'}},y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'#2d3148'}}}}});
-  });
-  const tb=document.getElementById('cal-tbody');
-  if(!data.length){tb.innerHTML='<tr><td colspan="13"><div class="empty-state"><div class="icon">🔬</div><p>Sin análisis registrados</p></div></td></tr>';return;}
-  tb.innerHTML=data.slice().reverse().map(r=>{
-    const brix=parseFloat(r.Brix),bostw=parseFloat(r.Bostwick),color=parseFloat(r.Color),acidez=parseFloat(r.Acidez),tamiz=parseFloat(r.Tamiz);
-    const fmtNum=v=>isNaN(v)?'—':v.toFixed(2);
-    const sabOk=!r.Sabor||r.Sabor.toLowerCase().includes('caract'),olorOk=!r.Olor||r.Olor.toLowerCase().includes('caract');
-    return`<tr><td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${r.Fecha||'—'}</td><td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r.Hora||'—'}</td><td style="font-family:var(--mono);font-size:11px">${r.Lote||'—'}</td><td style="font-size:12px">${r.Operador||'—'}</td><td class="${cellClass(brix,lims.brix.min,lims.brix.max)}" style="font-family:var(--mono)">${fmtNum(brix)}</td><td class="${cellClass(tamiz,lims.tamiz.min,lims.tamiz.max)}" style="font-family:var(--mono)">${fmtNum(tamiz)}</td><td class="${cellClass(bostw,lims.bostw.min,lims.bostw.max)}" style="font-family:var(--mono)">${fmtNum(bostw)}</td><td class="${cellClass(color,lims.color.min,lims.color.max)}" style="font-family:var(--mono)">${fmtNum(color)}</td><td class="${cellClass(acidez,lims.acidez.min,lims.acidez.max)}" style="font-family:var(--mono)">${fmtNum(acidez)}</td><td style="font-size:12px;color:${sabOk?'var(--green)':'var(--red)'}">${r.Sabor||'—'}</td><td style="font-size:12px;color:${olorOk?'var(--green)':'var(--red)'}">${r.Olor||'—'}</td><td>${r.FotoCristal?`<a href="${r.FotoCristal}" target="_blank" class="cal-foto-link">🔗 ver</a>`:'—'}</td><td style="font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.Observaciones||''}">${r.Observaciones||'—'}</td><td class="row-actions"><button class="btn-row-edit" onclick="editRecord('calidad','${r.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('calidad','${r.ID}')">🗑</button></td></tr>`;
-  }).join('');
-}
-// Apply saved theme label on load
+═══════════════════════════════════════ */// Apply saved theme label on load
 document.addEventListener('DOMContentLoaded',()=>{
   // Tema
   if(document.body.classList.contains('warm'))
@@ -6780,731 +6708,11 @@ document.addEventListener('mousedown',e=>{
     closeBombonaNotaPopover();
 });
 </script>
-<!-- ═══════════════════════════════════════════════════════════════
-     INTEGRACIÓN IA + OBSIDIAN — Gemini 2.0 Flash + Obsidian REST
-═══════════════════════════════════════════════════════════════ -->
-<style>
-/* ── CONFIG MODAL ── */
-#ia-config-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:center;justify-content:center;}
-#ia-config-overlay.open{display:flex;}
-#ia-config-box{background:var(--surface);border-radius:14px;padding:28px 32px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.25);font-family:inherit;}
-#ia-config-box h2{margin:0 0 18px;font-size:17px;color:var(--accent);}
-.ia-cfg-group{margin-bottom:14px;}
-.ia-cfg-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase;}
-.ia-cfg-group input{width:100%;box-sizing:border-box;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--surface2);color:var(--text);}
-.ia-cfg-group input:focus{outline:none;border-color:var(--accent);}
-.ia-cfg-hint{font-size:11px;color:var(--muted);margin-top:4px;}
-.ia-cfg-hint a{color:var(--accent);}
-.ia-cfg-row{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
-.ia-cfg-btn{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;}
-.ia-cfg-btn.save{background:var(--accent);color:#fff;}
-.ia-cfg-btn.cancel{background:var(--surface2);color:var(--text);}
-.ia-cfg-status{font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:14px;display:none;}
-.ia-cfg-status.ok{display:block;background:#e8f7ee;color:#2e7d4f;}
-.ia-cfg-status.err{display:block;background:#fde8e8;color:#c0392b;}
-
-/* ── IA SECTION ── */
-#section-ia{display:none;flex-direction:column;height:calc(100vh - 56px);overflow:hidden;}
-#section-ia.active{display:flex;}
-.ia-layout{display:flex;gap:0;height:100%;overflow:hidden;}
-
-/* Sidebar quick-actions */
-.ia-sidebar{width:220px;min-width:200px;background:var(--surface2);border-right:1px solid var(--border);padding:16px 12px;overflow-y:auto;flex-shrink:0;}
-.ia-sidebar h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px;}
-.ia-qa-btn{display:block;width:100%;text-align:left;padding:9px 11px;margin-bottom:6px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);font-size:12.5px;cursor:pointer;font-family:inherit;line-height:1.35;}
-.ia-qa-btn:hover{border-color:var(--accent);color:var(--accent);}
-.ia-sidebar-sep{height:1px;background:var(--border);margin:12px 0;}
-.ia-obs-status{font-size:11.5px;padding:8px 10px;border-radius:8px;background:var(--surface);border:1.5px solid var(--border);color:var(--muted);display:flex;align-items:center;gap:6px;}
-.ia-obs-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;}
-.ia-obs-dot.ok{background:#27ae60;}
-.ia-obs-dot.err{background:#e74c3c;}
-.ia-obs-btn-sm{display:block;width:100%;text-align:left;padding:7px 10px;margin-top:5px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer;font-family:inherit;}
-.ia-obs-btn-sm:hover{border-color:#27ae60;color:#27ae60;}
-
-/* Chat area */
-.ia-chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.ia-chat-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
-.ia-msg-wrap{position:relative;display:flex;flex-direction:column;}
-.ia-msg-wrap.user{align-items:flex-end;}
-.ia-msg-wrap.assistant{align-items:flex-start;}
-.ia-msg{max-width:82%;padding:12px 16px;border-radius:14px;font-size:13.5px;line-height:1.55;}
-.ia-msg.user{background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
-.ia-msg.assistant{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px;}
-.ia-msg.system{align-self:center;background:transparent;color:var(--muted);font-size:12px;font-style:italic;}
-.ia-msg pre{font-size:12px;background:rgba(0,0,0,.07);padding:10px;border-radius:6px;overflow-x:auto;white-space:pre-wrap;margin:8px 0 0;}
-.ia-msg code{font-size:12px;background:rgba(0,0,0,.07);padding:1px 5px;border-radius:4px;font-family:var(--mono);}
-.ia-msg h1,.ia-msg h2,.ia-msg h3{font-size:14px;font-weight:700;margin:10px 0 4px;color:inherit;}
-.ia-msg h1{font-size:15px;}
-.ia-msg ul,.ia-msg ol{margin:6px 0 6px 18px;padding:0;}
-.ia-msg li{margin-bottom:3px;}
-.ia-msg table{border-collapse:collapse;width:100%;font-size:12.5px;margin:8px 0;}
-.ia-msg th{background:rgba(0,0,0,.08);padding:5px 10px;text-align:left;font-weight:700;border:1px solid rgba(0,0,0,.12);}
-.ia-msg td{padding:5px 10px;border:1px solid rgba(0,0,0,.1);}
-.ia-msg tr:nth-child(even) td{background:rgba(0,0,0,.03);}
-.ia-msg hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
-.ia-copy-btn{align-self:flex-end;margin-top:4px;padding:2px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;opacity:0;transition:opacity .15s;font-family:inherit;}
-.ia-msg-wrap.assistant:hover .ia-copy-btn{opacity:1;}
-.ia-copy-btn:hover{color:var(--text);}
-.ia-typing{align-self:flex-start;background:var(--surface2);padding:12px 16px;border-radius:14px;border-bottom-left-radius:4px;color:var(--muted);font-size:13px;display:none;}
-.ia-typing.show{display:block;}
-.ia-typing span{animation:ia-blink 1s infinite;}
-.ia-typing span:nth-child(2){animation-delay:.2s;}
-.ia-typing span:nth-child(3){animation-delay:.4s;}
-@keyframes ia-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-
-/* Input bar */
-.ia-input-bar{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;background:var(--surface2);}
-#ia-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-family:inherit;resize:none;min-height:42px;max-height:160px;overflow:hidden;background:var(--surface);color:var(--text);line-height:1.4;}
-#ia-input:focus{outline:none;border-color:var(--accent);}
-#ia-send{padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:18px;line-height:1;align-self:flex-end;}
-#ia-send:disabled{opacity:.4;cursor:default;}
-.ia-context-bar{padding:8px 20px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface2);}
-.ia-ctx-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-.ia-ctx-chip{padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:11.5px;cursor:pointer;color:var(--muted);}
-.ia-ctx-chip.active{border-color:var(--accent);background:var(--accent);color:#fff;}
-
-/* → Obsidian button (injected into cards) */
-.obs-push-btn{padding:5px 10px;border-radius:7px;border:1.5px solid #27ae60;background:transparent;color:#27ae60;font-size:11.5px;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:600;}
-.obs-push-btn:hover{background:#27ae60;color:#fff;}
-.obs-push-btn.loading{opacity:.6;cursor:default;}
-.obs-push-btn.done{border-color:#888;color:#888;}
-
-/* IA nav pill */
-.ia-cfg-icon-btn{margin-top:2px;padding:6px 10px;background:transparent;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;width:100%;text-align:left;color:var(--muted);font-family:inherit;}
-.ia-cfg-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
-</style>
-
-<!-- CONFIG MODAL -->
-<div id="ia-config-overlay" onclick="if(event.target===this)closeIAConfig()">
-  <div id="ia-config-box">
-    <h2>⚙ Configuración IA + Obsidian</h2>
-    <div id="ia-cfg-status" class="ia-cfg-status"></div>
-    <div class="ia-cfg-group">
-      <label>Gemini API Key <span style="font-weight:400;text-transform:none">(gratis)</span></label>
-      <input type="password" id="cfg-gemini-key" placeholder="AIza…" autocomplete="off">
-      <p class="ia-cfg-hint">Obtené tu clave en <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Get API Key</p>
-    </div>
-    <div class="ia-cfg-group">
-      <label>Obsidian Local REST API Key</label>
-      <input type="password" id="cfg-obsidian-key" placeholder="Tu API key del plugin" autocomplete="off">
-      <p class="ia-cfg-hint">Obsidian → Settings → Local REST API → API Key</p>
-    </div>
-    <div class="ia-cfg-group">
-      <label>URL Obsidian REST API</label>
-      <input type="text" id="cfg-obsidian-url" placeholder="http://localhost:27123">
-      <p class="ia-cfg-hint">Dejá el valor por defecto salvo que hayas cambiado el puerto.</p>
-    </div>
-    <div class="ia-cfg-group">
-      <label>Anthropic API Key <span style="font-weight:400;text-transform:none">(para exportación Excel)</span></label>
-      <input type="password" id="cfg-anthropic-key" placeholder="sk-ant-…" autocomplete="off">
-      <p class="ia-cfg-hint">Requerido solo para la función "Exportar Excel" en Ventas.</p>
-    </div>
-    <div class="ia-cfg-row">
-      <button class="ia-cfg-btn cancel" onclick="closeIAConfig()">Cancelar</button>
-      <button class="ia-cfg-btn save" onclick="saveIAConfig()">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- IA SECTION -->
-<div class="section" id="section-ia">
-  <div class="ia-layout">
-    <!-- Sidebar -->
-    <div class="ia-sidebar">
-      <h3>Acciones rápidas</h3>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Resumí las ventas del período actual: clientes principales, productos y montos totales.')">📊 Resumen de ventas</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Listá todas las tareas pendientes con su prioridad y fecha de vencimiento.')">✅ Tareas pendientes</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Analizá los clientes activos: quiénes compran más, qué productos y en qué países.')">👥 Análisis de clientes</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Mostrá el estado de todas las cargas activas y su transportista.')">🚛 Estado de cargas</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Listá los reclamos abiertos con su urgencia y cliente afectado.')">🚨 Reclamos abiertos</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Revisá el inventario y alertá sobre productos por debajo del stock mínimo.')">📦 Alertas de stock</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Mostrá las cotizaciones vigentes con su estado y validez.')">📝 Cotizaciones activas</button>
-      <button class="ia-qa-btn" onclick="iaQuickAsk('Dame un resumen ejecutivo del estado general del negocio hoy.')">🧭 Estado general</button>
-
-      <div class="ia-sidebar-sep"></div>
-      <h3>Obsidian</h3>
-      <div class="ia-obs-status" id="ia-obs-status">
-        <div class="ia-obs-dot" id="ia-obs-dot"></div>
-        <span id="ia-obs-label">Sin conectar</span>
-      </div>
-      <button class="ia-obs-btn-sm" onclick="testObsidianConnection()">🔄 Probar conexión</button>
-      <button class="ia-obs-btn-sm" onclick="obsidianPushAll()">⬆ Sincronizar todo a vault</button>
-
-      <div class="ia-sidebar-sep"></div>
-      <h3>Configuración</h3>
-      <button class="ia-cfg-icon-btn" onclick="openIAConfig()">⚙ API Keys y URLs</button>
-      <button class="ia-cfg-icon-btn" onclick="clearIAChat()">🗑 Borrar chat</button>
-    </div>
-
-    <!-- Chat -->
-    <div class="ia-chat-area">
-      <div class="ia-context-bar">
-        <span class="ia-ctx-label">Contexto:</span>
-        <button class="ia-ctx-chip active" data-ctx="all" onclick="toggleCtx(this,'all')">Todo</button>
-        <button class="ia-ctx-chip" data-ctx="ventas" onclick="toggleCtx(this,'ventas')">Ventas</button>
-        <button class="ia-ctx-chip" data-ctx="clientes" onclick="toggleCtx(this,'clientes')">Clientes</button>
-        <button class="ia-ctx-chip" data-ctx="tareas" onclick="toggleCtx(this,'tareas')">Tareas</button>
-        <button class="ia-ctx-chip" data-ctx="cargas" onclick="toggleCtx(this,'cargas')">Cargas</button>
-        <button class="ia-ctx-chip" data-ctx="reclamos" onclick="toggleCtx(this,'reclamos')">Reclamos</button>
-        <button class="ia-ctx-chip" data-ctx="none" onclick="toggleCtx(this,'none')">Sin datos</button>
-      </div>
-      <div class="ia-chat-messages" id="ia-chat-messages">
-        <div class="ia-msg system">Asistente IA listo. Hacé una pregunta o elegí una acción rápida.</div>
-      </div>
-      <div class="ia-typing" id="ia-typing">● <span>●</span><span>●</span><span>●</span></div>
-      <div class="ia-input-bar">
-        <textarea id="ia-input" placeholder="Preguntá sobre tus datos, pedí análisis, solicitá resúmenes…" rows="1"
-          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,160)+'px'"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMessage();}"></textarea>
-        <button id="ia-send" onclick="sendIAMessage()">➤</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   CONFIG
-═══════════════════════════════════════════════════════════════ */
-function getIACfg(key,def=''){return localStorage.getItem('crm-ia-'+key)||def;}
-function setIACfg(key,val){localStorage.setItem('crm-ia-'+key,val);}
-
-function openIAConfig(){
-  document.getElementById('cfg-gemini-key').value=getIACfg('gemini-key');
-  document.getElementById('cfg-obsidian-key').value=getIACfg('obsidian-key');
-  document.getElementById('cfg-obsidian-url').value=getIACfg('obsidian-url','http://localhost:27123');
-  document.getElementById('cfg-anthropic-key').value=getIACfg('anthropic-key');
-  document.getElementById('ia-cfg-status').className='ia-cfg-status';
-  document.getElementById('ia-config-overlay').classList.add('open');
-}
-function closeIAConfig(){document.getElementById('ia-config-overlay').classList.remove('open');}
-function saveIAConfig(){
-  const gk=document.getElementById('cfg-gemini-key').value.trim();
-  const ok=document.getElementById('cfg-obsidian-key').value.trim();
-  const ou=document.getElementById('cfg-obsidian-url').value.trim()||'http://localhost:27123';
-  const ak=document.getElementById('cfg-anthropic-key').value.trim();
-  if(gk)setIACfg('gemini-key',gk);
-  if(ok)setIACfg('obsidian-key',ok);
-  setIACfg('obsidian-url',ou);
-  if(ak)setIACfg('anthropic-key',ak);
-  const st=document.getElementById('ia-cfg-status');
-  st.className='ia-cfg-status ok';st.textContent='✓ Configuración guardada.';
-  setTimeout(()=>{closeIAConfig();testObsidianConnection();},1200);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   GEMINI API
-═══════════════════════════════════════════════════════════════ */
-const IA_CHAT_HISTORY=[];
-const IA_CTX_ACTIVE=new Set(['all']);
-const GEMINI_MODEL='gemini-2.0-flash';
-
-function toggleCtx(btn,ctx){
-  if(ctx==='all'){
-    IA_CTX_ACTIVE.clear();IA_CTX_ACTIVE.add('all');
-    document.querySelectorAll('.ia-ctx-chip').forEach(c=>c.classList.remove('active'));
-    btn.classList.add('active');
-  } else if(ctx==='none'){
-    IA_CTX_ACTIVE.clear();IA_CTX_ACTIVE.add('none');
-    document.querySelectorAll('.ia-ctx-chip').forEach(c=>c.classList.remove('active'));
-    btn.classList.add('active');
-  } else {
-    IA_CTX_ACTIVE.delete('all');IA_CTX_ACTIVE.delete('none');
-    btn.classList.toggle('active');
-    if(btn.classList.contains('active'))IA_CTX_ACTIVE.add(ctx);
-    else IA_CTX_ACTIVE.delete(ctx);
-    if(!IA_CTX_ACTIVE.size)IA_CTX_ACTIVE.add('none');
-    document.querySelector('[data-ctx="all"]').classList.remove('active');
-    document.querySelector('[data-ctx="none"]').classList.remove('active');
-  }
-}
-
-function buildContext(){
-  if(IA_CTX_ACTIVE.has('none'))return '';
-  const d=typeof DB!=='undefined'?DB:{};
-  const include=IA_CTX_ACTIVE.has('all')
-    ?['clientes','ventas','tareas','cargas','reclamos','inventario','cotizaciones','proyectos','contactos','facturas']
-    :Array.from(IA_CTX_ACTIVE);
-  const parts=[];
-
-  // Pick only relevant fields per entity to reduce tokens
-  const pick=(obj,keys)=>keys.reduce((r,k)=>{if(obj[k]!=null&&obj[k]!=='')r[k]=obj[k];return r;},{});
-  const fmt=(arr,label,keys,max=80)=>{
-    if(!arr||!arr.length)return;
-    const rows=arr.slice(0,max).map(r=>pick(r,keys));
-    parts.push(`## ${label} (${arr.length} total, mostrando ${rows.length})\n${JSON.stringify(rows,null,0)}`);
-  };
-
-  if(include.includes('clientes'))
-    fmt(d.clientes,'Clientes',['ID','Empresa','Pais','Contacto','Email','Estado','Rubro'],100);
-  if(include.includes('ventas'))
-    fmt(d.ventas,'Ventas',['ID','NumOrden','Fecha','Cliente','Producto','CantidadTon','ValorUSD','Etapa','Responsable','Notas'],80);
-  if(include.includes('tareas'))
-    fmt(d.tareas,'Tareas',['ID','Titulo','Asignado','Prioridad','Estado','FechaVenc','Descripcion'],100);
-  if(include.includes('cargas'))
-    fmt(d.cargas,'Cargas',['ID','NumOrden','Cliente','Categoria','FechaCarga','FechaEntrega','Transportista','Estado','Notas'],80);
-  if(include.includes('reclamos'))
-    fmt(d.reclamos,'Reclamos',['ID','Cliente','Producto','TipoReclamo','Urgencia','Estado','MontoAfectado','Motivo','FechaApertura'],60);
-  if(include.includes('inventario'))
-    fmt(d.inventario,'Inventario',['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],200);
-  if(include.includes('cotizaciones'))
-    fmt(d.cotizaciones,'Cotizaciones',['ID','NroCotizacion','Fecha','Cliente','Pais','Condicion','Estado','ValidezDias'],60);
-  if(include.includes('proyectos'))
-    fmt(d.proyectos,'Proyectos',['ID','Nombre','Cliente','Estado','Responsable','FechaInicio'],50);
-  if(include.includes('contactos'))
-    fmt(d.contactos,'Contactos',['ID','Nombre','Empresa','Cargo','Email','Telefono'],80);
-  if(include.includes('facturas'))
-    fmt(d.facturas,'Facturas',['ID','NumFactura','Cliente','Monto','Moneda','EstadoFactura','FechaVencimiento'],60);
-
-  return parts.join('\n\n');
-}
-
-const IA_SYSTEM=`Sos un asistente comercial especializado para el Grupo Cazorla / Tomalar SA.
-El usuario es Santiago Bóveda, responsable de Comercio Exterior.
-
-Empresas del grupo:
-- Seville Cazorla SA: importa aceitunas en granel desde España.
-- Tomalar SA: importa y comercializa pasta de tomate.
-- Guerta: fabrica y vende frutas deshidratadas (retail, food-service, mayoristas).
-
-Clientes clave: Grupo Herdez (México, aceitunas), Assaí Atacadista (Brasil, pasta de tomate).
-Proveedores principales: Aceitunas Cazorla SL, Agro Sevilla Aceitunas SCA, Arasol SL, Stone Factory SL (España).
-Logística: contenedores IBC (Goodpack do Brasil). Moneda operativa: USD.
-Terminología habitual: DFU, FOB, CIF, Incoterms — usarlos sin explicar salvo pedido.
-
-Respondé siempre en español, con precisión y brevedad. Usá formato markdown (headings, listas, tablas) cuando mejore la legibilidad.
-Si se te proporcionan datos del CRM, basá tu respuesta en ellos y citá números concretos.`;
-
-async function callGemini(userMsg){
-  const key=getIACfg('gemini-key');
-  if(!key){appendMsg('assistant','⚠ Configurá primero la Gemini API Key en ⚙ Configuración.');return;}
-  const ctx=buildContext();
-  const fullMsg=ctx?`Datos actuales del CRM:\n${ctx}\n\n---\nConsulta: ${userMsg}`:userMsg;
-  IA_CHAT_HISTORY.push({role:'user',parts:[{text:fullMsg}]});
-  const body={
-    system_instruction:{parts:[{text:IA_SYSTEM}]},
-    contents:IA_CHAT_HISTORY,
-    generationConfig:{temperature:0.3,maxOutputTokens:2048}
-  };
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||r.statusText);}
-  const data=await r.json();
-  const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'(sin respuesta)';
-  IA_CHAT_HISTORY.push({role:'model',parts:[{text:reply}]});
-  return reply;
-}
-
-function renderMarkdown(text){
-  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // Extract code blocks before escaping
-  const codeBlocks=[];
-  text=text.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,lang,code)=>{
-    codeBlocks.push(`<pre><code>${esc(code.trimEnd())}</code></pre>`);
-    return `\x00CODE${codeBlocks.length-1}\x00`;
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
   });
-  // Escape HTML in the rest
-  text=esc(text);
-  // Restore code blocks
-  text=text.replace(/\x00CODE(\d+)\x00/g,(_,i)=>codeBlocks[i]);
-  // Tables
-  text=text.replace(/(?:^\|.+\|\s*\n)+/gm,tableBlock=>{
-    const rows=tableBlock.trim().split('\n').filter(r=>r.trim());
-    let html='<table>';
-    rows.forEach((row,i)=>{
-      if(/^\|[-| :]+\|$/.test(row.trim()))return;
-      const cells=row.replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
-      const tag=i===0?'th':'td';
-      html+=`<tr>${cells.map(c=>`<${tag}>${c}</${tag}>`).join('')}</tr>`;
-    });
-    return html+'</table>';
-  });
-  // Headings
-  text=text.replace(/^### (.+)$/gm,'<h3>$1</h3>');
-  text=text.replace(/^## (.+)$/gm,'<h2>$1</h2>');
-  text=text.replace(/^# (.+)$/gm,'<h1>$1</h1>');
-  // HR
-  text=text.replace(/^---+$/gm,'<hr>');
-  // Bold + italic
-  text=text.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
-  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  text=text.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  // Inline code
-  text=text.replace(/`([^`\n]+)`/g,'<code>$1</code>');
-  // Unordered lists (group consecutive lines)
-  text=text.replace(/^([ \t]*[-*] .+\n?)+/gm,block=>{
-    const items=block.trim().split('\n').map(l=>l.replace(/^[ \t]*[-*] /,''));
-    return '<ul>'+items.map(i=>`<li>${i}</li>`).join('')+'</ul>';
-  });
-  // Ordered lists
-  text=text.replace(/^([ \t]*\d+\. .+\n?)+/gm,block=>{
-    const items=block.trim().split('\n').map(l=>l.replace(/^[ \t]*\d+\. /,''));
-    return '<ol>'+items.map(i=>`<li>${i}</li>`).join('')+'</ol>';
-  });
-  // Line breaks (but not inside block elements)
-  text=text.replace(/\n/g,'<br>');
-  // Clean up <br> inside block elements
-  text=text.replace(/(<(?:ul|ol|table|h[123]|hr|pre)[^>]*>)<br>/gi,'$1');
-  text=text.replace(/<br>(<\/(?:ul|ol|li|table|tr|th|td|h[123]|pre)>)/gi,'$1');
-  return text;
 }
-
-function appendMsg(role,text){
-  const box=document.getElementById('ia-chat-messages');
-  if(role==='system'){
-    const div=document.createElement('div');
-    div.className='ia-msg system';
-    div.textContent=text;
-    box.appendChild(div);
-    box.scrollTop=box.scrollHeight;
-    return;
-  }
-  const wrap=document.createElement('div');
-  wrap.className='ia-msg-wrap '+role;
-  const div=document.createElement('div');
-  div.className='ia-msg '+role;
-  div.innerHTML=renderMarkdown(text);
-  wrap.appendChild(div);
-  if(role==='assistant'){
-    const btn=document.createElement('button');
-    btn.className='ia-copy-btn';
-    btn.textContent='Copiar';
-    btn.onclick=()=>{navigator.clipboard.writeText(text).then(()=>{btn.textContent='✓ Copiado';setTimeout(()=>{btn.textContent='Copiar';},2000);});};
-    wrap.appendChild(btn);
-  }
-  box.appendChild(wrap);
-  box.scrollTop=box.scrollHeight;
-}
-
-async function sendIAMessage(){
-  const inp=document.getElementById('ia-input');
-  const msg=inp.value.trim();
-  if(!msg)return;
-  inp.value='';
-  appendMsg('user',msg);
-  document.getElementById('ia-send').disabled=true;
-  document.getElementById('ia-typing').classList.add('show');
-  document.getElementById('ia-chat-messages').scrollTop=99999;
-  try{
-    const reply=await callGemini(msg);
-    appendMsg('assistant',reply);
-  }catch(e){appendMsg('assistant','❌ Error: '+e.message);}
-  finally{
-    document.getElementById('ia-send').disabled=false;
-    document.getElementById('ia-typing').classList.remove('show');
-  }
-}
-
-function iaQuickAsk(q){
-  document.getElementById('ia-input').value=q;
-  if(document.querySelector('.nav-item[onclick*="ia"]')){}
-  // Switch to IA section if not already there
-  document.querySelectorAll('.nav-item').forEach(n=>{if(n.onclick&&n.onclick.toString().includes("'ia'"))n.click();});
-  sendIAMessage();
-}
-function clearIAChat(){IA_CHAT_HISTORY.length=0;const b=document.getElementById('ia-chat-messages');b.innerHTML='<div class="ia-msg system">Chat reiniciado.</div>';}
-
-/* ═══════════════════════════════════════════════════════════════
-   OBSIDIAN LOCAL REST API
-═══════════════════════════════════════════════════════════════ */
-async function obsidianFetch(method,path,body){
-  const base=getIACfg('obsidian-url','http://localhost:27123');
-  const key=getIACfg('obsidian-key');
-  if(!key)throw new Error('Configurá la Obsidian API Key en ⚙ Configuración.');
-  const opts={method,headers:{'Authorization':'Bearer '+key}};
-  if(body!==undefined){opts.headers['Content-Type']='text/markdown';opts.body=body;}
-  const r=await fetch(base+path,opts);
-  if(!r.ok){
-    const txt=await r.text().catch(()=>'');
-    throw new Error(`Obsidian API error ${r.status}: ${txt||r.statusText}`);
-  }
-  const ct=r.headers.get('content-type')||'';
-  if(ct.includes('json'))return r.json();
-  return r.text();
-}
-
-async function testObsidianConnection(){
-  const dot=document.getElementById('ia-obs-dot');
-  const lbl=document.getElementById('ia-obs-label');
-  dot.className='ia-obs-dot';lbl.textContent='Probando…';
-  try{
-    await obsidianFetch('GET','/');
-    dot.className='ia-obs-dot ok';lbl.textContent='Conectado ✓';
-  }catch(e){
-    dot.className='ia-obs-dot err';
-    lbl.textContent='Sin conexión';
-  }
-}
-
-function slugify(s){return s.replace(/[^\w\s\-áéíóúüñÁÉÍÓÚÜÑ]/g,'').replace(/\s+/g,' ').trim();}
-
-async function obsidianWriteNote(vaultPath,mdContent){
-  // vaultPath e.g. "Cazorla/Clientes/Herdez.md"
-  const encoded='/vault/'+encodeURIComponent(vaultPath).replace(/%2F/g,'/');
-  await obsidianFetch('PUT',encoded,mdContent);
-}
-
-/* ── PUSH HELPERS ── */
-function buildClienteNote(c){
-  const now=new Date().toISOString().split('T')[0];
-  return `---
-tipo: cliente
-empresa: "${(c.Empresa||'').replace(/"/g,"'")}"
-pais: "${c.Pais||''}"
-contacto: "${c.Contacto||''}"
-cargo: "${c.Cargo||''}"
-telefono: "${c.Telefono||''}"
-email: "${c.Email||''}"
-rubro: "${c.Rubro||''}"
-estado: "${c.Estado||'activo'}"
-ultima_actualizacion: ${now}
-fuente: CRM Cazorla
----
-
-# ${c.Empresa||'Cliente'}
-
-## Datos de contacto
-- **País:** ${c.Pais||'—'}
-- **Contacto:** ${c.Contacto||'—'} (${c.Cargo||'—'})
-- **Teléfono:** ${c.Telefono||'—'}
-- **Email:** ${c.Email||'—'}
-- **Dirección:** ${c.Direccion||'—'}
-- **CUIT/ID fiscal:** ${c.CUIT||'—'}
-
-## Notas
-${c.Notas||'_Sin notas._'}
-
-## Historial
-_Nota sincronizada desde CRM el ${now}._
-`;
-}
-
-function buildCargaNote(v){
-  const now=new Date().toISOString().split('T')[0];
-  return `---
-tipo: operacion
-num_orden: "${v.NumOrden||v.ID||''}"
-cliente: "${(v.Cliente||'').replace(/"/g,"'")}"
-categoria: "${v.Categoria||''}"
-fecha_carga: "${v.FechaCarga||''}"
-fecha_entrega: "${v.FechaEntrega||''}"
-transportista: "${v.Transportista||''}"
-estado: "${v.Estado||''}"
-fuente: CRM Cazorla
----
-
-# Operación ${v.NumOrden||v.ID||''}
-
-| Campo | Valor |
-|---|---|
-| Cliente | ${v.Cliente||'—'} |
-| Categoría | ${v.Categoria||'—'} |
-| Fecha de carga | ${v.FechaCarga||'—'} |
-| Fecha de entrega | ${v.FechaEntrega||'—'} |
-| Transportista | ${v.Transportista||'—'} |
-| Estado | ${v.Estado||'—'} |
-
-## Notas
-${v.Notas||'_Sin notas._'}
-`;
-}
-
-function buildTareaNote(t){
-  const now=new Date().toISOString().split('T')[0];
-  return `---
-tipo: tarea
-titulo: "${(t.Titulo||'').replace(/"/g,"'")}"
-asignado: "${t.Asignado||''}"
-prioridad: "${t.Prioridad||''}"
-estado: "${t.Estado||''}"
-fecha_vencimiento: "${t.FechaVenc||''}"
-fuente: CRM Cazorla
----
-
-# ${t.Titulo||'Tarea'}
-
-- **Asignado:** ${t.Asignado||'—'}
-- **Prioridad:** ${t.Prioridad||'—'}
-- **Estado:** ${t.Estado||'—'}
-- **Vencimiento:** ${t.FechaVenc||'—'}
-
-## Descripción
-${t.Descripcion||'_Sin descripción._'}
-`;
-}
-
-function buildReclamoNote(r){
-  const now=new Date().toISOString().split('T')[0];
-  return `---
-tipo: reclamo
-cliente: "${(r.Cliente||'').replace(/"/g,"'")}"
-producto: "${r.Producto||''}"
-urgencia: "${r.Urgencia||''}"
-estado: "${r.Estado||''}"
-fecha_apertura: "${r.FechaApertura||''}"
-fuente: CRM Cazorla
----
-
-# Reclamo — ${r.Cliente||''} (${r.Producto||''})
-
-| Campo | Valor |
-|---|---|
-| Tipo | ${r.TipoReclamo||'—'} |
-| Urgencia | ${r.Urgencia||'—'} |
-| Estado | ${r.Estado||'—'} |
-| Monto afectado | ${r.MontoAfectado||'—'} |
-| Responsable | ${r.Responsable||'—'} |
-| Fecha apertura | ${r.FechaApertura||'—'} |
-
-## Motivo
-${r.Motivo||'_Sin detalle._'}
-`;
-}
-
-async function pushToObsidian(type,record,btnEl){
-  if(btnEl){btnEl.classList.add('loading');btnEl.textContent='Enviando…';}
-  try{
-    let path='',content='';
-    if(type==='cliente'){
-      const name=slugify(record.Empresa||record.ID||'cliente');
-      path=`Cazorla/Clientes/${name}.md`;
-      content=buildClienteNote(record);
-    } else if(type==='carga'){
-      const name=record.NumOrden||record.ID||'carga';
-      path=`Cazorla/Operaciones/${slugify(name)}.md`;
-      content=buildCargaNote(record);
-    } else if(type==='tarea'){
-      const name=slugify(record.Titulo||record.ID||'tarea');
-      path=`Cazorla/Notas Rápidas/${name}.md`;
-      content=buildTareaNote(record);
-    } else if(type==='reclamo'){
-      const cl=slugify(record.Cliente||'');
-      path=`Cazorla/Clientes/${cl}_reclamo_${record.ID||Date.now()}.md`;
-      content=buildReclamoNote(record);
-    }
-    await obsidianWriteNote(path,content);
-    if(btnEl){btnEl.classList.remove('loading');btnEl.classList.add('done');btnEl.textContent='✓ En vault';}
-    setTimeout(()=>{if(btnEl){btnEl.classList.remove('done');btnEl.textContent='→ Obsidian';}},4000);
-  }catch(e){
-    if(btnEl){btnEl.classList.remove('loading');btnEl.textContent='✕ Error';}
-    alert('Error al enviar a Obsidian:\n'+e.message);
-    setTimeout(()=>{if(btnEl)btnEl.textContent='→ Obsidian';},3000);
-  }
-}
-
-async function obsidianPushAll(){
-  const d=typeof DB!=='undefined'?DB:{};
-  let count=0;
-  const push=async(arr,type)=>{for(const r of(arr||[])){try{await pushToObsidian(type,r,null);count++;}catch(e){console.warn('Push error',e);}}};
-  try{
-    await push(d.clientes,'cliente');
-    await push(d.cargas,'carga');
-    await push(d.tareas,'tarea');
-    alert(`✓ Sincronizados ${count} registros al vault de Obsidian.`);
-  }catch(e){alert('Error en sincronización: '+e.message);}
-}
-
-/* ── INJECT → OBSIDIAN BUTTONS INTO RENDERED CARDS ── */
-function injectObsidianButtons(){
-  // Clientes
-  if(typeof DB!=='undefined'){
-    document.querySelectorAll('[data-client-id]').forEach(card=>{
-      const id=card.dataset.clientId;
-      if(card.querySelector('.obs-push-btn'))return;
-      const c=DB.clientes.find(x=>x.ID===id);
-      if(!c)return;
-      const btn=document.createElement('button');
-      btn.className='obs-push-btn';btn.textContent='→ Obsidian';
-      btn.onclick=e=>{e.stopPropagation();pushToObsidian('cliente',c,btn);};
-      card.appendChild(btn);
-    });
-    // Cargas
-    document.querySelectorAll('[data-carga-id]').forEach(card=>{
-      const id=card.dataset.cargaId;
-      if(card.querySelector('.obs-push-btn'))return;
-      const v=DB.cargas.find(x=>x.ID===id);
-      if(!v)return;
-      const btn=document.createElement('button');
-      btn.className='obs-push-btn';btn.textContent='→ Obsidian';
-      btn.onclick=e=>{e.stopPropagation();pushToObsidian('carga',v,btn);};
-      card.appendChild(btn);
-    });
-  }
-}
-
-/* ── ADD IA NAV ITEM ── */
-(function addIANavItem(){
-  const nav=document.querySelector('.sidebar');
-  if(!nav)return;
-  // Separator + IA button before theme toggle
-  const themeToggle=nav.querySelector('.theme-toggle');
-  const iaItem=document.createElement('div');
-  iaItem.className='nav-item';
-  iaItem.innerHTML='<span class="icon">🤖</span><span>Asistente IA</span>';
-  iaItem.onclick=function(){showSection('ia',this);};
-  if(themeToggle)nav.insertBefore(iaItem,themeToggle);
-  else nav.appendChild(iaItem);
-  // Config gear button
-  const cfgBtn=document.createElement('button');
-  cfgBtn.className='ia-cfg-icon-btn';cfgBtn.textContent='⚙ IA + Obsidian';
-  cfgBtn.title='Configurar API Keys';
-  cfgBtn.onclick=openIAConfig;
-  if(themeToggle)nav.insertBefore(cfgBtn,themeToggle);
-  else nav.appendChild(cfgBtn);
-})();
-
-/* ── PATCH showSection TO HANDLE 'ia' ── */
-const _origShowSection=typeof showSection==='function'?showSection:null;
-if(_origShowSection){
-  window.showSection=function(name,el){
-    if(name==='ia'){
-      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-      const sec=document.getElementById('section-ia');
-      if(sec)sec.classList.add('active');
-      if(el)el.classList.add('active');
-      return;
-    }
-    _origShowSection(name,el);
-  };
-}
-
-/* ── PATCH exportExcel TO USE STORED ANTHROPIC KEY ── */
-const _origExportExcel=typeof exportExcel==='function'?exportExcel:null;
-// Patch the fetch call inside Ventas section to inject auth header
-(function patchAnthropicKey(){
-  const origFetch=window.fetch;
-  window.fetch=function(url,...args){
-    if(typeof url==='string'&&url.includes('api.anthropic.com')){
-      const key=getIACfg('anthropic-key');
-      if(key&&args[0]&&args[0].headers){
-        args[0].headers['x-api-key']=key;
-        args[0].headers['anthropic-dangerous-direct-browser-access']='true';
-      } else if(key){
-        args[0]=args[0]||{};
-        args[0].headers=Object.assign({},args[0]?.headers||{},{'x-api-key':key,'anthropic-dangerous-direct-browser-access':'true'});
-      }
-    }
-    return origFetch.call(this,url,...args);
-  };
-})();
-
-/* ── INIT ── */
-document.addEventListener('DOMContentLoaded',function(){
-  // Auto-test Obsidian if key is configured
-  if(getIACfg('obsidian-key'))testObsidianConnection();
-  // Prompt config if no Gemini key
-  if(!getIACfg('gemini-key')){
-    const dot=document.getElementById('ia-obs-dot');
-    const lbl=document.getElementById('ia-obs-label');
-    if(dot)dot.className='ia-obs-dot';
-    if(lbl)lbl.textContent='Sin configurar';
-  }
-  // Inject Obsidian buttons when sections are opened
-  setInterval(injectObsidianButtons,3000);
-});
 </script>
-<!-- ═══════════════════════════════════════════════════════════════ -->
-
-</body>
 </html>
