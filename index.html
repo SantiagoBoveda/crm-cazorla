@@ -27,9 +27,9 @@
   --border2:#c4b8a5;--text2:#5c4e3a;--text3:#9e8e78;
   --purple:#a7001d;--radius:12px;
   --mono:'DM Mono',monospace;--sans:'Instrument Sans','Segoe UI',sans-serif;
-  --sidebar-bg:#CF0000;
-  --sidebar-text:#ffffff;--sidebar-muted:#ffbbbb;--sidebar-border:#a80000;
-  --sidebar-active-bg:#a80000;--sidebar-active-text:#ffffff;
+  --sidebar-bg:#722F37;
+  --sidebar-text:#ffffff;--sidebar-muted:#e8b4bc;--sidebar-border:#5a1f28;
+  --sidebar-active-bg:#5a1f28;--sidebar-active-text:#ffffff;
 }
 /* ══ TEMA OSCURO CAZORLA (toggle) ══ */
 body.warm{
@@ -37,9 +37,9 @@ body.warm{
   --accent:#e05040;--accent2:#b83028;--green:#8a9830;--yellow:#f59e0b;
   --red:#ef5540;--text:#e5e0d0;--muted:#707558;--border:#2e3018;
   --border2:#3a3e20;--text2:#8a9060;--text3:#4c5230;
-  --purple:#e05040;--sidebar-bg:#a80000;
-  --sidebar-text:#ffffff;--sidebar-muted:#ffaaaa;--sidebar-border:#880000;
-  --sidebar-active-bg:#880000;--sidebar-active-text:#ffffff;
+  --purple:#e05040;--sidebar-bg:#5a1228;
+  --sidebar-text:#ffffff;--sidebar-muted:#dda0aa;--sidebar-border:#451020;
+  --sidebar-active-bg:#451020;--sidebar-active-text:#ffffff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;transition:background .3s,color .3s}
@@ -48,8 +48,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .sidebar::-webkit-scrollbar{width:4px}
 .sidebar::-webkit-scrollbar-track{background:transparent}
 .sidebar::-webkit-scrollbar-thumb{background:var(--sidebar-border);border-radius:4px}
-.sidebar::-webkit-scrollbar-thumb:hover{background:#880000}
-.logo{position:relative;overflow:hidden;border-bottom:1px solid var(--sidebar-border);margin-bottom:8px;background:#CF0000;height:88px;flex-shrink:0}
+.sidebar::-webkit-scrollbar-thumb:hover{background:#451020}
+.logo{position:relative;overflow:hidden;border-bottom:1px solid var(--sidebar-border);margin-bottom:8px;background:#722F37;height:88px;flex-shrink:0}
 .logo img{width:100%;height:100%;object-fit:cover;object-position:center 22%;display:block;transition:transform .4s ease}
 .logo:hover img{transform:scale(1.04)}
 .logo::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.08) 0%,rgba(30,4,10,.55) 100%);pointer-events:none}
@@ -3170,6 +3170,8 @@ async function deleteRecord(type, id){
   if(renders[type]) renders[type]();
   if(type==='producto') syncProductsFromInventory();
   renderDashboard();
+  // 4. Sincronizar eliminación a Google Sheets
+  if(token && spreadsheetId) silentSyncToSheets();
 }
 async function saveModal(){
   // Recuperar _editingId desde el DOM si fue reseteado por error
@@ -3479,7 +3481,7 @@ async function savePrevisionProySheet(productoId, pais, nombre, mesIdx, valor){
 const SMART_LISTS = {
   País: ['Argentina','Australia','Brasil','Chile','Colombia','España','México','Paraguay','Perú','Uruguay','Francia','Italia','Portugal'],
   Cliente: [],
-  Producto: ['Aceitunas Negras','Aceitunas Verdes','Pasta de Tomate','Aceite de Oliva'],
+  Producto: ['Aceituna Verde Comercial','Aceituna Negra Natural','Aceituna Negra Acética','Pasta de Tomate','Passata','Salsas','Triturado','Otros'],
   Rubro: [],   // se puebla dinámicamente desde PRODUCTS
   Categoría: ['Aceitunas','Tomate','Aceite','Granos','Frutas','Conservas','Logística','Otro'],
   Responsable: ['Santiago','Alfonso'],
@@ -3939,13 +3941,25 @@ async function deleteContact(id){
 }
 /* ─── Poblar PRODUCTS[*].data desde DB.prevision (cargado de Sheets) ─── */
 function loadPrevisionFromDB(){
-  // Limpiar DB.prevision de registros huérfanos (cliente no existe en DB.clientes)
+  // Detectar y advertir sobre registros huérfanos antes de eliminarlos
   if(DB.prevision && DB.clientes){
+    const clientesSet=new Set((DB.clientes||[]).map(c=>(c.Empresa||'').toLowerCase().trim()));
+    const huerfanos=DB.prevision.filter(row=>{
+      if(!row.Cliente) return true;
+      return !clientesSet.has(row.Cliente.toLowerCase().trim());
+    });
+    if(huerfanos.length>0){
+      const nombres=[...new Set(huerfanos.map(r=>r.Cliente).filter(Boolean))];
+      const lista=nombres.slice(0,8).join(', ')+(nombres.length>8?' y '+(nombres.length-8)+' más':'');
+      const msg=`⚠️ Previsión: se encontraron ${huerfanos.length} registro${huerfanos.length>1?'s':''} huérfano${huerfanos.length>1?'s':''} (cliente${nombres.length>1?'s':''} sin ficha en el CRM).\n\nCliente${nombres.length>1?'s':''}: ${lista}\n\n¿Eliminar estos registros? (No tienen cliente asociado y no se mostrarán en Previsión)`;
+      if(!confirm(msg)){
+        // Usuario canceló: no hacer nada con la previsión en este ciclo
+        return;
+      }
+    }
     DB.prevision = DB.prevision.filter(row=>{
       if(!row.Cliente) return false;
-      return DB.clientes.some(c=>
-        c.Empresa && c.Empresa.toLowerCase().trim() === row.Cliente.toLowerCase().trim()
-      );
+      return clientesSet.has(row.Cliente.toLowerCase().trim());
     });
   }
   // Reconstruir data desde DB.clientes (fuente de verdad absoluta)
@@ -3997,29 +4011,19 @@ function loadPrevisionFromDB(){
   });
   syncProductsFromInventory();
 }
-/* Sincronizar productos del inventario → previsión (sentido único).
-   Agrega a PRODUCTS cualquier producto de DB.inventario que no exista aún.
-   No elimina productos de PRODUCTS aunque se eliminen del inventario. */
+/* Sincronizar productos del inventario → previsión (solo lectura, sin agregar).
+   Lista blanca: solo los 8 productos oficiales de Cazorla.
+   No agrega productos nuevos aunque aparezcan en DB.inventario. */
 function syncProductsFromInventory(){
-  const names=[...new Set((DB.inventario||[]).map(i=>(i.Producto||'').trim()).filter(Boolean))];
-  let changed=false;
-  names.forEach(name=>{
-    const exists=PRODUCTS.find(p=>p.label.toLowerCase()===name.toLowerCase());
-    if(!exists){
-      const nm=name.toLowerCase();
-      const emoji=nm.includes('tomate')||nm.includes('pasta')?'🍅':
-                  nm.includes('aceite')?'🫙':nm.includes('aceitun')?'🫒':
-                  nm.includes('acerc')||nm.includes('oliv')?'🫙':'📦';
-      PRODUCTS.push({
-        id:'prod_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-        emoji, label:name,
-        subtitle:name+' · '+(_previsionYear||2026)+' · Toneladas',
-        data:buildEmptyData()
-      });
-      changed=true;
-    }
-  });
-  if(changed){
+  // Solo se permite actualizar datos de los 8 productos oficiales.
+  // No se crean nuevas entradas bajo ningún concepto.
+  const defaultIds = new Set(_DEFAULT_PRODUCTS.map(d=>d.id));
+  // Eliminar cualquier producto no-oficial que haya podido colarse en PRODUCTS
+  const antes = PRODUCTS.length;
+  const extra = PRODUCTS.filter(p=>!defaultIds.has(p.id));
+  if(extra.length>0){
+    extra.forEach(p=>{ const idx=PRODUCTS.indexOf(p); if(idx>-1) PRODUCTS.splice(idx,1); });
+    if(!PRODUCTS.find(p=>p.id===currentProductId)) currentProductId=PRODUCTS[0]?.id||'';
     savePrevisionYears();
     if(document.getElementById('product-tabs')) renderTabs();
   }
@@ -4175,10 +4179,11 @@ function resetPrevisionProducts(){
   savePrevisionYears();renderModalList();renderTabs();renderAll();
 }
 function ensureDefaultProducts(){
-  // ── Migración única: eliminar productos no-default (ej: subproductos acumulados) ──
-  const CLEANUP_FLAG='crm_prevision_cleanup_v2';
+  // ── Migración única: eliminar productos no-default y limpiar DB.prevision ──
+  const CLEANUP_FLAG='crm_prevision_cleanup_v3';
   if(!localStorage.getItem(CLEANUP_FLAG)){
     const defaultIds=new Set(_DEFAULT_PRODUCTS.map(d=>d.id));
+    // 1. Limpiar PRODUCTS a solo los 8 oficiales
     const hadExtras=PRODUCTS.some(p=>!defaultIds.has(p.id));
     if(hadExtras){
       const kept=_DEFAULT_PRODUCTS.map(d=>{
@@ -4191,6 +4196,22 @@ function ensureDefaultProducts(){
       kept.forEach(p=>PRODUCTS.push(p));
       if(!PRODUCTS.find(p=>p.id===currentProductId)) currentProductId=PRODUCTS[0]?.id||'';
       savePrevisionYears();
+    }
+    // 2. Limpiar DB.prevision de filas con ProductoId no oficial
+    if(DB.prevision && DB.prevision.length){
+      const antes=DB.prevision.length;
+      DB.prevision=DB.prevision.filter(r=>defaultIds.has(r.ProductoId));
+      if(DB.prevision.length<antes){ saveLocal(); }
+    }
+    // 3. Limpiar DB.inventario de productos no oficiales (por nombre)
+    const defaultNames=new Set(_DEFAULT_PRODUCTS.map(d=>d.label.toLowerCase()));
+    if(DB.inventario && DB.inventario.length){
+      const antesInv=DB.inventario.length;
+      DB.inventario=DB.inventario.filter(r=>{
+        const nm=(r.Producto||'').trim().toLowerCase();
+        return !nm || defaultNames.has(nm);
+      });
+      if(DB.inventario.length<antesInv){ saveLocal(); }
     }
     localStorage.setItem(CLEANUP_FLAG,'1');
     return;
@@ -4868,12 +4889,6 @@ function requestGoogleAuth(onSuccess){
     }
   }
   doAuth();
-}
-function connectGoogleFromSidebar(){ openGauthModal(); }
-/* Ocultar botón conectar cuando ya hay token */
-function hideConnectButton(){
-  const btn = document.getElementById('btn-connect-google');
-  if(btn) btn.style.display = 'none';
 }
 /* ═══════════════════════════════════════
    CALENDARIO — LÓGICA COMPLETA
