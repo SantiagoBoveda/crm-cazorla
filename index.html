@@ -675,7 +675,6 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .cal-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .cal-filter-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--muted);background:var(--surface2)}
 .cal-filter-chip.active{color:#fff}
-.cal-filter-chip[data-type=tarea].active{background:#a7001d;border-color:#a7001d}
 .cal-filter-chip[data-type=venta].active{background:#a7001d;border-color:#a7001d}
 .cal-filter-chip[data-type=cliente].active{background:#6b7215;border-color:#6b7215}
 .cal-filter-chip[data-type=reclamo].active{background:#dc2626;border-color:#dc2626}
@@ -692,7 +691,6 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .cal-event-pill{display:flex;align-items:center;gap:4px;padding:2px 5px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;transition:opacity .1s}
 .cal-event-pill:hover{opacity:.8}
 .cal-event-pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.cal-event-pill.tarea{background:rgba(167,0,29,.12);color:#a7001d}
 .cal-event-pill.venta{background:rgba(167,0,29,.1);color:#a7001d}
 .cal-event-pill.cliente{background:rgba(107,114,21,.1);color:#6b7215}
 .cal-event-pill.reclamo{background:rgba(220,38,38,.1);color:#dc2626}
@@ -766,6 +764,88 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 .limit-row label{font-size:11px;color:var(--muted);width:70px;font-family:var(--mono)}
 .limit-row input{width:65px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:var(--mono);text-align:center}
 .limit-sep{font-size:11px;color:var(--muted)}
+/* ══ PIPELINE ══ */
+.pipeline-stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.pipeline-stage{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;position:relative;overflow:hidden}
+.pipeline-stage::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.pipeline-stage.cotiz::before{background:#94a3b8}
+.pipeline-stage.confirmada::before{background:var(--accent)}
+.pipeline-stage.despachada::before{background:var(--yellow)}
+.pipeline-stage.cobrada::before{background:var(--green)}
+.pipeline-stage.cancelada::before{background:var(--red)}
+.ps-label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;font-family:var(--mono)}
+.ps-count{font-size:32px;font-weight:800;line-height:1;margin-bottom:4px}
+.ps-usd{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.ps-pct{font-size:11px;color:var(--green);margin-top:4px;font-family:var(--mono)}
+.pipeline-conv-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.conv-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:12px;display:flex;align-items:center;gap:10px}
+.conv-arrow{color:var(--muted);font-size:16px}
+.conv-pct-val{font-size:18px;font-weight:800;font-family:var(--mono);color:var(--accent)}
+/* ══ BÚSQUEDA GLOBAL ══ */
+.global-search-wrap{padding:8px 12px 4px;position:relative}
+.global-search-input{width:100%;padding:7px 10px 7px 30px;background:var(--sidebar-active-bg);border:1px solid var(--sidebar-border);border-radius:8px;color:var(--sidebar-text);font-size:12px;outline:none;transition:border-color .15s;font-family:var(--sans)}
+.global-search-input::placeholder{color:var(--sidebar-muted)}
+.global-search-input:focus{border-color:rgba(219,71,60,.6)}
+.gs-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
+.gs-results{position:fixed;left:224px;top:auto;width:340px;max-height:420px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 12px 40px rgba(44,13,28,.18);overflow-y:auto;z-index:300;display:none}
+.gs-results.open{display:block}
+.gs-result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s;display:flex;flex-direction:column;gap:2px}
+.gs-result-item:last-child{border-bottom:none}
+.gs-result-item:hover{background:var(--surface2)}
+.gs-result-title{font-size:13px;font-weight:600;color:var(--text)}
+.gs-result-meta{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.gs-result-type{font-size:9px;text-transform:uppercase;letter-spacing:.6px;padding:1px 6px;border-radius:4px;font-weight:700;align-self:flex-start}
+.gs-type-cliente{background:rgba(107,114,21,.13);color:var(--green)}
+.gs-type-venta{background:rgba(167,0,29,.1);color:var(--accent)}
+.gs-type-factura{background:rgba(180,83,9,.12);color:var(--yellow)}
+.gs-type-cotizacion{background:rgba(167,0,29,.08);color:var(--accent2)}
+.gs-type-reclamo{background:rgba(219,71,60,.14);color:var(--red)}
+.gs-empty{padding:20px;text-align:center;font-size:12px;color:var(--muted)}
+/* ══ AGING DE COBROS ══ */
+.aging-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:4px}
+.aging-bucket{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.aging-bucket .ab-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)}
+.aging-bucket .ab-count{font-size:22px;font-weight:800;line-height:1}
+.aging-bucket .ab-usd{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:3px}
+.aging-bucket.corriente .ab-count{color:var(--green)}
+.aging-bucket.dias30 .ab-count{color:var(--yellow)}
+.aging-bucket.dias60 .ab-count{color:#e07020}
+.aging-bucket.dias90 .ab-count{color:var(--red)}
+.aging-bucket.dias90plus .ab-count{color:var(--red);animation:pulse-dot 1.5s infinite}
+/* ══ BADGES SIDEBAR ══ */
+.nav-item{position:relative}
+.nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:var(--mono);line-height:1}
+/* ══ FICHA 360° ══ */
+.ficha360-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.ficha360-overlay.open{opacity:1;pointer-events:all}
+.ficha360{background:var(--card);border-radius:20px;width:min(780px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s}
+.ficha360-overlay.open .ficha360{transform:translateY(0)}
+.ficha360-head{display:flex;align-items:center;gap:16px;padding:24px 28px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ficha360-avatar{width:52px;height:52px;border-radius:14px;background:var(--accent);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ficha360-info{flex:1;min-width:0}
+.ficha360-nombre{font-size:20px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ficha360-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap}
+.ficha360-meta span{display:flex;align-items:center;gap:4px}
+.ficha360-close{margin-left:auto;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:8px;transition:background .15s;line-height:1;flex-shrink:0}
+.ficha360-close:hover{background:var(--border)}
+.ficha360-kpis{display:flex;gap:12px;padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.ficha360-kpis::-webkit-scrollbar{display:none}
+.ficha360-kpi{background:var(--bg);border-radius:12px;padding:12px 18px;min-width:110px;text-align:center;flex-shrink:0}
+.fk-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.fk-val{font-size:22px;font-weight:800;color:var(--text);line-height:1}
+.fk-sub{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.ficha360-tabs{display:flex;gap:6px;padding:12px 28px 0;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.ficha360-tabs::-webkit-scrollbar{display:none}
+.f360-tab{padding:7px 16px;border-radius:10px 10px 0 0;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.f360-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg)}
+.f360-tab:hover:not(.active){color:var(--text);background:var(--border)}
+.ficha360-body{padding:20px 28px;overflow-y:auto;flex:1;min-height:200px}
+.f360-empty{text-align:center;color:var(--muted);padding:40px;font-size:14px}
+.f360-table{width:100%;border-collapse:collapse;font-size:13px}
+.f360-table th{text-align:left;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;border-bottom:1px solid var(--border)}
+.f360-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.f360-table tr:last-child td{border-bottom:none}
+.f360-table tr:hover td{background:var(--bg)}
 </style>
 </head>
 <body>
@@ -777,7 +857,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <div class="features">
       <div class="feature"><span>👥</span><span>Gestión de clientes</span></div>
       <div class="feature"><span>📁</span><span>Proyectos y pipeline</span></div>
-      <div class="feature"><span>✅</span><span>Tareas Kanban</span></div>
       <div class="feature"><span>📦</span><span>Inventario</span></div>
       <div class="feature"><span>💰</span><span>Ventas y métricas</span></div>
     </div>
@@ -792,6 +871,22 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <button onclick="continueOffline()" style="margin-top:10px;width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
       Continuar sin Google (solo local)
     </button>
+  </div>
+</div>
+<!-- FICHA 360° CLIENTE -->
+<div class="ficha360-overlay" id="ficha360-overlay" onclick="if(event.target===this)closeFicha360()">
+  <div class="ficha360">
+    <div class="ficha360-head">
+      <div class="ficha360-avatar" id="f360-avatar">—</div>
+      <div class="ficha360-info">
+        <div class="ficha360-nombre" id="f360-nombre">—</div>
+        <div class="ficha360-meta" id="f360-meta"></div>
+      </div>
+      <button class="ficha360-close" onclick="closeFicha360()">✕</button>
+    </div>
+    <div class="ficha360-kpis" id="f360-kpis"></div>
+    <div class="ficha360-tabs" id="f360-tabs"></div>
+    <div class="ficha360-body" id="f360-body"></div>
   </div>
 </div>
 <!-- CRM BASE MODAL (clientes, proyectos, tareas, inventario, ventas, reclamos, facturas, calidad) -->
@@ -873,12 +968,20 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       <p>CRM Interno · Grupo Cazorla</p>
     </div>
   </div>
+  <div class="global-search-wrap">
+    <span class="gs-icon">🔍</span>
+    <input class="global-search-input" id="global-search" type="text" placeholder="Buscar en todo el CRM…" autocomplete="off"
+      oninput="onGlobalSearch(this.value)"
+      onblur="setTimeout(()=>closeGlobalSearch(),200)"
+      onfocus="if(this.value.trim().length>=2)openGlobalSearch()">
+  </div>
+  <div class="gs-results" id="gs-results"></div>
   <div class="nav-item active" onclick="showSection('dashboard',this)"><span class="icon">📊</span><span>Dashboard</span></div>
   <div class="nav-item" onclick="showSection('clientes',this)"><span class="icon">👥</span><span>Clientes</span></div>
   <div class="nav-item" onclick="showSection('contactos',this)"><span class="icon">📇</span><span>Contactos</span></div>
   <div class="nav-item" onclick="showSection('proyectos',this)"><span class="icon">📁</span><span>Proyectos</span></div>
   <div class="nav-item" onclick="showSection('cotizaciones',this)"><span class="icon">📝</span><span>Cotizaciones</span></div>
-  <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
+  <div class="nav-item" onclick="showSection('pipeline',this)"><span class="icon">🔀</span><span>Pipeline</span></div>
   <div class="nav-item" onclick="showSection('inventario',this)"><span class="icon">📦</span><span>Inventario</span></div>
   <div class="nav-item" onclick="showSection('ventas',this)"><span class="icon">💰</span><span>Ventas</span></div>
   <div class="nav-item" onclick="showSection('cargas',this)"><span class="icon">🚛</span><span>Cargas</span></div>
@@ -932,7 +1035,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <div id="dash-olive-stock" style="margin-bottom:24px"></div>
     <div class="chart-grid">
       <div class="chart-card"><h3>Ventas por mes (USD)</h3><canvas id="chart-ventas" height="180"></canvas></div>
-      <div class="chart-card"><h3>Stock aceitunas por tipo (ton)</h3><canvas id="chart-clientes" height="180"></canvas></div>
+      <div class="chart-card"><h3>Stock aceitunas por tipo (ton)</h3><canvas id="chart-aceitunas" height="180"></canvas></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px" id="dash-bottom-grid">
       <div class="table-container" style="margin-bottom:0">
@@ -993,17 +1096,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
   </div>
   <!-- TAREAS -->
-  <div class="section" id="section-tareas">
-    <div class="ph-row">
-      <div><h1>Tareas</h1><p>Tablero Kanban</p></div>
-      <button class="btn btn-primary" onclick="openCRMModal('tarea')">+ Nueva tarea</button>
-    </div>
-    <div class="kanban">
-      <div class="kanban-col"><h4>Pendiente <span id="cnt-pendiente" class="badge badge-yellow">0</span></h4><div id="col-pendiente"></div></div>
-      <div class="kanban-col"><h4>En progreso <span id="cnt-progreso" class="badge badge-blue">0</span></h4><div id="col-progreso"></div></div>
-      <div class="kanban-col"><h4>Completado <span id="cnt-completado" class="badge badge-green">0</span></h4><div id="col-completado"></div></div>
-    </div>
-  </div>
   <!-- INVENTARIO -->
   <div class="section" id="section-inventario">
     <div class="ph-row">
@@ -1083,6 +1175,15 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <tbody id="inventario-tbody"></tbody></table>
       </div>
     </div>
+  </div>
+  <!-- PIPELINE -->
+  <div class="section" id="section-pipeline">
+    <div class="ph-row">
+      <div><h1>🔀 Pipeline de Ventas</h1><p>Embudo comercial · estado actual</p></div>
+    </div>
+    <div id="pipeline-funnel" style="margin-bottom:24px"></div>
+    <div id="pipeline-conversion" style="margin-bottom:24px"></div>
+    <div id="pipeline-table"></div>
   </div>
   <!-- COTIZACIONES -->
   <div class="section" id="section-cotizaciones">
@@ -1487,6 +1588,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       <button class="btn btn-primary" onclick="openCRMModal('factura')">+ Nueva factura</button>
     </div>
     <div class="mod-stats" id="facturacion-stats"></div>
+    <div id="aging-cobros" style="margin-bottom:20px"></div>
     <div class="mod-toolbar">
       <div class="state-pills">
         <button class="state-pill active" onclick="filterSection('facturacion','all',this)">Todas</button>
@@ -1566,11 +1668,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       </svg>
       ↑ Exportar a GCal
     </button>
-    <button id="btn-gcal-import" class="btn btn-outline btn-sm"
-      onclick="syncCalendarFromGoogle()"
-      style="border-color:#34A853;color:#34A853;white-space:nowrap">
-      ↓ Importar de GCal
-    </button>
     <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
       <span id="gcal-sync-status" style="font-size:11px;font-family:var(--mono);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       <span id="gcal-last-sync"></span>
@@ -1584,7 +1681,6 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <button class="today-btn" onclick="calToday()">Hoy</button>
   </div>
   <div class="cal-filters" id="cal-filters">
-    <span class="cal-filter-chip active" data-type="tarea" onclick="toggleCalFilter(this)">✅ Tareas</span>
     <span class="cal-filter-chip active" data-type="venta" onclick="toggleCalFilter(this)">💰 Ventas</span>
     <span class="cal-filter-chip active" data-type="cliente" onclick="toggleCalFilter(this)">👥 Clientes</span>
     <span class="cal-filter-chip active" data-type="reclamo" onclick="toggleCalFilter(this)">⚠️ Reclamos</span>
@@ -1669,7 +1765,12 @@ function loadLocal(){
     const raw = localStorage.getItem(LS_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
-      Object.keys(DB).forEach(k=>{ if(parsed[k]) DB[k]=parsed[k]; });
+      // BUG-FIX: validar tipo antes de asignar — evita crash si datos corruptos
+      Object.keys(DB).forEach(k=>{
+        if(parsed[k] === undefined || parsed[k] === null) return;
+        if(Array.isArray(DB[k]) && !Array.isArray(parsed[k])) return;
+        DB[k] = parsed[k];
+      });
       migrateDB();
       return true;
     }
@@ -1678,6 +1779,8 @@ function loadLocal(){
 }
 /* Migración: corregir registros de versiones anteriores con campos desalineados */
 function migrateDB(){
+  // BUG-FIX: proteger contra DB.clientes no-array (datos corruptos)
+  if(!Array.isArray(DB.clientes)) DB.clientes = [];
   // Clientes viejos: detectar si Email está en columna Rubro (campo mal mapeado)
   // La versión vieja tenía: ID,Empresa,Contacto,Email,Telefono,Pais,Rubro,Estado,UltimaInteraccion,Notas
   // La nueva tiene:         ID,Empresa,Contacto,Cargo,Telefono,Telefono2,Email,Email2,Pais,Rubro,Estado,UltimaInteraccion,Notas
@@ -1735,7 +1838,7 @@ function scheduleAutoBackup(){
 async function silentSyncToSheets(){
   if(!_dirty || !token || !spreadsheetId) return;
   try{
-    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',tareas:'Tareas',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores'};
+    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores'};
     for(const [dbKey, sheetName] of Object.entries(sheetMap)){
       if(!DB[dbKey]?.length) continue;
       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:Z:clear`,
@@ -1891,7 +1994,6 @@ function continueOffline(){
 const HEADERS={
   Clientes:['ID','Empresa','Contacto','Cargo','Telefono','Telefono2','Email','Email2','Pais','Direccion','DomicilioReal','DomicilioLegal','CUIT','Rubro','Estado','UltimaInteraccion','Notas'],
   Proyectos:['ID','Nombre','Cliente','Producto','ValorUSD','Etapa','Responsable','FechaInicio','FechaEstimada','Notas'],
-  Tareas:['ID','Titulo','Descripcion','Asignado','Prioridad','Estado','FechaVenc'],
   Inventario:['ID','Producto','Categoria','StockActual','StockMin','Unidad','Precio'],
   Ventas:['ID','NumOrden','Fecha','FechaCarga','NroOrden','Categoria','Cliente','Producto','CantidadTon','ValorUSD','FormaPago','DiasPlayzo','FechaVencimiento','Vencimientos','DireccionCliente','DomicilioRealCliente','DomicilioLegalCliente','CUITCliente','Adquirente','DomicilioRealAdquirente','DomicilioLegalAdquirente','CUITAdquirente','FechaRetiro','LugarEntrega','EstadoCuenta','NombreTransporte','DatosTractor','DatosSemiremolque','DatoChofer','Comisionista','PorcentajeComision','GastoFlete','Etapa','Responsable','Notas','Lineas'],
   Reclamos:['ID','Cliente','Pais','Producto','TipoReclamo','Evidencia','Motivo','Urgencia','Estado','MontoAfectado','Responsable','FechaApertura','FechaResolucion','Notas'],
@@ -1934,7 +2036,7 @@ async function syncFromSheetsIfNewer(){
   try{
     document.getElementById('sync-status-text').textContent = 'Verificando Sheets...';
     const sheetsDB = {};
-    const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
+    const map={Clientes:'clientes',Proyectos:'proyectos',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
     for(const[sheet,key]of Object.entries(map)){
       try{
         const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
@@ -1959,11 +2061,12 @@ async function syncFromSheetsIfNewer(){
       return;
     }
     if(sheetsTotal > localTotal){
-      // Sheets tiene MÁS datos — ofrecer importar
+      // BUG-FIX: aclarar que la comparación es por cantidad de registros, no por fecha
       const usar = confirm(
-        `Sheets tiene ${sheetsTotal} registros y tu dispositivo tiene ${localTotal}.\n\n` +
-        `¿Cargar los datos de Sheets? (reemplaza los datos locales)\n\n` +
-        `Aceptar = usar Sheets | Cancelar = mantener local`
+        `Sheets tiene ${sheetsTotal} registros y este dispositivo tiene ${localTotal}.\n\n` +
+        `⚠️ Nota: la comparación es por cantidad de registros, no por fecha de modificación.\n` +
+        `Solo aceptá si estás seguro de que Sheets tiene los datos más recientes.\n\n` +
+        `Aceptar = cargar desde Sheets (reemplaza local) | Cancelar = mantener local`
       );
       if(usar){
         Object.keys(map).forEach(sheet=>{ DB[map[sheet]] = sheetsDB[map[sheet]]; });
@@ -1981,9 +2084,10 @@ async function syncFromSheetsIfNewer(){
     } else if(localTotal > sheetsTotal){
       // Local tiene MÁS datos — ofrecer subir a Sheets
       const subir = confirm(
-        `Tu dispositivo tiene ${localTotal} registros y Sheets tiene ${sheetsTotal}.\n\n` +
-        `¿Subir tus datos locales a Sheets para sincronizar?\n\n` +
-        `Aceptar = subir a Sheets | Cancelar = no hacer nada`
+        `Este dispositivo tiene ${localTotal} registros y Sheets tiene ${sheetsTotal}.\n\n` +
+        `⚠️ Nota: la comparación es por cantidad de registros, no por fecha de modificación.\n` +
+        `Solo aceptá si estás seguro de que los datos locales son los más recientes.\n\n` +
+        `Aceptar = subir a Sheets (reemplaza Sheets) | Cancelar = no hacer nada`
       );
       if(subir) silentSyncToSheets();
     }
@@ -1995,7 +2099,7 @@ async function syncFromSheetsIfNewer(){
 }
 async function loadAllData(){
   if(!spreadsheetId||!token)return;
-  const map={Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
+  const map={Clientes:'clientes',Proyectos:'proyectos',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas',Prevision:'prevision',Contactos:'contactos',Cotizaciones:'cotizaciones',Novedades:'novedades',Fermentadores:'fermentadores'};
   for(const[sheet,key]of Object.entries(map)){
     try{
       const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A:Z`,{headers:{Authorization:'Bearer '+token}});
@@ -2029,8 +2133,8 @@ function showSection(id,el){
   else if(id==='clientes')renderClientes();
   else if(id==='contactos')renderContactos();
   else if(id==='proyectos')renderProyectos();
-  else if(id==='tareas')renderTareas();
   else if(id==='inventario')renderInventario();
+  else if(id==='pipeline')renderPipeline();
   else if(id==='cotizaciones')renderCotizaciones();
   else if(id==='ventas')renderVentas();
   else if(id==='cargas')renderCargas();
@@ -2407,10 +2511,17 @@ function renderCotizaciones(){
   const stats=document.getElementById('cotiz-stats');
   if(stats){
     const env=data.filter(c=>c.Estado==='Enviada').length,ace=data.filter(c=>c.Estado==='Aceptada').length;
+    const totalUSDCotiz=data.reduce((s,c)=>s+(parseFloat(c.TotalUSD)||0),0);
+    const ventasActivas=(DB.ventas||[]).filter(v=>['Confirmada','Despachada','Cobrada'].includes(v.Etapa));
+    const cotizConvertidas=data.filter(c=>ventasActivas.some(v=>
+      (v.Cliente===c.Cliente&&v.Fecha&&c.Fecha&&Math.abs(new Date(v.Fecha+'T00:00:00')-new Date(c.Fecha+'T00:00:00'))<=45*86400000)
+    )).length;
+    const tasaConv=data.length>0?Math.round(cotizConvertidas/data.length*100):0;
     stats.innerHTML=`
-      <div class="stat-card"><div class="label">Total cotizaciones</div><div class="value">${data.length}</div></div>
+      <div class="stat-card"><div class="label">Total cotizaciones</div><div class="value">${data.length}</div><div class="sub" style="color:var(--muted)">$${totalUSDCotiz.toLocaleString('en-US',{maximumFractionDigits:0})} USD</div></div>
       <div class="stat-card"><div class="label">Enviadas</div><div class="value">${env}</div></div>
-      <div class="stat-card"><div class="label">Aceptadas</div><div class="value">${ace}</div></div>`;
+      <div class="stat-card"><div class="label">Aceptadas</div><div class="value">${ace}</div></div>
+      <div class="stat-card"><div class="label">Tasa conversión</div><div class="value" style="color:${tasaConv>=50?'var(--green)':tasaConv>=25?'var(--yellow)':'var(--accent)'}">${tasaConv}%</div><div class="sub" style="color:var(--muted)">${cotizConvertidas} → venta activa</div></div>`;
   }
   if(!data.length){tb.innerHTML='<tr><td colspan="9"><div class="empty-state"><div class="icon">📝</div><p>Sin cotizaciones</p></div></td></tr>';return;}
   const eB=e=>({Borrador:'badge-blue',Enviada:'badge-yellow',Aceptada:'badge-green',Rechazada:'badge-red',Vencida:'badge-red'}[e]||'badge-blue');
@@ -2482,7 +2593,9 @@ ${c.NotaExtra?`<div class="notes-box" style="font-style:italic">${c.NotaExtra}</
 }
 function renderDashboard(){
   const hoy=new Date().toISOString().slice(0,10);
-  const en30=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+  // BUG-FIX: usar setDate en lugar de milisegundos para evitar desfase por DST
+  const _d30=new Date(); _d30.setDate(_d30.getDate()+30);
+  const en30=_d30.toISOString().slice(0,10);
   const fmt=n=>n.toLocaleString('es-AR',{maximumFractionDigits:2});
   const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
   // Stock aceitunas por tipo
@@ -2495,31 +2608,38 @@ function renderDashboard(){
     return{cat,ton:items.reduce((s,i)=>s+_toTon(i.StockActual,i.Unidad),0)};
   });
   const totalTomateTon=tomateData.reduce((s,d)=>s+d.ton,0);
-  // Ventas
-  const totalVentasUSD=DB.ventas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
-  const ventasConfirmadas=DB.ventas.filter(v=>['Confirmada','Despachada'].includes(v.Etapa));
-  const ventasVencidas=DB.ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa));
-  const ventasVencen30=DB.ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento>=hoy&&v.FechaVencimiento<=en30&&!['Cobrada','Cancelada'].includes(v.Etapa));
-  // Clientes
-  const clientesActivos=DB.clientes.filter(c=>c.Estado==='Activo').length;
-  const clientesProspecto=DB.clientes.filter(c=>c.Estado==='Prospecto').length;
-  // Tareas
-  const tareasAlta=DB.tareas.filter(t=>t.Prioridad==='Alta'&&t.Estado!=='Completado');
-  const tareasPend=DB.tareas.filter(t=>t.Estado!=='Completado').length;
+  // Ventas — BUG-FIX: defensivo con ||[] y excluir Canceladas del total
+  const _ventas=DB.ventas||[];
+  const totalVentasUSD=_ventas.filter(v=>v.Etapa!=='Cancelada').reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  // YoY: comparativa año actual vs año anterior
+  const _anoActual=new Date().getFullYear();
+  const _anoPrev=_anoActual-1;
+  const _totalAno=_ventas.filter(v=>v.Etapa!=='Cancelada'&&(v.Fecha||'').startsWith(String(_anoActual))).reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const _totalAnoPrev=_ventas.filter(v=>v.Etapa!=='Cancelada'&&(v.Fecha||'').startsWith(String(_anoPrev))).reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const _yoyPct=_totalAnoPrev>0?Math.round((_totalAno-_totalAnoPrev)/_totalAnoPrev*100):null;
+  const _yoyBadge=_yoyPct===null?''
+    :_yoyPct>=0
+      ?`<span style="font-size:10px;background:rgba(107,114,21,.13);color:var(--green);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:700">▲ +${_yoyPct}% vs ${_anoPrev}</span>`
+      :`<span style="font-size:10px;background:rgba(219,71,60,.12);color:var(--red);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:700">▼ ${_yoyPct}% vs ${_anoPrev}</span>`;
+  const ventasConfirmadas=_ventas.filter(v=>['Confirmada','Despachada'].includes(v.Etapa));
+  const ventasVencidas=_ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa));
+  const ventasVencen30=_ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento>=hoy&&v.FechaVencimiento<=en30&&!['Cobrada','Cancelada'].includes(v.Etapa));
+  // Clientes — BUG-FIX: defensivo con ||[]
+  const _clientes=DB.clientes||[];
+  const clientesActivos=_clientes.filter(c=>c.Estado==='Activo').length;
+  const clientesProspecto=_clientes.filter(c=>c.Estado==='Prospecto').length;
   // Reclamos
   const reclamosAbiertos=(DB.reclamos||[]).filter(r=>['Abierto','En gestión'].includes(r.Estado));
   // ── KPIs ──
   const kpiAlertVencidos=ventasVencidas.length?'border-color:var(--red)':'';
-  const kpiAlertTareas=tareasAlta.length?'border-color:var(--yellow)':'';
   const kpiAlertReclamos=reclamosAbiertos.length?'border-color:var(--red)':'';
   document.getElementById('dash-kpis').innerHTML=`
-    <div class="stat-card"><div class="label">Total ventas (USD)</div><div class="value">${fmtUSD(totalVentasUSD)}</div><div class="sub" style="color:var(--muted)">${DB.ventas.length} órdenes</div></div>
+    <div class="stat-card"><div class="label">Total ventas (USD) ${_yoyBadge}</div><div class="value">${fmtUSD(totalVentasUSD)}</div><div class="sub" style="color:var(--muted)">${_ventas.filter(v=>v.Etapa!=='Cancelada').length} órdenes activas · ${_anoActual}</div></div>
     <div class="stat-card"><div class="label">Ventas confirmadas</div><div class="value">${ventasConfirmadas.length}</div><div class="sub" style="color:var(--accent)">${fmtUSD(ventasConfirmadas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0))}</div></div>
-    <div class="stat-card"><div class="label">Clientes</div><div class="value">${DB.clientes.length}</div><div class="sub" style="color:var(--green)">${clientesActivos} activos · ${clientesProspecto} prospectos</div></div>
+    <div class="stat-card"><div class="label">Clientes</div><div class="value">${_clientes.length}</div><div class="sub" style="color:var(--green)">${clientesActivos} activos · ${clientesProspecto} prospectos</div></div>
     <div class="stat-card" style="${kpiAlertVencidos}"><div class="label">Cobros vencidos</div><div class="value" style="${ventasVencidas.length?'color:var(--red)':''}">${ventasVencidas.length}</div><div class="sub" style="color:var(--muted)">${ventasVencen30.length} vencen en 30 días</div></div>
     <div class="stat-card"><div class="label">Stock aceitunas</div><div class="value">${fmt(totalOliveTon)}</div><div class="sub" style="color:var(--muted)">toneladas totales</div></div>
     <div class="stat-card"><div class="label">Stock tomate</div><div class="value">${fmt(totalTomateTon)}</div><div class="sub" style="color:var(--muted)">toneladas totales</div></div>
-    <div class="stat-card" style="${kpiAlertTareas}"><div class="label">Tareas pendientes</div><div class="value">${tareasPend}</div><div class="sub" style="${tareasAlta.length?'color:var(--red)':'color:var(--muted)'}">${tareasAlta.length} alta prioridad</div></div>
     <div class="stat-card" style="${kpiAlertReclamos}"><div class="label">Reclamos abiertos</div><div class="value" style="${reclamosAbiertos.length?'color:var(--red)':''}">${reclamosAbiertos.length}</div><div class="sub" style="color:var(--muted)">${(DB.reclamos||[]).length} total</div></div>`;
   // ── Stock aceitunas por tipo ──
   document.getElementById('dash-olive-stock').innerHTML=`
@@ -2558,9 +2678,12 @@ function renderDashboard(){
   ventasVencidas.forEach(v=>alertas.push({c:'var(--red)',t:`Cobro vencido — ${v.Cliente} · ${fmtUSD(parseFloat(v.ValorUSD)||0)} · ${v.FechaVencimiento}`}));
   ventasVencen30.forEach(v=>alertas.push({c:'var(--yellow)',t:`Vence pronto — ${v.Cliente} · ${fmtUSD(parseFloat(v.ValorUSD)||0)} · ${v.FechaVencimiento}`}));
   reclamosAbiertos.forEach(r=>alertas.push({c:'var(--red)',t:`Reclamo ${r.Urgencia||''}: ${r.Cliente||'—'} · ${r.TipoReclamo||''}`}));
-  tareasAlta.forEach(t=>alertas.push({c:'var(--yellow)',t:`Tarea alta: ${t.Titulo||'Sin título'}${t.Asignado?' — '+t.Asignado:''}`}));
+  // BUG-FIX: mostrar aviso si hay más de 8 alertas
+  const _alertasVisible=alertas.slice(0,8);
+  const _alertasExtra=alertas.length-_alertasVisible.length;
   document.getElementById('dash-alertas').innerHTML=alertas.length
-    ?alertas.slice(0,8).map(a=>`<div style="padding:9px 14px;border-left:3px solid ${a.c};font-size:12px;border-bottom:1px solid var(--border);line-height:1.4">${a.t}</div>`).join('')
+    ?_alertasVisible.map(a=>`<div style="padding:9px 14px;border-left:3px solid ${a.c};font-size:12px;border-bottom:1px solid var(--border);line-height:1.4">${a.t}</div>`).join('')
+      +(_alertasExtra>0?`<div style="padding:9px 14px;font-size:11px;color:var(--muted);text-align:center;font-style:italic">…y ${_alertasExtra} alerta${_alertasExtra>1?'s':''} más</div>`:'')
     :'<div style="padding:16px;color:var(--green);font-size:13px;text-align:center">✅ Sin alertas pendientes</div>';
   // ── Stock tomate ──
   document.getElementById('dash-tomate-stock').innerHTML=`<div style="padding:4px 0">${tomateData.map(d=>`
@@ -2570,8 +2693,14 @@ function renderDashboard(){
     </div>`).join('')}</div>`;
   // ── Charts ──
   _renderDashCharts(stocks,DB.ventas);
+  // ── Badges sidebar ──
+  updateNavBadges();
 }
 function _renderDashCharts(stocks,ventas){
+  // BUG-FIX: colores adaptativos según tema claro/oscuro
+  const isDark=document.body.classList.contains('warm');
+  const tickColor =isDark?'#94a3b8':'#6e5f4e';
+  const gridColor =isDark?'rgba(255,255,255,.08)':'rgba(0,0,0,.07)';
   // Chart 1: Ventas por mes
   const monthMap={};
   ventas.forEach(v=>{if(!v.Fecha)return;const m=v.Fecha.slice(0,7);monthMap[m]=(monthMap[m]||0)+(parseFloat(v.ValorUSD)||0);});
@@ -2581,16 +2710,16 @@ function _renderDashCharts(stocks,ventas){
   const cv=document.getElementById('chart-ventas');
   if(cv){
     if(window._dChV)window._dChV.destroy();
-    window._dChV=new Chart(cv,{type:'bar',data:{labels:sortedM.length?mLabels:['Sin datos'],datasets:[{label:'USD',data:sortedM.length?sortedM.map(m=>monthMap[m]):[0],backgroundColor:'rgba(167,0,29,.75)',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#94a3b8',font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(255,255,255,.05)'}}}}});
+    window._dChV=new Chart(cv,{type:'bar',data:{labels:sortedM.length?mLabels:['Sin datos'],datasets:[{label:'USD',data:sortedM.length?sortedM.map(m=>monthMap[m]):[0],backgroundColor:'rgba(167,0,29,.75)',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()}}},scales:{x:{ticks:{color:tickColor,font:{size:10}},grid:{color:gridColor}},y:{ticks:{color:tickColor,font:{size:10},callback:v=>'$'+v.toLocaleString()},grid:{color:gridColor}}}}});
   }
-  // Chart 2: Stock aceitunas apilado
-  const cc=document.getElementById('chart-clientes');
+  // Chart 2: Stock aceitunas apilado — BUG-FIX: canvas renombrado a chart-aceitunas
+  const cc=document.getElementById('chart-aceitunas');
   if(cc){
-    if(window._dChC)window._dChC.destroy();
-    window._dChC=new Chart(cc,{type:'bar',data:{labels:['Verde Comercial','Negra Natural','Negra Acética'],datasets:[
+    if(window._dChAceitunas)window._dChAceitunas.destroy();
+    window._dChAceitunas=new Chart(cc,{type:'bar',data:{labels:['Verde Comercial','Negra Natural','Negra Acética'],datasets:[
       {label:'Bombonas (ton)',data:[stocks.verde.kgBombonas/1000,stocks.negra.kgBombonas/1000,stocks.acetica.kgBombonas/1000],backgroundColor:'rgba(34,197,94,.65)',borderRadius:4},
       {label:'Fermentadores (ton)',data:[stocks.verde.kgFerm/1000,stocks.negra.kgFerm/1000,stocks.acetica.kgFerm/1000],backgroundColor:'rgba(59,130,246,.65)',borderRadius:4}
-    ]},options:{responsive:true,plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{size:10},boxWidth:12}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},stacked:true},y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},stacked:true}}}});
+    ]},options:{responsive:true,plugins:{legend:{display:true,labels:{color:tickColor,font:{size:10},boxWidth:12}}},scales:{x:{ticks:{color:tickColor,font:{size:10}},grid:{color:gridColor},stacked:true},y:{ticks:{color:tickColor,font:{size:10}},grid:{color:gridColor},stacked:true}}}});
   }
 }
 function renderClientes(){
@@ -2603,7 +2732,7 @@ function renderClientes(){
     const telHtml = tel!=='—' ? `<a href="tel:${tel.replace(/\s/g,'')}" style="color:var(--text);font-size:12px">${tel}</a>` : '—';
     const estadoBadge = c.Estado==='Activo'?'green':c.Estado==='Prospecto'?'yellow':c.Estado==='Inactivo'?'red':'blue';
     return`<tr>
-      <td><strong>${c.Empresa||'—'}</strong></td>
+      <td><strong style="cursor:pointer;color:var(--accent)" onclick="openFicha360('${c.ID}')" title="Ver ficha completa">${c.Empresa||'—'}</strong></td>
       <td>${c.Contacto||'—'}${c.Cargo?`<div style="font-size:11px;color:var(--muted)">${c.Cargo}</div>`:''}</td>
       <td>${c.Pais||'—'}</td>
       <td>${(c.Rubro||'').split(',').filter(Boolean).map(r=>`<span style="display:inline-block;background:rgba(167,0,29,.08);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:11px;margin:1px">${r.trim()}</span>`).join('')||'—'}</td>
@@ -2633,28 +2762,6 @@ function renderProyectos(){
         <button class="btn-row-del" onclick="deleteRecord('proyecto','${p.ID}')">🗑</button>
       </td></tr>`;
   }).join('');
-}
-function renderTareas(){
-  ['Pendiente','En progreso','Completado'].forEach(estado=>{
-    const cols={'Pendiente':'pendiente','En progreso':'progreso','Completado':'completado'};
-    const container=document.getElementById('col-'+cols[estado]);if(!container)return;
-    const tasks=DB.tareas.filter(t=>t.Estado===estado);
-    container.innerHTML=tasks.map(t=>{
-      const novCount=(DB.novedades||[]).filter(n=>n.Tipo==='tarea'&&n.RefId===t.ID).length;
-      const novBadge=novCount?`<span style="font-size:10px;color:var(--accent);font-weight:700">📋 ${novCount}</span>`:'';
-      return`
-      <div class="kanban-card">
-        <div class="task-title">${t.Titulo||'Sin título'} ${novBadge}</div>
-        <div class="task-meta">
-          <span>${t.Asignado||'—'}</span>
-          <span class="badge badge-${t.Prioridad==='Alta'?'red':t.Prioridad==='Media'?'yellow':'green'}">${t.Prioridad||'—'}</span>
-        </div>
-        <div class="task-meta" style="margin-top:8px;justify-content:flex-end;gap:4px">
-          <button class="btn-row-edit" onclick="editRecord('tarea','${t.ID}')">✏️</button>
-          <button class="btn-row-del" onclick="deleteRecord('tarea','${t.ID}')">🗑</button>
-        </div>
-      </div>`;    }).join('')||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Sin tareas</div>';
-  });
 }
 /* ── Inventario tab state ── */
 let _invTab='aceitunas', _invSubTab='verde_comercial', _invTomSubTab='pasta_tomate', _currentOliveTipo='verde_comercial';
@@ -2959,14 +3066,13 @@ function filterVentasSearch(q){
 const FORMS={
   cliente:{title:'Nuevo cliente',fields:'<div class="form-row"><div class="form-group"><label>Empresa *</label><input id="f-Empresa" placeholder="Ej: Aceitunera del Norte S.A."></div><div class="form-group"><label>Rubro / Productos</label><input type="hidden" id="f-Rubro"><div class="rubro-picker" id="rubro-picker"></div></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">👤 Datos del responsable / contacto</div><div class="form-row"><div class="form-group"><label>Nombre contacto</label><input id="f-Contacto" placeholder="Juan García"></div><div class="form-group"><label>Cargo / Rol</label><input id="f-Cargo" placeholder="Gerente de compras"></div></div><div class="form-row"><div class="form-group"><label>Teléfono 1</label><input id="f-Telefono" type="tel" placeholder="+54 9 11 1234-5678"></div><div class="form-group"><label>Teléfono 2</label><input id="f-Telefono2" type="tel" placeholder="+54 9 261 400-0000"></div></div><div class="form-row"><div class="form-group"><label>Email 1</label><input id="f-Email" type="email" placeholder="contacto@empresa.com"></div><div class="form-group"><label>Email 2</label><input id="f-Email2" type="email" placeholder="alternativo@empresa.com"></div></div></div><div class="form-row"><div class="form-group"><label>País</label><select id="f-Pais" data-smartlist="País"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Prospecto</option><option>Activo</option><option>Inactivo</option></select></div></div><div class="form-group"><label>Dirección</label><input id="f-Direccion" placeholder="Calle, ciudad, código postal, provincia…"></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🏢 Datos fiscales / Tributarios</div><div class="form-group"><label>Domicilio real</label><input id="f-DomicilioReal" placeholder="Domicilio real o comercial"></div><div class="form-group"><label>Domicilio legal</label><input id="f-DomicilioLegal" placeholder="Domicilio legal / fiscal"></div><div class="form-group"><label>CUIT / N° identificación tributaria</label><input id="f-CUIT" placeholder="Ej: 30-12345678-9 o equivalente"></div></div><div class="form-row"><div class="form-group"><label>Última interacción</label><input id="f-UltimaInteraccion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   proyecto:{title:'Nuevo proyecto',fields:'<div class="form-row"><div class="form-group"><label>Nombre</label><input id="f-Nombre"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Producto</label><select id="f-Producto" data-smartlist="Producto"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Valor USD</label><input id="f-ValorUSD" type="number"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Prospecto</option><option>Cotización</option><option>Negociación</option><option>Cerrado</option><option>Perdido</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha inicio</label><input id="f-FechaInicio" type="date"></div><div class="form-group"><label>Fecha estimada</label><input id="f-FechaEstimada" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
-  tarea:{title:'Nueva tarea',fields:'<div class="form-group"><label>Título</label><input id="f-Titulo"></div><div class="form-group"><label>Descripción</label><textarea id="f-Descripcion"></textarea></div><div class="form-row"><div class="form-group"><label>Asignado a</label><select id="f-Asignado" data-smartlist="Persona"><option value="">— Seleccionar —</option></select></div><div class="form-group"><label>Prioridad</label><select id="f-Prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div></div><div class="form-row"><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Pendiente</option><option>En progreso</option><option>Completado</option></select></div><div class="form-group"><label>Fecha venc.</label><input id="f-FechaVenc" type="date"></div></div>'},
   producto:{title:'Nuevo producto en inventario',fields:'<div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto" placeholder="Ej: Passata Extra" autocomplete="off" list="inv-prod-dl"><datalist id="inv-prod-dl"></datalist></div><div class="form-group"><label>Categoría</label><input id="f-Categoria" placeholder="Ej: Pasta de Tomate" autocomplete="off" list="inv-cat-dl"><datalist id="inv-cat-dl"></datalist></div></div><div class="form-row"><div class="form-group"><label>Stock actual</label><input id="f-StockActual" type="number"></div><div class="form-group"><label>Stock mínimo</label><input id="f-StockMin" type="number"></div></div><div class="form-row"><div class="form-group"><label>Unidad</label><input id="f-Unidad" placeholder="kg / ton / unidad"></div><div class="form-group"><label>Precio USD</label><input id="f-Precio" type="number"></div></div>'},
   venta:{title:'Nueva venta',fields:'<input type="hidden" id="f-NumOrden"><input type="hidden" id="f-Producto"><input type="hidden" id="f-CantidadTon"><input type="hidden" id="f-Lineas"><input type="hidden" id="f-DiasPlayzo"><input type="hidden" id="f-FechaVencimiento"><input type="hidden" id="f-Vencimientos"><input type="hidden" id="f-DireccionCliente"><input type="hidden" id="f-DomicilioRealCliente"><input type="hidden" id="f-DomicilioLegalCliente"><input type="hidden" id="f-CUITCliente"><div style="display:flex;gap:10px;margin-bottom:14px"><button type="button" id="cat-btn-aceitunas" onclick="selectCategoriaVenta(\'aceitunas\')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;font-weight:700;transition:all .15s">🫒 Aceitunas</button><button type="button" id="cat-btn-tomate" onclick="selectCategoriaVenta(\'tomate\')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;font-size:14px;font-weight:700;transition:all .15s">🍅 Tomate</button></div><input type="hidden" id="f-Categoria"><div class="form-row"><div class="form-group"><label>Fecha de venta</label><input id="f-Fecha" type="date" oninput="recalcVencimientos()"></div><div class="form-group"><label>Fecha de carga</label><input id="f-FechaCarga" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nº de Orden</label><input id="f-NroOrden" placeholder="OC-2026-001"></div><div class="form-group"><label>Cliente</label><select id="f-Cliente" data-smartlist="Cliente" onchange="onClienteVentaChange()"><option value="">— Seleccionar —</option></select></div></div><div id="venta-addr-row" style="display:none;margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px">Dirección del cliente</div><div id="venta-addr-display" style="background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:12px;border:1px solid var(--border)">—</div></div><div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🏢 Adquirente</div><div class="form-group"><label>Adquirente</label><input id="f-Adquirente" list="adquirente-list" autocomplete="off" placeholder="Empresa adquirente (si difiere del cliente)…" oninput="onAdquirenteVentaChange()"><datalist id="adquirente-list"></datalist></div><div class="form-group"><label>CUIT / N° identificación tributaria</label><input id="f-CUITAdquirente" placeholder="Ej: 30-12345678-9"></div><div class="form-group"><label>Domicilio real</label><input id="f-DomicilioRealAdquirente" placeholder="Domicilio real o comercial"></div><div class="form-group"><label>Domicilio legal</label><input id="f-DomicilioLegalAdquirente" placeholder="Domicilio legal / fiscal"></div></div><div class="form-row"><div class="form-group"><label>Estado de cuenta</label><input id="f-EstadoCuenta" placeholder="Al día / Con saldo pendiente…"></div><div class="form-group"><label>Forma de pago</label><select id="f-FormaPago" onchange="onFormaPagoChange()"><option>Anticipado</option><option>Diferido Nacional</option><option>Diferido España</option></select></div></div><div style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><label style="font-size:12px;font-weight:600;color:var(--text2)">Líneas de producto</label><button type="button" class="btn btn-outline btn-sm" onclick="addVentaLinea()">＋ Agregar producto</button></div><div id="ventas-lineas-ui"></div></div><div class="form-row"><div class="form-group"><label>Total USD <span id="vtotal-lbl" style="font-size:10px;color:var(--muted)">(calculado)</span></label><input id="f-ValorUSD" type="number" readonly style="background:var(--surface2);cursor:not-allowed"></div></div><div id="venta-total-display" style="display:none;background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--accent)"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px">Total operación</div><div id="venta-total-value" style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--accent)">USD 0</div><div id="venta-total-detail" style="font-size:11px;color:var(--muted);margin-top:2px"></div></div><div id="fp-venc-section" style="display:none;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Vencimientos de pago</div><button type="button" class="btn btn-outline btn-sm" onclick="addVencimiento()">＋ Cuota</button></div><div id="vencimientos-ui"></div></div><div class="form-row"><div class="form-group"><label>Comisionista</label><div style="display:flex;gap:6px;align-items:center"><select id="f-Comisionista" style="flex:1;min-width:0"><option value="">— Sin comisionista —</option></select><button type="button" class="btn btn-outline btn-sm" onclick="openNewComisionistaModal()" title="Nuevo comisionista">＋</button></div></div><div class="form-group"><label>Comisión %</label><input id="f-PorcentajeComision" type="number" step="0.1" min="0" max="100" placeholder="0.0" oninput="calcVentaNeta()"></div></div><div class="form-row"><div class="form-group"><label>Gastos de flete (USD)</label><input id="f-GastoFlete" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcVentaNeta()"></div><div class="form-group" id="venta-neta-group" style="display:none"><label>Venta neta</label><div id="venta-neta-display" style="padding:6px 0"></div></div></div><div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">🚛 Retiro y transporte</div><div class="form-row"><div class="form-group"><label>Fecha de retiro</label><input id="f-FechaRetiro" type="date"></div><div class="form-group"><label>Lugar de entrega</label><input id="f-LugarEntrega" placeholder="Ej: Puerto de Cádiz"></div></div><div class="form-group"><label>Empresa transportista</label><input id="f-NombreTransporte" placeholder="Nombre de la empresa"></div><div class="form-row"><div class="form-group"><label>Datos del tractor</label><input id="f-DatosTractor" placeholder="Marca / Patente / Nº interno"></div><div class="form-group"><label>Datos del semirremolque</label><input id="f-DatosSemiremolque" placeholder="Patente / Capacidad"></div></div><div class="form-group"><label>Datos del chofer</label><input id="f-DatoChofer" placeholder="Nombre / DNI / Licencia"></div></div><div class="form-row"><div class="form-group"><label>Etapa</label><select id="f-Etapa"><option>Cotización</option><option>Confirmada</option><option>Despachada</option><option>Cobrada</option><option>Cancelada</option></select></div><div class="form-group"><label>Responsable</label><select id="f-Responsable" data-smartlist="Responsable"><option value="">— Seleccionar —</option></select></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   reclamo:{title:'Nuevo reclamo',fields:'<div class="form-row"><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div><div class="form-group"><label>País</label><input id="f-Pais"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Tipo de reclamo</label><select id="f-TipoReclamo"><option>Calidad</option><option>Logística</option><option>Precio</option><option>Cantidad</option><option>Documentación</option><option>Otro</option></select></div></div><div class="form-group"><label>Evidencia (link)</label><input id="f-Evidencia" placeholder="https://…"></div><div class="form-group"><label>Motivo / descripción</label><textarea id="f-Motivo"></textarea></div><div class="form-row"><div class="form-group"><label>Urgencia</label><select id="f-Urgencia"><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Abierto</option><option>En gestión</option><option>Resuelto</option></select></div></div><div class="form-row"><div class="form-group"><label>Monto afectado USD</label><input id="f-MontoAfectado" type="number"></div><div class="form-group"><label>Responsable</label><input id="f-Responsable"></div></div><div class="form-row"><div class="form-group"><label>Fecha apertura</label><input id="f-FechaApertura" type="date"></div><div class="form-group"><label>Fecha resolución</label><input id="f-FechaResolucion" type="date"></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   factura:{title:'Nueva / Editar factura',fields:'<div class="form-row"><div class="form-group"><label>Nº Factura</label><input id="f-NumFactura" placeholder="FAC-2026-001"></div><div class="form-group"><label>Cliente</label><input id="f-Cliente"></div></div><div class="form-row"><div class="form-group"><label>País</label><input id="f-Pais"></div><div class="form-group"><label>Nº Pedido / OC</label><input id="f-NroPedido"></div></div><div class="form-row"><div class="form-group"><label>Producto</label><input id="f-Producto"></div><div class="form-group"><label>Cantidad (kg)</label><input id="f-Cantidad" type="number" step="0.1"></div></div><div class="form-row"><div class="form-group"><label>Monto</label><input id="f-Monto" type="number" step="0.01"></div><div class="form-group"><label>Moneda</label><select id="f-Moneda"><option>USD</option><option>EUR</option></select></div></div><div class="form-row"><div class="form-group"><label>Condición de pago</label><input id="f-CondPago" placeholder="30 días, 60 días…"></div><div class="form-group"><label>Días de plazo</label><input id="f-DiasVenc" type="number" min="1" step="1" placeholder="ej: 60" oninput="calcFacturaVencimiento()"></div></div><div class="form-row"><div class="form-group"><label>Estado facturación</label><select id="f-EstadoFactura"><option value="">— Seleccionar —</option><option>No facturado</option><option>Facturado</option><option>Cobro en prueba</option></select></div><div class="form-group"><label>Estado</label><select id="f-Estado"><option>Emitida</option><option>Enviada</option><option>Vencida</option><option>Cobrada</option><option>Anulada</option></select></div></div><div class="form-row"><div class="form-group"><label>Fecha emisión</label><input id="f-FechaEmision" type="date" oninput="calcFacturaVencimiento()"></div><div class="form-group"><label>Fecha vencimiento</label><input id="f-FechaVencimiento" type="date"></div></div><div class="form-row"><div class="form-group"><label>Nota de Crédito (Nº / monto)</label><input id="f-NotaCredito" placeholder="NC-001 / USD 500"></div><div class="form-group"><label>Nota de Débito (Nº / monto)</label><input id="f-NotaDebito" placeholder="ND-001 / USD 200"></div></div><div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📎 Documentos</div><input type="hidden" id="f-FacturaFileId"><input type="hidden" id="f-FacturaFileName"><input type="hidden" id="f-FacturaTransFileId"><input type="hidden" id="f-FacturaTransFileName"><div class="form-row"><div class="form-group"><label>Factura (PDF / imagen)</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-file-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-file-input\',\'f-FacturaFileId\',\'f-FacturaFileName\',\'factura-file-status\')">☁️ Drive</button></div><div id="factura-file-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div><div class="form-group"><label>Factura de transporte</label><div style="display:flex;gap:6px;align-items:center"><input type="file" id="factura-trans-input" accept=".pdf,.jpg,.png,.jpeg" style="flex:1;font-size:12px"><button type="button" class="btn btn-outline btn-sm" onclick="uploadFacturaFile(\'factura-trans-input\',\'f-FacturaTransFileId\',\'f-FacturaTransFileName\',\'factura-trans-status\')">☁️ Drive</button></div><div id="factura-trans-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div></div></div></div><div class="form-group"><label>Notas</label><textarea id="f-Notas"></textarea></div>'},
   calidad:{title:'Nuevo análisis de calidad',fields:'<div class="form-row"><div class="form-group"><label>Fecha</label><input id="f-Fecha" type="date"></div><div class="form-group"><label>Hora</label><input id="f-Hora" type="time"></div></div><div class="form-row"><div class="form-group"><label>Lote / Nº partida</label><input id="f-Lote" placeholder="LOT-2026-…"></div><div class="form-group"><label>Operador / Analista</label><input id="f-Operador"></div></div><div class="form-row"><div class="form-group"><label>Brix</label><input id="f-Brix" type="number" step="0.01" placeholder="28–35"></div><div class="form-group"><label>Tamiz</label><input id="f-Tamiz" type="number" step="0.01" placeholder="0.8"></div></div><div class="form-row"><div class="form-group"><label>Bostwick</label><input id="f-Bostwick" type="number" step="0.01" placeholder="3–6"></div><div class="form-group"><label>Color</label><input id="f-Color" type="number" step="0.01" placeholder="1.5–2.5"></div></div><div class="form-row"><div class="form-group"><label>Acidez</label><input id="f-Acidez" type="number" step="0.01" placeholder="1.2–2.5"></div><div class="form-group"><label>Sabor</label><select id="f-Sabor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div></div><div class="form-row"><div class="form-group"><label>Olor</label><select id="f-Olor"><option>Característico</option><option>Atípico</option><option>Defectuoso</option></select></div><div class="form-group"><label>Foto Cristal (URL)</label><input id="f-FotoCristal" placeholder="https://…"></div></div><div class="form-group"><label>Observaciones</label><textarea id="f-Observaciones"></textarea></div>'}
 };
-const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas'};
+const MODAL_SHEET={cliente:'Clientes',proyecto:'Proyectos',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas'};
 function openCRMModal(type){
   currentCRMModal=type;
   _editingId=null;
@@ -2979,8 +3085,8 @@ function openCRMModal(type){
   document.getElementById('modal-body').innerHTML=cfg.fields;
   modal.classList.add('open');
   populateFormSelects();
-  // Para nuevo proyecto/tarea, mostrar historial vacío con aviso de guardar primero
-  if(type==='proyecto' || type==='tarea'){
+  // Para nuevo proyecto, mostrar historial vacío con aviso de guardar primero
+  if(type==='proyecto'){
     const panel = document.createElement('div');
     panel.className = 'historial-panel';
     panel.id = 'historial-panel';
@@ -3095,7 +3201,7 @@ function closeCRMModal(){
 let _editingId = null;
 /* Abrir modal en modo edición con datos pre-cargados */
 function editRecord(type, id){
-  const sheetKey = {cliente:'clientes',proyecto:'proyectos',tarea:'tareas',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
+  const sheetKey = {cliente:'clientes',proyecto:'proyectos',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
   const dbKey = sheetKey[type];
   const record = DB[dbKey]?.find(r=>r.ID===id);
   if(!record) return;
@@ -3125,8 +3231,8 @@ function editRecord(type, id){
       el.value = record[h]||'';
     }
   });
-  // Mostrar historial de novedades para proyectos y tareas
-  if(type==='proyecto' || type==='tarea'){
+  // Mostrar historial de novedades para proyectos
+  if(type==='proyecto'){
     renderHistorialPanel(type, id);
   }
   if(type==='venta') setTimeout(()=>{
@@ -3151,8 +3257,8 @@ function editRecord(type, id){
 }
 /* Eliminar registro — borra en DB local Y en Google Sheets */
 async function deleteRecord(type, id){
-  const sheetKey = {cliente:'clientes',proyecto:'proyectos',tarea:'tareas',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
-  const sheetName = {cliente:'Clientes',proyecto:'Proyectos',tarea:'Tareas',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas'};
+  const sheetKey = {cliente:'clientes',proyecto:'proyectos',producto:'inventario',venta:'ventas',reclamo:'reclamos',factura:'facturas',calidad:'calidad'};
+  const sheetName = {cliente:'Clientes',proyecto:'Proyectos',producto:'Inventario',venta:'Ventas',reclamo:'Reclamos',factura:'Facturas'};
   const dbKey = sheetKey[type];
   if(!DB[dbKey]) return;
   const rec = DB[dbKey]?.find(r=>r.ID===id);
@@ -3166,7 +3272,7 @@ async function deleteRecord(type, id){
   // 2. Guardar en localStorage (instantáneo)
   saveLocal();
   // 3. Re-renderizar
-  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion};
+  const renders = {cliente:renderClientes,proyecto:renderProyectos,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion};
   if(renders[type]) renders[type]();
   if(type==='producto') syncProductsFromInventory();
   renderDashboard();
@@ -3193,7 +3299,7 @@ async function saveModal(){
   }
   if(!currentCRMModal) return;
   const sheet = MODAL_SHEET[currentCRMModal];
-  const dbKey = {Clientes:'clientes',Proyectos:'proyectos',Tareas:'tareas',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas'}[sheet];
+  const dbKey = {Clientes:'clientes',Proyectos:'proyectos',Inventario:'inventario',Ventas:'ventas',Reclamos:'reclamos',Facturas:'facturas'}[sheet];
   // Collect values — skip any select still showing __new__
   const row = {ID: _editingId || genId()};
   let invalid = false;
@@ -3245,17 +3351,13 @@ async function saveModal(){
   }
   // Guardar en localStorage (instantáneo)
   saveLocal();
-  // Auto-push tarea nueva a Google Calendar
-  if(currentCRMModal === 'tarea' && !_editingId && row.FechaVenc){
-    autoPushTaskToGCal(row);
-  }
   // Auto-push vencimientos de venta a Google Calendar
   if(currentCRMModal === 'venta' && !_editingId){
     autoPushVencimientoToGCal(row);
   }
   closeCRMModal();
   // Re-render relevant section
-  const renders = {cliente:renderClientes,proyecto:renderProyectos,tarea:renderTareas,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion};
+  const renders = {cliente:renderClientes,proyecto:renderProyectos,producto:renderInventario,venta:renderVentas,reclamo:renderReclamos,factura:renderFacturacion};
   if(renders[currentCRMModal]) renders[currentCRMModal]();
   renderDashboard();
 }
@@ -4732,8 +4834,254 @@ function renderFacturacion(){
       <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')">🗑</button></td>
     </tr>`;
   }).join('');
+  renderAgingCobros();
+}
+function renderAgingCobros(){
+  const el=document.getElementById('aging-cobros');if(!el)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const pendientes=(DB.facturas||[]).filter(f=>f.Estado!=='Cobrada'&&f.Estado!=='Anulada'&&f.FechaVencimiento);
+  if(!pendientes.length){el.innerHTML='';return;}
+  const fmt=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  const buckets=[
+    {key:'corriente',label:'Al corriente',min:null,max:0,items:[]},
+    {key:'dias30',label:'1-30 días',min:1,max:30,items:[]},
+    {key:'dias60',label:'31-60 días',min:31,max:60,items:[]},
+    {key:'dias90',label:'61-90 días',min:61,max:90,items:[]},
+    {key:'dias90plus',label:'+90 días',min:91,max:null,items:[]},
+  ];
+  pendientes.forEach(f=>{
+    const venc=new Date(f.FechaVencimiento+'T00:00:00');
+    const dias=Math.floor((today-venc)/(1000*60*60*24));
+    const b=dias<=0?buckets[0]:dias<=30?buckets[1]:dias<=60?buckets[2]:dias<=90?buckets[3]:buckets[4];
+    b.items.push({...f,diasVencido:dias});
+  });
+  const totalPend=pendientes.reduce((s,f)=>s+(parseFloat(f.Monto)||0),0);
+  el.innerHTML=`
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px">📊 Aging de cobros · ${pendientes.length} facturas pendientes · ${fmt(totalPend)} total</div>
+    <div class="aging-grid">
+    ${buckets.map(b=>`
+      <div class="aging-bucket ${b.key}">
+        <div class="ab-label">${b.label}</div>
+        <div class="ab-count">${b.items.length}</div>
+        <div class="ab-usd">${fmt(b.items.reduce((s,f)=>s+(parseFloat(f.Monto)||0),0))}</div>
+      </div>`).join('')}
+    </div>`;
 }
 function stat(label,value,sub,accent){return`<div class="mod-stat ${accent}"><div class="ms-label">${label}</div><div class="ms-value">${value}</div><div class="ms-sub">${sub}</div></div>`;}
+/* ═══════════════════════════════════════
+   PIPELINE DE VENTAS
+═══════════════════════════════════════ */
+function renderPipeline(){
+  const all=DB.ventas||[];
+  const fmt=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  const etapas=[
+    {key:'Cotización',label:'Cotización',cls:'cotiz',icon:'📋'},
+    {key:'Confirmada',label:'Confirmada',cls:'confirmada',icon:'✅'},
+    {key:'Despachada',label:'Despachada',cls:'despachada',icon:'🚛'},
+    {key:'Cobrada',label:'Cobrada',cls:'cobrada',icon:'💰'},
+    {key:'Cancelada',label:'Cancelada',cls:'cancelada',icon:'❌'},
+  ];
+  const data=etapas.map(e=>{
+    const items=all.filter(v=>v.Etapa===e.key);
+    return{...e,count:items.length,usd:items.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0)};
+  });
+  const totalActive=all.filter(v=>v.Etapa!=='Cancelada').length||1;
+  document.getElementById('pipeline-funnel').innerHTML=`
+    <div class="pipeline-stages">
+    ${data.map(d=>`
+      <div class="pipeline-stage ${d.cls}">
+        <div class="ps-label">${d.icon} ${d.label}</div>
+        <div class="ps-count" style="color:${d.cls==='cobrada'?'var(--green)':d.cls==='cancelada'?'var(--red)':'var(--accent)'}">${d.count}</div>
+        <div class="ps-usd">${fmt(d.usd)}</div>
+        <div class="ps-pct">${d.cls!=='cancelada'?Math.round(d.count/totalActive*100)+'% del total':''}</div>
+      </div>`).join('')}
+    </div>`;
+  const activas=[data[0],data[1],data[2],data[3]];
+  let convHtml='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px">Tasas de conversión entre etapas</div><div class="pipeline-conv-row">';
+  for(let i=0;i<activas.length-1;i++){
+    const from=activas[i],to=activas[i+1];
+    const pct=from.count>0?Math.round(to.count/from.count*100):0;
+    const col=pct>=60?'var(--green)':pct>=30?'var(--yellow)':'var(--red)';
+    convHtml+=`<div class="conv-card"><span style="font-size:11px;color:var(--muted)">${from.label}</span><span class="conv-arrow">→</span><span style="font-size:11px;color:var(--muted)">${to.label}</span><span class="conv-pct-val" style="color:${col}">${pct}%</span></div>`;
+    if(i<activas.length-2)convHtml+=`<span style="color:var(--border2);font-size:18px;margin:0 2px">·</span>`;
+  }
+  convHtml+='</div>';
+  document.getElementById('pipeline-conversion').innerHTML=convHtml;
+  const etapasActivas=data.filter(d=>d.cls!=='cancelada'&&d.count>0);
+  if(!etapasActivas.length){document.getElementById('pipeline-table').innerHTML='<div class="empty-state"><div class="icon">🔀</div><p>Sin ventas registradas</p></div>';return;}
+  let tableHtml='';
+  etapasActivas.forEach(e=>{
+    const items=all.filter(v=>v.Etapa===e.key).sort((a,b)=>(b.Fecha||'').localeCompare(a.Fecha||''));
+    tableHtml+=`<div class="ventas-grupo">
+      <div class="ventas-grupo-hdr"><span>${e.icon} ${e.label}</span><span class="ventas-grupo-kpi">${e.count} órdenes · ${fmt(e.usd)}</span></div>
+      <div class="table-container"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Nº Orden</th><th>USD</th><th>Forma pago</th></tr></thead><tbody>
+      ${items.map(v=>`<tr>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${v.Fecha||'—'}</td>
+        <td style="font-weight:600">${v.Cliente||'—'}</td>
+        <td style="font-family:var(--mono);font-size:11px">${v.NumOrden||'—'}</td>
+        <td style="font-family:var(--mono);font-weight:700">${fmt(parseFloat(v.ValorUSD)||0)}</td>
+        <td style="font-size:11px;color:var(--muted)">${v.FormaPago||'—'}</td>
+      </tr>`).join('')}
+      </tbody></table></div></div>`;
+  });
+  document.getElementById('pipeline-table').innerHTML=tableHtml;
+}
+/* ═══════════════════════════════════════
+   BÚSQUEDA GLOBAL
+═══════════════════════════════════════ */
+function onGlobalSearch(q){
+  q=(q||'').trim();
+  const box=document.getElementById('gs-results');
+  if(q.length<2){box.classList.remove('open');return;}
+  const ql=q.toLowerCase();
+  const results=[];
+  (DB.clientes||[]).forEach(c=>{
+    if((c.Empresa||'').toLowerCase().includes(ql)||(c.Contacto||'').toLowerCase().includes(ql)||(c.Email||'').toLowerCase().includes(ql))
+      results.push({type:'cliente',title:c.Empresa||'—',meta:`${c.Contacto||''} · ${c.Pais||''} · ${c.Estado||''}`,section:'clientes'});
+  });
+  (DB.ventas||[]).forEach(v=>{
+    if((v.Cliente||'').toLowerCase().includes(ql)||(v.NumOrden||'').toLowerCase().includes(ql))
+      results.push({type:'venta',title:v.Cliente||'—',meta:`${v.NumOrden||''} · ${v.Etapa||''} · $${parseFloat(v.ValorUSD||0).toLocaleString('en-US',{maximumFractionDigits:0})}`,section:'ventas'});
+  });
+  (DB.facturas||[]).forEach(f=>{
+    if((f.NumFactura||'').toLowerCase().includes(ql)||(f.Cliente||'').toLowerCase().includes(ql))
+      results.push({type:'factura',title:f.NumFactura||'—',meta:`${f.Cliente||''} · ${f.Estado||''} · ${f.Moneda||'USD'} ${parseFloat(f.Monto||0).toLocaleString()}`,section:'facturacion'});
+  });
+  (DB.cotizaciones||[]).forEach(c=>{
+    if((c.NroCotizacion||'').toLowerCase().includes(ql)||(c.Cliente||'').toLowerCase().includes(ql))
+      results.push({type:'cotizacion',title:c.NroCotizacion||'—',meta:`${c.Cliente||''} · ${c.Estado||''}`,section:'cotizaciones'});
+  });
+  (DB.reclamos||[]).forEach(r=>{
+    if((r.Cliente||'').toLowerCase().includes(ql)||(r.TipoReclamo||'').toLowerCase().includes(ql))
+      results.push({type:'reclamo',title:r.Cliente||'—',meta:`${r.TipoReclamo||''} · ${r.Estado||''} · ${r.Urgencia||''}`,section:'reclamos'});
+  });
+  const typeLabels={cliente:'Cliente',venta:'Venta',factura:'Factura',cotizacion:'Cotización',reclamo:'Reclamo'};
+  box.innerHTML=results.length
+    ?results.slice(0,12).map(r=>`
+        <div class="gs-result-item" onclick="goToResult('${r.section}')">
+          <span class="gs-result-type gs-type-${r.type}">${typeLabels[r.type]}</span>
+          <span class="gs-result-title">${r.title}</span>
+          <span class="gs-result-meta">${r.meta}</span>
+        </div>`).join('')
+        +(results.length>12?`<div class="gs-empty" style="border-top:1px solid var(--border)">${results.length-12} resultados más — refiná la búsqueda</div>`:'')
+    :`<div class="gs-empty">Sin resultados para "${q}"</div>`;
+  const inp=document.getElementById('global-search');
+  const rect=inp.getBoundingClientRect();
+  box.style.top=(rect.bottom+4)+'px';
+  box.classList.add('open');
+}
+function openGlobalSearch(){document.getElementById('gs-results').classList.add('open');}
+function closeGlobalSearch(){document.getElementById('gs-results').classList.remove('open');}
+function goToResult(section){
+  closeGlobalSearch();
+  document.getElementById('global-search').value='';
+  const navEl=document.querySelector(`.sidebar .nav-item[onclick*="'${section}'"]`);
+  showSection(section,navEl);
+}
+/* ═══════════════════════════════════════
+   BADGES SIDEBAR
+═══════════════════════════════════════ */
+function updateNavBadges(){
+  const hoy=new Date().toISOString().slice(0,10);
+  const ventasVenc=(DB.ventas||[]).filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa)).length;
+  const factVenc=(DB.facturas||[]).filter(f=>f.FechaVencimiento&&f.FechaVencimiento<hoy&&f.Estado!=='Cobrada'&&f.Estado!=='Anulada').length;
+  const reclamCrit=(DB.reclamos||[]).filter(r=>r.Urgencia==='Crítica'&&['Abierto','En gestión'].includes(r.Estado)).length;
+  [{sel:`[onclick*="'ventas'"]`,n:ventasVenc},{sel:`[onclick*="'facturacion'"]`,n:factVenc},{sel:`[onclick*="'reclamos'"]`,n:reclamCrit}]
+  .forEach(({sel,n})=>{
+    const el=document.querySelector('.sidebar .nav-item'+sel);if(!el)return;
+    const ex=el.querySelector('.nav-badge');
+    if(n>0){
+      if(ex)ex.textContent=n>99?'99+':n;
+      else{const b=document.createElement('span');b.className='nav-badge';b.textContent=n>99?'99+':n;el.appendChild(b);}
+    }else if(ex)ex.remove();
+  });
+}
+/* ═══════════════════════════════════════
+   FICHA 360° CLIENTE
+═══════════════════════════════════════ */
+function openFicha360(clienteId){
+  const c=(DB.clientes||[]).find(x=>x.ID===clienteId);if(!c)return;
+  const fmt=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  const hoy=new Date().toISOString().slice(0,10);
+  document.getElementById('f360-avatar').textContent=(c.Empresa||'?').charAt(0).toUpperCase();
+  document.getElementById('f360-nombre').textContent=c.Empresa||'—';
+  document.getElementById('f360-meta').innerHTML=[
+    c.Contacto?`<span>👤 ${c.Contacto}${c.Cargo?' · '+c.Cargo:''}</span>`:'',
+    c.Pais?`<span>🌍 ${c.Pais}</span>`:'',
+    c.Estado?`<span>● ${c.Estado}</span>`:'',
+    c.Email?`<span>✉ ${c.Email}</span>`:'',
+  ].filter(Boolean).join('');
+  const ventas=(DB.ventas||[]).filter(v=>v.Cliente===c.Empresa);
+  const facturas=(DB.facturas||[]).filter(f=>f.Cliente===c.Empresa);
+  const cotiz=(DB.cotizaciones||[]).filter(q=>q.Cliente===c.Empresa);
+  const reclamos=(DB.reclamos||[]).filter(r=>r.Cliente===c.Empresa);
+  const totalVentas=ventas.filter(v=>v.Etapa!=='Cancelada').reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0);
+  const totalPend=facturas.filter(f=>f.Estado!=='Cobrada'&&f.Estado!=='Anulada').reduce((s,f)=>s+(parseFloat(f.Monto)||0),0);
+  const ventasVenc=ventas.filter(v=>v.FechaVencimiento&&v.FechaVencimiento<hoy&&!['Cobrada','Cancelada'].includes(v.Etapa)).length;
+  document.getElementById('f360-kpis').innerHTML=`
+    <div class="ficha360-kpi"><div class="fk-label">Ventas</div><div class="fk-val">${ventas.filter(v=>v.Etapa!=='Cancelada').length}</div><div class="fk-sub">${fmt(totalVentas)}</div></div>
+    <div class="ficha360-kpi"><div class="fk-label">Facturas</div><div class="fk-val">${facturas.length}</div><div class="fk-sub">${fmt(totalPend)} pendiente</div></div>
+    <div class="ficha360-kpi"><div class="fk-label">Cotizaciones</div><div class="fk-val">${cotiz.length}</div><div class="fk-sub">${cotiz.filter(q=>q.Estado==='Aceptada').length} aceptadas</div></div>
+    <div class="ficha360-kpi"><div class="fk-label">Reclamos</div><div class="fk-val" style="${reclamos.length?'color:var(--red)':''}">${reclamos.length}</div><div class="fk-sub">${reclamos.filter(r=>r.Estado==='Abierto').length} abiertos</div></div>
+    ${ventasVenc?`<div class="ficha360-kpi"><div class="fk-label">Cobros vencidos</div><div class="fk-val" style="color:var(--red)">${ventasVenc}</div><div class="fk-sub">requieren acción</div></div>`:''}`;
+  const tabs=[
+    {id:'ventas',label:`💰 Ventas (${ventas.length})`,html:_f360Ventas(ventas,fmt)},
+    {id:'facturas',label:`🧾 Facturas (${facturas.length})`,html:_f360Facturas(facturas,fmt,hoy)},
+    {id:'cotiz',label:`📝 Cotiz. (${cotiz.length})`,html:_f360Cotizaciones(cotiz,fmt)},
+    {id:'reclamos',label:`🚨 Reclamos (${reclamos.length})`,html:_f360Reclamos(reclamos)},
+  ];
+  let activeId=tabs[0].id;
+  const paint=()=>{
+    document.getElementById('f360-tabs').innerHTML=tabs.map(t=>`<div class="f360-tab${t.id===activeId?' active':''}" onclick="_f360Switch('${t.id}')">${t.label}</div>`).join('');
+    document.getElementById('f360-body').innerHTML=tabs.find(t=>t.id===activeId)?.html||'';
+  };
+  window._f360Switch=id=>{activeId=id;paint();};
+  paint();
+  document.getElementById('ficha360-overlay').classList.add('open');
+}
+function closeFicha360(){document.getElementById('ficha360-overlay').classList.remove('open');}
+function _f360Ventas(ventas,fmt){
+  if(!ventas.length)return'<div class="f360-empty">Sin ventas registradas</div>';
+  return`<table style="width:100%;border-collapse:collapse"><thead><tr><th>Fecha</th><th>Nº Orden</th><th>Etapa</th><th>USD</th></tr></thead><tbody>
+  ${ventas.sort((a,b)=>(b.Fecha||'').localeCompare(a.Fecha||'')).map(v=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${v.Fecha||'—'}</td>
+    <td style="font-size:12px;font-family:var(--mono)">${v.NumOrden||'—'}</td>
+    <td><span class="badge badge-blue" style="font-size:10px">${v.Etapa||'—'}</span></td>
+    <td style="font-family:var(--mono);font-weight:700;font-size:12px">${fmt(parseFloat(v.ValorUSD)||0)}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function _f360Facturas(facturas,fmt,hoy){
+  if(!facturas.length)return'<div class="f360-empty">Sin facturas registradas</div>';
+  return`<table style="width:100%;border-collapse:collapse"><thead><tr><th>Nº Factura</th><th>Estado</th><th>Vencimiento</th><th>Monto</th></tr></thead><tbody>
+  ${facturas.sort((a,b)=>(b.FechaEmision||'').localeCompare(a.FechaEmision||'')).map(f=>{
+    const venc=f.FechaVencimiento&&f.FechaVencimiento<hoy&&f.Estado!=='Cobrada';
+    return`<tr${venc?' style="background:rgba(219,71,60,.04)"':''}>
+      <td style="font-size:12px;font-family:var(--mono)">${f.NumFactura||'—'}</td>
+      <td><span class="badge badge-${f.Estado==='Cobrada'?'green':f.Estado==='Vencida'||venc?'red':'blue'}" style="font-size:10px">${f.Estado||'—'}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:${venc?'var(--red)':'var(--muted)'}">${f.FechaVencimiento||'—'}${venc?' ⚠️':''}</td>
+      <td style="font-family:var(--mono);font-weight:700;font-size:12px">${f.Moneda||'USD'} ${fmt(parseFloat(f.Monto)||0)}</td>
+    </tr>`;}).join('')}</tbody></table>`;
+}
+function _f360Cotizaciones(cotiz,fmt){
+  if(!cotiz.length)return'<div class="f360-empty">Sin cotizaciones registradas</div>';
+  return`<table style="width:100%;border-collapse:collapse"><thead><tr><th>Nº Cotiz.</th><th>Fecha</th><th>Estado</th><th>Total</th></tr></thead><tbody>
+  ${cotiz.sort((a,b)=>(b.Fecha||'').localeCompare(a.Fecha||'')).map(q=>`<tr>
+    <td style="font-size:12px;font-family:var(--mono)">${q.NroCotizacion||'—'}</td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${q.Fecha||'—'}</td>
+    <td><span class="badge badge-blue" style="font-size:10px">${q.Estado||'—'}</span></td>
+    <td style="font-family:var(--mono);font-weight:700;font-size:12px">${fmt(parseFloat(q.TotalUSD)||0)}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function _f360Reclamos(reclamos){
+  if(!reclamos.length)return'<div class="f360-empty">Sin reclamos registrados</div>';
+  return`<table style="width:100%;border-collapse:collapse"><thead><tr><th>Tipo</th><th>Urgencia</th><th>Estado</th><th>Apertura</th></tr></thead><tbody>
+  ${reclamos.sort((a,b)=>(b.FechaApertura||'').localeCompare(a.FechaApertura||'')).map(r=>`<tr>
+    <td style="font-size:12px">${r.TipoReclamo||'—'}</td>
+    <td><span class="badge badge-${r.Urgencia==='Crítica'||r.Urgencia==='Alta'?'red':r.Urgencia==='Media'?'yellow':'green'}" style="font-size:10px">${r.Urgencia||'—'}</span></td>
+    <td><span class="badge badge-${r.Estado==='Abierto'?'red':r.Estado==='En gestión'?'yellow':'green'}" style="font-size:10px">${r.Estado||'—'}</span></td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${r.FechaApertura||'—'}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
 /* ═══════════════════════════════════════
    CALIDAD
 ═══════════════════════════════════════ */// Apply saved theme label on load
@@ -4895,7 +5243,7 @@ function requestGoogleAuth(onSuccess){
 ═══════════════════════════════════════ */
 let _calYear  = new Date().getFullYear();
 let _calMonth = new Date().getMonth(); // 0-based
-let _calActiveFilters = new Set(['tarea','venta','cliente','reclamo','factura','vencimiento']);
+let _calActiveFilters = new Set(['venta','cliente','reclamo','factura','vencimiento']);
 let _calPopoverEvent  = null; // evento activo en popover
 /* ═══════════════════════════════════════
    CARGAS
@@ -5095,21 +5443,11 @@ function openVentaFromCarga(ventaId){
   setTimeout(()=>openCRMModal('venta',ventaId),100);
 }
 const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const CAL_COLORS = {tarea:'#a7001d',venta:'#96983e',cliente:'#404626',reclamo:'#db473c',factura:'#b45309',vencimiento:'#c8001f',carga:'#0369a1'};
-const CAL_SECTIONS = {tarea:'tareas',venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion',vencimiento:'ventas',carga:'cargas'};
+const CAL_COLORS = {venta:'#96983e',cliente:'#404626',reclamo:'#db473c',factura:'#b45309',vencimiento:'#c8001f',carga:'#0369a1'};
+const CAL_SECTIONS = {venta:'ventas',cliente:'clientes',reclamo:'reclamos',factura:'facturacion',vencimiento:'ventas',carga:'cargas'};
 /* Recolectar todos los eventos desde las secciones de la app */
 function getCalEvents(){
   const events = [];
-  // Tareas con fecha de vencimiento
-  DB.tareas.forEach(t=>{
-    if(!t.FechaVenc) return;
-    events.push({
-      type:'tarea', date:t.FechaVenc,
-      title: t.Titulo||'Tarea sin título',
-      meta: `${t.Estado||''} · ${t.Asignado||''}`,
-      ref: t.ID, estado: t.Estado
-    });
-  });
   // Ventas — fecha de carga
   DB.ventas.forEach(v=>{
     const d = v.FechaCarga || v.Fecha;
@@ -5269,8 +5607,6 @@ function buildDayCell(date, byDate, todayStr, otherMonth){
     more.onclick = (e)=>{ e.stopPropagation(); openCalDayDetail(dateStr, dayEvents); };
     cell.appendChild(more);
   }
-  // Click en celda vacía → nueva tarea con esa fecha
-  cell.onclick = ()=>{ newTaskFromCal(dateStr); };
   return cell;
 }
 /* Agenda lateral — próximos 30 días */
@@ -5361,13 +5697,6 @@ function openCalDayDetail(dateStr, events){
       </div>
     </div>`).join('');
   document.getElementById('main-modal').classList.add('open');
-}
-/* Nueva tarea desde click en día */
-function newTaskFromCal(dateStr){
-  openCRMModal('tarea');
-  const el = document.getElementById('f-FechaVenc');
-  if(el) el.value = dateStr;
-  document.getElementById('modal-title').textContent = '+ Nueva tarea';
 }
 /* Navegación */
 function calPrev(){
@@ -5508,7 +5837,6 @@ function toggleSidebar(){
 const GCAL_CAZORLA_TAG = 'crm_cazorla_v1';
 /* ── Mapa de colores GCal por tipo de evento ── */
 const GCAL_COLOR = {
-  tarea:       '11', // rojo tomate
   vencimiento: '6',  // mandarina
   factura:     '5',  // banana
   cliente:     '2',  // salvia
@@ -5593,7 +5921,7 @@ async function syncCalendarToGoogle() {
   try {
     // 1. Recolectar TODOS los eventos del CRM
     const allCRMEvents = getCalEvents().filter(e =>
-      ['tarea', 'vencimiento', 'factura', 'cliente', 'venta', 'reclamo'].includes(e.type)
+      ['vencimiento', 'factura', 'cliente', 'venta', 'reclamo'].includes(e.type)
       && e.date
     );
     if (!allCRMEvents.length) {
@@ -5652,110 +5980,6 @@ async function syncCalendarToGoogle() {
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '↑ Exportar a GCal'; }
   }
-}
-/* ══════════════════════════════════════════
-   IMPORTAR: Google Calendar → CRM (como tareas)
-══════════════════════════════════════════ */
-async function syncCalendarFromGoogle() {
-  if (!token) {
-    requestGoogleAuth(() => setTimeout(syncCalendarFromGoogle, 1500));
-    return;
-  }
-  const btn = document.getElementById('btn-gcal-import');
-  if (btn) { btn.disabled = true; btn.textContent = '↻ Importando...'; }
-  setGCalStatus('Leyendo Google Calendar...', 'var(--yellow)');
-  try {
-    // Rango: hoy - 7 días hasta + 180 días
-    const from = new Date(Date.now() - 7  * 24 * 3600 * 1000);
-    const to   = new Date(Date.now() + 180 * 24 * 3600 * 1000);
-    const url  = `https://www.googleapis.com/calendar/v3/calendars/primary/events`
-      + `?timeMin=${encodeURIComponent(from.toISOString())}`
-      + `&timeMax=${encodeURIComponent(to.toISOString())}`
-      + `&singleEvents=true&orderBy=startTime&maxResults=500`;
-    const res  = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    const data = await res.json();
-    const items = data.items || [];
-    // Solo eventos externos (no los que generó el propio CRM)
-    const externos = items.filter(e =>
-      e.extendedProperties?.private?.source !== GCAL_CAZORLA_TAG
-      && e.status !== 'cancelled'
-    );
-    if (!DB.tareas) DB.tareas = [];
-    let imported = 0, skipped = 0;
-    for (const gev of externos) {
-      const gcalId = gev.id;
-      const fecha  = (gev.start?.date || gev.start?.dateTime || '').slice(0, 10);
-      const titulo = (gev.summary || 'Reunión sin título')
-                       .replace(/^\[CRM\]\s*/i, '')
-                       .trim();
-      const desc   = gev.description || '';
-      // Evitar duplicados: buscar por gcalId en el campo Notas
-      const yaExiste = DB.tareas.some(t =>
-        (t.Notas || '').includes('gcalId:' + gcalId)
-      );
-      if (yaExiste) { skipped++; continue; }
-      // Detectar si es invitación a reunión (tiene attendees)
-      const esReunion  = !!(gev.attendees && gev.attendees.length);
-      const organizador = gev.organizer?.displayName || gev.organizer?.email || '';
-      const nuevaTarea = {
-        ID:          genId(),
-        Titulo:      titulo,
-        Descripcion: [
-          desc,
-          esReunion ? `Organizador: ${organizador}` : '',
-          gev.location ? `Lugar: ${gev.location}` : ''
-        ].filter(Boolean).join('\n'),
-        Asignado:    userData?.name || '',
-        Prioridad:   esReunion ? 'Alta' : 'Media',
-        Estado:      'Pendiente',
-        FechaVenc:   fecha,
-        Notas:       `Importado desde Google Calendar\ngcalId:${gcalId}\nFuente: ${gev.htmlLink || ''}`
-      };
-      DB.tareas.push(nuevaTarea);
-      imported++;
-    }
-    if (imported > 0) {
-      saveLocal();
-      if (document.getElementById('section-tareas').classList.contains('active'))
-        renderTareas();
-      renderCalendario();
-    }
-    const ts = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-    localStorage.setItem('gcal_last_import', new Date().toISOString());
-    setGCalStatus(
-      `✅ ${imported} importados · ${skipped} ya existían · ${ts}`,
-      imported > 0 ? 'var(--green)' : 'var(--muted)'
-    );
-  } catch(e) {
-    setGCalStatus('❌ Error: ' + e.message, 'var(--red)');
-    console.error('syncCalendarFromGoogle error:', e);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '↓ Importar de GCal'; }
-  }
-}
-/* ══════════════════════════════════════════
-   AUTO-PUSH: cuando se guarda una tarea con fecha → GCal
-══════════════════════════════════════════ */
-function autoPushTaskToGCal(tarea) {
-  if (!token || !tarea.FechaVenc) return;
-  const ev = {
-    type:  'tarea',
-    date:  tarea.FechaVenc,
-    title: tarea.Titulo || 'Tarea sin título',
-    meta:  `${tarea.Estado || ''} · ${tarea.Asignado || ''}`,
-    ref:   tarea.ID
-  };
-  // Fire-and-forget — no bloquea el guardado del CRM
-  fetch(
-    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-    {
-      method:  'POST',
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body:    JSON.stringify(buildGCalEvent(ev))
-    }
-  ).then(r => {
-    if (r.ok) console.log('GCal: tarea pushada OK →', tarea.Titulo);
-  }).catch(() => {}); // silencioso
 }
 /* ══════════════════════════════════════════
    AUTO-PUSH: vencimiento de cobro → GCal
