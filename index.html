@@ -812,9 +812,65 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 .aging-bucket.dias60 .ab-count{color:#e07020}
 .aging-bucket.dias90 .ab-count{color:var(--red)}
 .aging-bucket.dias90plus .ab-count{color:var(--red);animation:pulse-dot 1.5s infinite}
+/* ══ FACTURA CARDS ══ */
+.fact-card{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:8px;display:flex;overflow:hidden;transition:box-shadow .15s,border-color .15s}
+.fact-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.09);border-color:var(--border2)}
+.fact-bar{width:5px;flex-shrink:0}
+.fact-bar-default{background:var(--border2)}
+.fact-bar-emitida{background:var(--yellow)}
+.fact-bar-enviada{background:var(--accent)}
+.fact-bar-vencida,.fact-bar-overdue{background:var(--red)}
+.fact-bar-cobrada{background:var(--green)}
+.fact-bar-anulada{background:var(--muted)}
+.fact-card.fact-overdue{background:rgba(219,71,60,.03)}
+.fact-card.fact-cobrada-card{background:rgba(16,185,129,.03)}
+.fact-inner{padding:13px 16px;flex:1;min-width:0}
+.fact-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:28px}
+.fact-num{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+.fact-client{font-weight:700;font-size:13px;color:var(--text);white-space:nowrap;flex-shrink:0}
+.fact-pais-tag{font-size:11px;color:var(--muted);white-space:nowrap;background:var(--bg);padding:2px 7px;border-radius:8px;flex-shrink:0}
+.fact-spacer{flex:1}
+.fact-monto{font-family:var(--mono);font-weight:800;font-size:15px;white-space:nowrap;flex-shrink:0}
+.fact-monto.m-overdue{color:var(--red)}
+.fact-monto.m-cobrada{color:var(--green)}
+.fact-monto.m-pending{color:var(--accent)}
+.fact-monto.m-muted{color:var(--muted)}
+.fact-row-actions{display:flex;gap:4px;flex-shrink:0;margin-left:6px}
+.fact-bot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
+.fact-chip{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);white-space:nowrap}
+.fact-chip strong{color:var(--text);font-weight:600}
+.fact-chip.warn{color:var(--red)}
+.fact-chip a{color:var(--accent);text-decoration:none;font-size:11px}
+.fact-chip a:hover{text-decoration:underline}
 /* ══ BADGES SIDEBAR ══ */
 .nav-item{position:relative}
 .nav-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:var(--mono);line-height:1}
+/* ══ AUDITORÍA FACTURAS ══ */
+.audit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.audit-overlay.open{opacity:1;pointer-events:all}
+.audit-modal{background:var(--card);border-radius:20px;width:min(900px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s}
+.audit-overlay.open .audit-modal{transform:translateY(0)}
+.audit-head{display:flex;align-items:center;gap:12px;padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.audit-title{font-size:17px;font-weight:800;color:var(--text);flex:1}
+.audit-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:8px;line-height:1}
+.audit-close:hover{background:var(--border)}
+.audit-body{padding:0 24px 20px;overflow-y:auto;flex:1}
+.audit-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.audit-section-title span.cnt{background:var(--accent);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px}
+.audit-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--surface)}
+.audit-row.orphan{border-color:rgba(219,71,60,.3);background:rgba(219,71,60,.04)}
+.audit-row.linked{border-color:rgba(16,185,129,.25);background:rgba(16,185,129,.03)}
+.audit-row.missing{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04)}
+.audit-chk{flex-shrink:0;width:16px;height:16px;cursor:pointer;accent-color:var(--red)}
+.audit-info{flex:1;min-width:0}
+.audit-info-top{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.audit-info-bot{font-size:11px;color:var(--muted);margin-top:3px}
+.audit-tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700;white-space:nowrap}
+.audit-tag-red{background:rgba(219,71,60,.15);color:var(--red)}
+.audit-tag-green{background:rgba(16,185,129,.15);color:var(--green)}
+.audit-tag-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
+.audit-footer{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card)}
+.audit-sel-all{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600;background:none;border:none;padding:0;text-decoration:underline}
 /* ══ FICHA 360° ══ */
 .ficha360-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .ficha360-overlay.open{opacity:1;pointer-events:all}
@@ -871,6 +927,24 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <button onclick="continueOffline()" style="margin-top:10px;width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
       Continuar sin Google (solo local)
     </button>
+  </div>
+</div>
+<!-- AUDITORÍA FACTURAS vs VENTAS -->
+<div class="audit-overlay" id="audit-overlay" onclick="if(event.target===this)closeAuditoria()">
+  <div class="audit-modal">
+    <div class="audit-head">
+      <span style="font-size:22px">🔍</span>
+      <div class="audit-title">Auditoría: Facturas vs Ventas</div>
+      <button class="audit-close" onclick="closeAuditoria()">✕</button>
+    </div>
+    <div class="audit-body" id="audit-body"></div>
+    <div class="audit-footer">
+      <button class="audit-sel-all" onclick="auditSelectAll()">Seleccionar todas las huérfanas</button>
+      <div style="flex:1"></div>
+      <span id="audit-sel-count" style="font-size:12px;color:var(--muted)">0 seleccionadas</span>
+      <button class="btn btn-outline btn-sm" onclick="closeAuditoria()">Cancelar</button>
+      <button class="btn btn-primary" id="audit-delete-btn" onclick="auditDeleteSelected()" style="background:var(--red);border-color:var(--red)" disabled>🗑 Eliminar seleccionadas</button>
+    </div>
   </div>
 </div>
 <!-- FICHA 360° CLIENTE -->
@@ -1585,7 +1659,10 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="section" id="section-facturacion">
     <div class="ph-row">
       <div><h1>🧾 Facturación</h1><p>Seguimiento de facturas emitidas y estado de cobro</p></div>
-      <button class="btn btn-primary" onclick="openCRMModal('factura')">+ Nueva factura</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline" onclick="openAuditoria()" title="Auditar coherencia facturas vs ventas" style="border-color:var(--yellow);color:var(--yellow)">🔍 Auditar</button>
+        <button class="btn btn-primary" onclick="openCRMModal('factura')">+ Nueva factura</button>
+      </div>
     </div>
     <div class="mod-stats" id="facturacion-stats"></div>
     <div id="aging-cobros" style="margin-bottom:20px"></div>
@@ -1599,29 +1676,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <button class="state-pill" onclick="filterSection('facturacion','Anulada',this)">🚫 Anulada</button>
       </div>
     </div>
-    <div class="factura-scroll-wrap">
-      <table id="facturacion-table" style="min-width:1200px;width:100%">
-        <thead><tr>
-          <th style="white-space:nowrap;min-width:90px">Nº Factura</th>
-          <th style="min-width:120px">Cliente</th>
-          <th style="min-width:70px">País</th>
-          <th style="white-space:nowrap;min-width:70px">Ref. OC</th>
-          <th style="min-width:110px">Producto</th>
-          <th style="white-space:nowrap;min-width:80px">Cant. (kg)</th>
-          <th style="min-width:90px">Monto</th>
-          <th style="min-width:100px">Cond. pago</th>
-          <th style="min-width:110px">Facturación</th>
-          <th style="min-width:80px">Estado</th>
-          <th style="white-space:nowrap;min-width:90px">Emisión</th>
-          <th style="white-space:nowrap;min-width:100px">Vencimiento</th>
-          <th style="white-space:nowrap;min-width:80px">N. Créd.</th>
-          <th style="white-space:nowrap;min-width:80px">N. Déb.</th>
-          <th style="min-width:60px">Docs</th>
-          <th style="width:70px"></th>
-        </tr></thead>
-        <tbody id="facturacion-tbody"></tbody>
-      </table>
-    </div>
+    <div id="facturas-list"></div>
   </div>
   <!-- CALIDAD -->
 <!-- CARGAS -->
@@ -4796,45 +4851,252 @@ function renderReclamos(){
 ═══════════════════════════════════════ */
 function facturaBadge(e){const m={Emitida:'badge-emitida',Enviada:'badge-enviada',Vencida:'badge-vencida',Cobrada:'badge-cobrada',Anulada:'badge-anulada'};return m[e]||'badge-emitida';}
 function renderFacturacion(){
-  const today=new Date(),filter=_sectionFilters.facturacion;
-  const data=filter==='all'?DB.facturas:DB.facturas.filter(f=>f.Estado===filter);
-  const total=DB.facturas.length,pendiente=DB.facturas.filter(f=>f.Estado==='Emitida'||f.Estado==='Enviada').length,vencidas=DB.facturas.filter(f=>f.Estado==='Vencida').length,cobradas=DB.facturas.filter(f=>f.Estado==='Cobrada').length;
-  const montoPend=DB.facturas.filter(f=>f.Estado!=='Cobrada'&&f.Estado!=='Anulada').reduce((a,f)=>a+(parseFloat(f.Monto)||0),0);
-  const montoCob=DB.facturas.filter(f=>f.Estado==='Cobrada').reduce((a,f)=>a+(parseFloat(f.Monto)||0),0);
-  document.getElementById('facturacion-stats').innerHTML=stat('Total facturas',total,total+' emitidas','')+stat('Pendiente cobro','USD '+montoPend.toLocaleString('es-AR',{minimumFractionDigits:0}),pendiente+' facturas','accent-yellow')+stat('Vencidas',vencidas,'requieren seguimiento','accent-red')+stat('Cobradas',cobradas,'facturas','accent-green')+stat('Total cobrado','USD '+montoCob.toLocaleString('es-AR',{minimumFractionDigits:0}),'acumulado','accent-blue');
-  const tb=document.getElementById('facturacion-tbody'),today_ms=today.getTime();
-  if(!data.length){tb.innerHTML=`<tr><td colspan="16"><div class="empty-state"><div class="icon">🧾</div><p>Sin facturas${filter!=='all'?' en este estado':''}</p></div></td></tr>`;return;}
-  tb.innerHTML=data.map(f=>{
-    const venc_ms=f.FechaVencimiento?new Date(f.FechaVencimiento).getTime():null;
-    const isOverdue=venc_ms&&today_ms>venc_ms&&f.Estado!=='Cobrada'&&f.Estado!=='Anulada';
-    const montoFmt=f.Monto?`<span class="amount-cell ${f.Estado==='Cobrada'?'positive':isOverdue?'negative':'pending'}">${f.Moneda||'USD'} ${parseFloat(f.Monto).toLocaleString()}</span>`:'—';
-    const ncFmt=f.NotaCredito?`<span style="color:var(--green);font-size:11px;font-family:var(--mono)">${f.NotaCredito}</span>`:'<span style="color:var(--muted)">—</span>';
-    const ndFmt=f.NotaDebito?`<span style="color:var(--red);font-size:11px;font-family:var(--mono)">${f.NotaDebito}</span>`:'<span style="color:var(--muted)">—</span>';
-    const estFact=f.EstadoFactura||'';
-    const estFactColor=estFact==='Facturado'?'var(--green)':estFact==='Cobro en prueba'?'var(--yellow)':'var(--muted)';
-    const docsFmt=[
-      f.FacturaFileId?`<a href="https://drive.google.com/file/d/${f.FacturaFileId}/view" target="_blank" title="${f.FacturaFileName||'Factura'}" style="font-size:11px;color:var(--accent);text-decoration:none">📄 FAC</a>`:'',
-      f.FacturaTransFileId?`<a href="https://drive.google.com/file/d/${f.FacturaTransFileId}/view" target="_blank" title="${f.FacturaTransFileName||'Transporte'}" style="font-size:11px;color:var(--accent);text-decoration:none">🚛 TRP</a>`:''
-    ].filter(Boolean).join(' ') || '<span style="color:var(--muted)">—</span>';
-    return`<tr class="${isOverdue?'overdue':''}">
-      <td><span style="font-family:var(--mono);font-weight:600;color:var(--accent)">${f.NumFactura||'—'}</span></td>
-      <td><strong>${f.Cliente||'—'}</strong></td>
-      <td style="font-size:11px;color:var(--muted)">${f.Pais||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px">${f.NroPedido||'—'}</td>
-      <td>${f.Producto||'—'}</td>
-      <td style="font-family:var(--mono);white-space:nowrap">${f.Cantidad?f.Cantidad+' kg':'—'}</td>
-      <td style="white-space:nowrap">${montoFmt}</td>
-      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${f.CondPago||'—'}${f.DiasVenc?` <span style="font-size:10px">(${f.DiasVenc}d)</span>`:''}</td>
-      <td style="font-size:11px;color:${estFactColor};font-weight:600;white-space:nowrap">${estFact||'—'}</td>
-      <td><span class="badge ${facturaBadge(f.Estado)}">${f.Estado||'—'}</span></td>
-      <td style="font-family:var(--mono);font-size:11px;white-space:nowrap">${f.FechaEmision||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:${isOverdue?'var(--red)':'inherit'}">${f.FechaVencimiento||'—'}${isOverdue?' ⚠️':''}</td>
-      <td>${ncFmt}</td><td>${ndFmt}</td>
-      <td>${docsFmt}</td>
-      <td class="row-actions"><button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')">✏️</button><button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')">🗑</button></td>
-    </tr>`;
+  const today=new Date(),hoy=today.toISOString().slice(0,10);
+  const filter=_sectionFilters.facturacion;
+  const all=DB.facturas||[];
+  const data=(filter==='all'?all:all.filter(f=>f.Estado===filter))
+    .slice().sort((a,b)=>(b.FechaEmision||'').localeCompare(a.FechaEmision||''));
+  // ── KPI stats ──
+  const total=all.length;
+  const pendiente=all.filter(f=>f.Estado==='Emitida'||f.Estado==='Enviada').length;
+  const vencidas=all.filter(f=>f.Estado==='Vencida'||
+    (f.FechaVencimiento&&f.FechaVencimiento<hoy&&f.Estado!=='Cobrada'&&f.Estado!=='Anulada')).length;
+  const cobradas=all.filter(f=>f.Estado==='Cobrada').length;
+  const montoPend=all.filter(f=>f.Estado!=='Cobrada'&&f.Estado!=='Anulada').reduce((a,f)=>a+(parseFloat(f.Monto)||0),0);
+  const montoCob=all.filter(f=>f.Estado==='Cobrada').reduce((a,f)=>a+(parseFloat(f.Monto)||0),0);
+  document.getElementById('facturacion-stats').innerHTML=
+    stat('Total facturas',total,total+' registradas','')+
+    stat('Pendiente cobro','USD '+montoPend.toLocaleString('en-US',{maximumFractionDigits:0}),pendiente+' facturas','accent-yellow')+
+    stat('Vencidas',vencidas,'requieren seguimiento','accent-red')+
+    stat('Cobradas',cobradas,'facturas','accent-green')+
+    stat('Total cobrado','USD '+montoCob.toLocaleString('en-US',{maximumFractionDigits:0}),'acumulado','accent-blue');
+  // ── Cards ──
+  const list=document.getElementById('facturas-list');
+  if(!data.length){
+    list.innerHTML=`<div class="empty-state"><div class="icon">🧾</div><p>Sin facturas${filter!=='all'?' en este estado':''}</p></div>`;
+    renderAgingCobros();return;
+  }
+  const fmt=n=>'USD '+parseFloat(n).toLocaleString('en-US',{maximumFractionDigits:0});
+  list.innerHTML=data.map(f=>{
+    const isOverdue=f.FechaVencimiento&&f.FechaVencimiento<hoy&&f.Estado!=='Cobrada'&&f.Estado!=='Anulada';
+    const isCob=f.Estado==='Cobrada';
+    const montoClass=isCob?'m-cobrada':isOverdue?'m-overdue':f.Estado==='Anulada'?'m-muted':'m-pending';
+    const barClass=isOverdue?'fact-bar-overdue':'fact-bar-'+(f.Estado||'default').toLowerCase().replace(/\s+/g,'-');
+    const cardClass=isOverdue?'fact-overdue':isCob?'fact-cobrada-card':'';
+    // bottom chips
+    const chips=[];
+    if(f.Producto) chips.push(`<span class="fact-chip">📦 <strong>${f.Producto}${f.Cantidad?' · '+f.Cantidad+' kg':''}</strong></span>`);
+    if(f.FechaEmision||f.FechaVencimiento){
+      const vencStr=f.FechaVencimiento
+        ?`<strong class="${isOverdue?'warn':''}">${f.FechaVencimiento}${isOverdue?' ⚠️':''}</strong>`
+        :'<span style="color:var(--muted)">sin venc.</span>';
+      chips.push(`<span class="fact-chip">📅 ${f.FechaEmision||'—'} → ${vencStr}</span>`);
+    }
+    if(f.CondPago) chips.push(`<span class="fact-chip">💳 ${f.CondPago}${f.DiasVenc?' ('+f.DiasVenc+'d)':''}</span>`);
+    if(f.NroPedido) chips.push(`<span class="fact-chip">📋 Ref. <strong>${f.NroPedido}</strong></span>`);
+    if(f.EstadoFactura) chips.push(`<span class="fact-chip" style="color:${f.EstadoFactura==='Facturado'?'var(--green)':f.EstadoFactura==='Cobro en prueba'?'var(--yellow)':'var(--muted)'}">● ${f.EstadoFactura}</span>`);
+    if(f.NotaCredito) chips.push(`<span class="fact-chip" style="color:var(--green)">NC <strong>${f.NotaCredito}</strong></span>`);
+    if(f.NotaDebito)  chips.push(`<span class="fact-chip" style="color:var(--red)">ND <strong>${f.NotaDebito}</strong></span>`);
+    const docs=[];
+    if(f.FacturaFileId)     docs.push(`<a class="fact-chip" href="https://drive.google.com/file/d/${f.FacturaFileId}/view" target="_blank">📄 Factura</a>`);
+    if(f.FacturaTransFileId)docs.push(`<a class="fact-chip" href="https://drive.google.com/file/d/${f.FacturaTransFileId}/view" target="_blank">🚛 Transporte</a>`);
+    chips.push(...docs);
+    return`<div class="fact-card ${cardClass}">
+      <div class="fact-bar ${barClass}"></div>
+      <div class="fact-inner">
+        <div class="fact-top">
+          <span class="fact-num">${f.NumFactura||'—'}</span>
+          <span class="badge ${facturaBadge(f.Estado)}" style="font-size:10px">${f.Estado||'—'}</span>
+          <span class="fact-client">${f.Cliente||'—'}</span>
+          ${f.Pais?`<span class="fact-pais-tag">🌍 ${f.Pais}</span>`:''}
+          <div class="fact-spacer"></div>
+          <span class="fact-monto ${montoClass}">${f.Monto?fmt(f.Monto):'—'}</span>
+          <div class="fact-row-actions">
+            <button class="btn-row-edit" onclick="editRecord('factura','${f.ID}')" title="Editar">✏️</button>
+            <button class="btn-row-del" onclick="deleteRecord('factura','${f.ID}')" title="Eliminar">🗑</button>
+          </div>
+        </div>
+        ${chips.length?`<div class="fact-bot">${chips.join('')}</div>`:''}
+      </div>
+    </div>`;
   }).join('');
   renderAgingCobros();
+}
+/* ═══════════════════════════════════════
+   AUDITORÍA FACTURAS vs VENTAS
+═══════════════════════════════════════ */
+function _auditMatchVenta(f){
+  // Buscar la venta correspondiente a una factura por múltiples estrategias
+  const ventas=DB.ventas||[];
+  // 1. NroPedido == NumOrden de alguna venta
+  if(f.NroPedido){
+    const v=ventas.find(v=>v.NumOrden===f.NroPedido||v.NroOrden===f.NroPedido);
+    if(v)return{venta:v,via:'NroPedido'};
+  }
+  // 2. Notas contiene el ID o NumOrden de una venta (auto-generadas)
+  if(f.Notas){
+    for(const v of ventas){
+      if(v.NumOrden&&f.Notas.includes(v.NumOrden))return{venta:v,via:'Notas'};
+      if(v.ID&&f.Notas.includes(v.ID))return{venta:v,via:'ID-Notas'};
+    }
+  }
+  // 3. Mismo cliente + monto muy similar + fechas cercanas (±45 días)
+  const montF=parseFloat(f.Monto)||0;
+  const fechF=f.FechaEmision?new Date(f.FechaEmision+'T00:00:00').getTime():null;
+  if(montF>0&&fechF&&f.Cliente){
+    const candidatos=ventas.filter(v=>v.Cliente===f.Cliente);
+    for(const v of candidatos){
+      const montV=parseFloat(v.ValorUSD)||0;
+      const fechV=v.Fecha?new Date(v.Fecha+'T00:00:00').getTime():null;
+      const montOk=montV>0&&Math.abs(montV-montF)/Math.max(montV,montF)<0.05;
+      const fechOk=fechV&&Math.abs(fechV-fechF)<=45*86400000;
+      if(montOk&&fechOk)return{venta:v,via:'Cliente+Monto+Fecha'};
+    }
+  }
+  return null;
+}
+function openAuditoria(){
+  const facturas=DB.facturas||[];
+  const ventas=DB.ventas||[];
+  if(!facturas.length&&!ventas.length){
+    alert('No hay facturas ni ventas registradas.');return;
+  }
+  // Clasificar facturas
+  const linked=[],orphans=[];
+  facturas.forEach(f=>{
+    const m=_auditMatchVenta(f);
+    if(m)linked.push({f,match:m});
+    else orphans.push(f);
+  });
+  // Ventas sin factura
+  const ventasSinFactura=ventas.filter(v=>
+    v.Etapa!=='Cancelada'&&
+    !facturas.some(f=>{
+      const m=_auditMatchVenta(f);
+      return m&&m.venta.ID===v.ID;
+    })
+  );
+  // Construir HTML
+  const fmtM=n=>'USD '+parseFloat(n||0).toLocaleString('en-US',{maximumFractionDigits:0});
+  let html='';
+  // Huérfanas
+  html+=`<div class="audit-section-title">⚠️ Facturas sin venta correspondiente <span class="cnt">${orphans.length}</span></div>`;
+  if(!orphans.length){
+    html+=`<div style="font-size:13px;color:var(--muted);padding:10px 0">✅ Todas las facturas tienen una venta vinculada.</div>`;
+  }else{
+    html+=orphans.map(f=>`
+      <div class="audit-row orphan" id="audit-row-${f.ID}">
+        <input type="checkbox" class="audit-chk orphan-chk" value="${f.ID}" onchange="auditUpdateCount()">
+        <div class="audit-info">
+          <div class="audit-info-top">
+            <span style="font-family:var(--mono);font-weight:700;color:var(--accent)">${f.NumFactura||'—'}</span>
+            <span class="audit-tag audit-tag-red">Huérfana</span>
+            <span style="font-weight:600">${f.Cliente||'—'}</span>
+            ${f.Pais?`<span style="font-size:11px;color:var(--muted)">${f.Pais}</span>`:''}
+            <span style="font-family:var(--mono);font-weight:700;color:var(--red);margin-left:auto">${fmtM(f.Monto)}</span>
+          </div>
+          <div class="audit-info-bot">
+            ${f.Producto?`📦 ${f.Producto}${f.Cantidad?' · '+f.Cantidad+' kg':''} · `:''}
+            📅 ${f.FechaEmision||'—'}
+            ${f.NroPedido?` · Ref: <strong>${f.NroPedido}</strong>`:'<em> · Sin Nº Pedido</em>'}
+            ${f.Estado?` · Estado: ${f.Estado}`:''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  // Vinculadas
+  html+=`<div class="audit-section-title">✅ Facturas vinculadas a una venta <span class="cnt" style="background:var(--green)">${linked.length}</span></div>`;
+  if(!linked.length){
+    html+=`<div style="font-size:13px;color:var(--muted);padding:10px 0">Sin facturas vinculadas.</div>`;
+  }else{
+    html+=linked.map(({f,match})=>`
+      <div class="audit-row linked">
+        <div class="audit-info">
+          <div class="audit-info-top">
+            <span style="font-family:var(--mono);font-weight:700;color:var(--accent)">${f.NumFactura||'—'}</span>
+            <span class="audit-tag audit-tag-green">OK · ${match.via}</span>
+            <span style="font-weight:600">${f.Cliente||'—'}</span>
+            <span style="font-family:var(--mono);font-weight:700;color:var(--green);margin-left:auto">${fmtM(f.Monto)}</span>
+          </div>
+          <div class="audit-info-bot">
+            Venta: <strong>${match.venta.NumOrden||match.venta.ID}</strong> · ${match.venta.Etapa||'—'}
+            ${f.NroPedido?` · Ref factura: ${f.NroPedido}`:''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  // Ventas sin factura
+  html+=`<div class="audit-section-title">🟡 Ventas activas sin factura <span class="cnt" style="background:var(--yellow)">${ventasSinFactura.length}</span></div>`;
+  if(!ventasSinFactura.length){
+    html+=`<div style="font-size:13px;color:var(--muted);padding:10px 0">✅ Todas las ventas activas tienen factura.</div>`;
+  }else{
+    html+=ventasSinFactura.map(v=>`
+      <div class="audit-row missing">
+        <div class="audit-info">
+          <div class="audit-info-top">
+            <span style="font-family:var(--mono);font-weight:700;color:var(--accent)">${v.NumOrden||'—'}</span>
+            <span class="audit-tag audit-tag-yellow">Sin factura</span>
+            <span style="font-weight:600">${v.Cliente||'—'}</span>
+            <span class="badge badge-blue" style="font-size:10px">${v.Etapa||'—'}</span>
+            <span style="font-family:var(--mono);font-weight:700;margin-left:auto">USD ${parseFloat(v.ValorUSD||0).toLocaleString('en-US',{maximumFractionDigits:0})}</span>
+          </div>
+          <div class="audit-info-bot">
+            📅 ${v.Fecha||'—'} · ${v.Producto||'—'}
+            ${v.NroOrden?` · OC: ${v.NroOrden}`:''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('audit-body').innerHTML=html;
+  document.getElementById('audit-overlay').classList.add('open');
+  auditUpdateCount();
+}
+function closeAuditoria(){document.getElementById('audit-overlay').classList.remove('open');}
+function auditUpdateCount(){
+  const checked=document.querySelectorAll('.orphan-chk:checked');
+  const n=checked.length;
+  document.getElementById('audit-sel-count').textContent=n+' seleccionada'+(n!==1?'s':'');
+  document.getElementById('audit-delete-btn').disabled=n===0;
+}
+function auditSelectAll(){
+  document.querySelectorAll('.orphan-chk').forEach(c=>{c.checked=true;});
+  auditUpdateCount();
+}
+async function auditDeleteSelected(){
+  const ids=Array.from(document.querySelectorAll('.orphan-chk:checked')).map(c=>c.value);
+  if(!ids.length)return;
+  const n=ids.length;
+  if(!confirm(`¿Eliminar ${n} factura${n!==1?'s':''} huérfana${n!==1?'s':''}?\nEsta acción también las borrará de Google Sheets.\nNo se puede deshacer.`))return;
+  // Eliminar de DB local
+  const toDelete=DB.facturas.filter(f=>ids.includes(f.ID));
+  DB.facturas=DB.facturas.filter(f=>!ids.includes(f.ID));
+  saveLocal();
+  // Quitar filas visualmente
+  ids.forEach(id=>{
+    const row=document.getElementById('audit-row-'+id);
+    if(row)row.style.opacity='0.3';
+  });
+  auditUpdateCount();
+  // Sincronizar a Sheets
+  if(token&&spreadsheetId){
+    try{
+      await silentSyncToSheets();
+    }catch(e){console.warn('auditDeleteSelected sync error',e);}
+  }
+  // Re-renderizar facturación
+  renderFacturacion();
+  closeAuditoria();
+  const msg=`✅ ${n} factura${n!==1?'s':''} huérfana${n!==1?'s':''} eliminada${n!==1?'s':''}.${token&&spreadsheetId?' Google Sheets sincronizado.':' (Sin conexión — solo local)'}`;
+  // Mostrar toast de éxito
+  _showAuditToast(msg);
+}
+function _showAuditToast(msg){
+  let t=document.getElementById('audit-toast');
+  if(!t){t=document.createElement('div');t.id='audit-toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:opacity .3s;white-space:nowrap';
+    document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';},3500);
 }
 function renderAgingCobros(){
   const el=document.getElementById('aging-cobros');if(!el)return;
