@@ -1091,6 +1091,28 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <div style="font-size:11px;color:var(--sidebar-muted)" id="sync-status-text">Desconectado</div>
       </div>
     </div>
+    <!-- Configuración de hoja compartida -->
+    <div id="shared-sheet-panel" style="margin-top:10px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid var(--sidebar-border);border-radius:10px;font-size:11px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-weight:700;color:var(--sidebar-muted);text-transform:uppercase;letter-spacing:.5px;font-size:10px">🔗 Hoja Google Sheets</span>
+        <button onclick="toggleSheetPanel()" style="background:none;border:none;color:var(--sidebar-muted);cursor:pointer;font-size:14px;line-height:1;padding:0" id="sheet-panel-toggle">▾</button>
+      </div>
+      <div id="sheet-panel-body">
+        <div id="sheet-id-display" style="display:none;margin-bottom:6px">
+          <div style="color:var(--sidebar-muted);font-size:10px;margin-bottom:3px">ID de la hoja activa:</div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <code id="sheet-id-code" style="font-size:9px;color:#a8c4e0;background:rgba(0,0,0,.25);padding:3px 6px;border-radius:5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block"></code>
+            <button onclick="copySheetId()" title="Copiar ID" style="background:none;border:1px solid var(--sidebar-border);border-radius:5px;color:var(--sidebar-muted);font-size:11px;cursor:pointer;padding:2px 6px;flex-shrink:0">📋</button>
+          </div>
+        </div>
+        <div style="color:var(--sidebar-muted);font-size:10px;margin-bottom:4px">Pegar ID de hoja compartida:</div>
+        <div style="display:flex;gap:4px">
+          <input id="sheet-id-input" placeholder="1BxiM..." style="flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--sidebar-border);border-radius:6px;color:#e8dfd0;font-size:10px;padding:4px 7px;outline:none;font-family:monospace">
+          <button onclick="applySharedSheetId()" style="background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:10px;font-weight:700;cursor:pointer;padding:4px 8px;flex-shrink:0;white-space:nowrap">Conectar</button>
+        </div>
+        <div id="sheet-connect-msg" style="font-size:10px;margin-top:5px;min-height:14px"></div>
+      </div>
+    </div>
     <button id="btn-connect-google" onclick="connectGoogleFromSidebar()"
       style="margin-top:10px;width:100%;padding:8px;background:rgba(255,255,255,.06);border:1px solid var(--sidebar-border);border-radius:8px;color:var(--sidebar-muted);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s"
       onmouseover="this.style.borderColor='#db473c';this.style.color='#f8ccc0'"
@@ -1788,6 +1810,10 @@ function toggleTheme() {
 ═══════════════════════════════════════ */
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar';
 const DEFAULT_CLIENT_ID = ''; // Ingresá tu propio Client ID
+// ── Hoja compartida: ID fijo opcional (se puede dejar vacío y se guarda automático) ──
+const LS_SHEET_ID_KEY = 'crm_shared_sheet_id';
+function getSavedSheetId(){ return localStorage.getItem(LS_SHEET_ID_KEY)||''; }
+function saveSheetId(id){ if(id) localStorage.setItem(LS_SHEET_ID_KEY, id); }
 function getActiveClientId(){
   // Prioridad: 1) guardado en localStorage, 2) input del auth-screen, 3) default
   const saved = localStorage.getItem('crm_client_id');
@@ -2064,26 +2090,41 @@ const HEADERS={
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 async function findOrCreateSpreadsheet(skipLoad=false){
   try{
+    // ── 1. Usar ID guardado/compartido si existe (evita buscar en Drive propio) ──
+    const savedId = getSavedSheetId();
+    if(savedId){
+      // Verificar que tenemos acceso real antes de usarlo
+      const check=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${savedId}?fields=spreadsheetId`,{headers:{Authorization:'Bearer '+token}});
+      if(check.ok){
+        spreadsheetId=savedId;
+        showSheetsLink();
+        updateSheetIdUI();
+        if(!skipLoad){ await loadAllData(); loadPrevisionFromDB(); renderDashboard(); }
+        else { await syncFromSheetsIfNewer(); }
+        return;
+      } else {
+        // El ID guardado ya no es accesible (permisos revocados, etc.) — limpiar y buscar
+        console.warn('Sheet ID guardado inaccesible, buscando en Drive…');
+        localStorage.removeItem(LS_SHEET_ID_KEY);
+      }
+    }
+    // ── 2. Buscar en Drive (propio + compartidos con el usuario) ──
     const r=await fetch("https://www.googleapis.com/drive/v3/files?q=name%3D'CRM_Cazorla_DB'%20and%20mimeType%3D'application/vnd.google-apps.spreadsheet'%20and%20trashed%3Dfalse&fields=files(id,name)",{headers:{Authorization:'Bearer '+token}});
     const d=await r.json();
     if(d.files&&d.files.length>0){
       spreadsheetId=d.files[0].id;
     } else {
-      // Crear spreadsheet nuevo y escribir headers
+      // ── 3. Crear spreadsheet nuevo (solo si no hay ninguno accesible) ──
       const cr=await fetch('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({properties:{title:'CRM_Cazorla_DB'},sheets:Object.keys(HEADERS).map(n=>({properties:{title:n}}))})});
       const cd=await cr.json();spreadsheetId=cd.spreadsheetId;
       for(const[sheet,cols]of Object.entries(HEADERS)){await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheet}!A1:append?valueInputOption=RAW`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values:[cols]})});}
     }
+    // ── Guardar el ID para futuros logins ──
+    saveSheetId(spreadsheetId);
     showSheetsLink();
-    if(!skipLoad){
-      await loadAllData();
-      loadPrevisionFromDB();
-      renderDashboard();
-    } else {
-      // skipLoad=true significa que entramos con datos locales.
-      // Cargar Sheets en background y comparar — usar el que tenga más datos
-      await syncFromSheetsIfNewer();
-    }
+    updateSheetIdUI();
+    if(!skipLoad){ await loadAllData(); loadPrevisionFromDB(); renderDashboard(); }
+    else { await syncFromSheetsIfNewer(); }
   }catch(e){console.error(e);}
 }
 /* Cargar datos de Sheets y usar el origen con más información */
@@ -5381,6 +5422,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     // Sin datos previos → mostrar auth normalmente
     updateStorageStatus();
   }
+  // Mostrar el ID guardado en el panel aunque no haya sesión aún
+  updateSheetIdUI();
 });
 /* Abrir el Google Sheet en una nueva pestaña */
 function openInSheets(){
@@ -5401,6 +5444,72 @@ function openInSheets(){
 function showSheetsLink(){
   const btn = document.getElementById('btn-sheets-open');
   if(btn && spreadsheetId) btn.style.display = '';
+}
+/* ── Panel de hoja compartida ── */
+function updateSheetIdUI(){
+  const disp=document.getElementById('sheet-id-display');
+  const code=document.getElementById('sheet-id-code');
+  if(!disp||!code)return;
+  const id=spreadsheetId||getSavedSheetId();
+  if(id){disp.style.display='';code.textContent=id;}
+  else{disp.style.display='none';}
+}
+function copySheetId(){
+  const id=spreadsheetId||getSavedSheetId();
+  if(!id)return;
+  navigator.clipboard.writeText(id).then(()=>{
+    const msg=document.getElementById('sheet-connect-msg');
+    if(msg){msg.style.color='var(--green)';msg.textContent='✓ ID copiado al portapapeles';}
+    setTimeout(()=>{if(msg)msg.textContent='';},2500);
+  });
+}
+function toggleSheetPanel(){
+  const body=document.getElementById('sheet-panel-body');
+  const btn=document.getElementById('sheet-panel-toggle');
+  if(!body)return;
+  const collapsed=body.style.display==='none';
+  body.style.display=collapsed?'':'none';
+  if(btn)btn.textContent=collapsed?'▾':'▸';
+}
+async function applySharedSheetId(){
+  const input=document.getElementById('sheet-id-input');
+  const msg=document.getElementById('sheet-connect-msg');
+  const id=(input?.value||'').trim();
+  if(!id||id.length<20){
+    if(msg){msg.style.color='var(--red)';msg.textContent='ID inválido (debe ser el ID del Sheet, no la URL completa)';}
+    return;
+  }
+  if(msg){msg.style.color='var(--muted)';msg.textContent='Verificando acceso…';}
+  // Si hay token, verificar acceso inmediatamente
+  if(token){
+    try{
+      const check=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${id}?fields=spreadsheetId,properties`,{headers:{Authorization:'Bearer '+token}});
+      if(!check.ok){
+        if(msg){msg.style.color='var(--red)';msg.textContent='❌ Sin acceso a esa hoja. Pedile al dueño que te comparta como Editor.';}
+        return;
+      }
+      const info=await check.json();
+      saveSheetId(id);
+      spreadsheetId=id;
+      if(input)input.value='';
+      updateSheetIdUI();
+      showSheetsLink();
+      if(msg){msg.style.color='var(--green)';msg.textContent='✅ Conectado. Sincronizando datos…';}
+      await loadAllData();
+      loadPrevisionFromDB();
+      renderDashboard();
+      setTimeout(()=>{if(msg)msg.textContent='';},3000);
+    }catch(e){
+      if(msg){msg.style.color='var(--red)';msg.textContent='Error al verificar. Intentá de nuevo.';}
+    }
+  } else {
+    // Sin token aún: guardar el ID para que se use cuando inicie sesión
+    saveSheetId(id);
+    if(input)input.value='';
+    updateSheetIdUI();
+    if(msg){msg.style.color='var(--green)';msg.textContent='✅ ID guardado. Inicia sesión con Google para conectar.';}
+    setTimeout(()=>{if(msg)msg.textContent='';},3000);
+  }
 }
 /* ── Mini-modal para ingresar Client ID ── */
 function openGauthModal(){
