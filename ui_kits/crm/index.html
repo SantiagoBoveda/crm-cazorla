@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Cazorla — UI Kit</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Instrument Sans',sans-serif;overflow-x:hidden;transition:background .3s,color .3s}
+
+/* ── LIGHT THEME ── */
+body{background:#f5f0e6;color:#1a0f09}
+:root{--bg:#f5f0e6;--surface:#fff;--surface2:#f0ebe0;--surface3:#ebe4d8;--accent:#a7001d;--accent2:#c8001f;--green:#6b7215;--yellow:#b45309;--red:#db473c;--text:#1a0f09;--text2:#5c4e3a;--text3:#9e8e78;--muted:#6e5f4e;--border:#dad0be;--border2:#c4b8a5;--sidebar-bg:#722F37;--sidebar-text:#fff;--sidebar-muted:#e8b4bc;--sidebar-border:#5a1f28;--sidebar-active:#5a1f28}
+
+/* ── DARK THEME ── */
+body.warm{background:#0f1008;color:#e5e0d0}
+body.warm{--bg:#0f1008;--surface:#191b0d;--surface2:#212410;--surface3:#1e210e;--accent:#e05040;--accent2:#b83028;--green:#8a9830;--yellow:#f59e0b;--red:#ef5540;--text:#e5e0d0;--text2:#8a9060;--text3:#4c5230;--muted:#707558;--border:#2e3018;--border2:#3a3e20;--sidebar-bg:#5a1228;--sidebar-muted:#dda0aa;--sidebar-border:#451020;--sidebar-active:#451020}
+
+.main-content{margin-left:220px;padding:28px;min-height:100vh;background:var(--bg);transition:background .3s}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2,#c4b8a5);border-radius:4px}
+</style>
+</head>
+<body>
+<script type="text/babel" src="Sidebar.jsx"></script>
+<script type="text/babel" src="Badge.jsx"></script>
+<script type="text/babel" src="StatCard.jsx"></script>
+<script type="text/babel" src="DataTable.jsx"></script>
+<script type="text/babel" src="Screens.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ── Sample data for Dashboard / Clientes / Cotizaciones / Pipeline / Facturación ── */
+const VENTAS_DASH=[
+  {cliente:'García & Hijos SRL',producto:'Aceituna Verde Com.',pais:'ARG',monto:'$12,250',estado:'cobrada'},
+  {cliente:'Azeite Portugal Lda',producto:'Passata',pais:'POR',monto:'$9,000',estado:'enviada'},
+  {cliente:'Olivetti SpA',producto:'Pasta de Tomate',pais:'ITA',monto:'$7,600',estado:'pendiente'},
+  {cliente:'Mercado Central',producto:'Aceituna Negra Nat.',pais:'CHI',monto:'$6,000',estado:'vencida',_overdue:true},
+];
+const CLIENTES=[
+  {empresa:'García & Hijos SRL',pais:'Argentina',rubro:'Aceitunas',contacto:'Luis García',ultima:'2026-04-20',total:'$48,200',estado:'Activo'},
+  {empresa:'Olivetti SpA',pais:'Italia',rubro:'Tomate',contacto:'Marco Bianchi',ultima:'2026-03-28',total:'$31,500',estado:'Activo'},
+  {empresa:'Mercado Central',pais:'Chile',rubro:'Aceitunas',contacto:'Ana Torres',ultima:'2026-02-14',total:'$18,200',estado:'Inactivo'},
+  {empresa:'Azeite Portugal Lda',pais:'Portugal',rubro:'Aceitunas',contacto:'João Silva',ultima:'2026-04-18',total:'$24,800',estado:'Activo'},
+  {empresa:'Distribuciones Sur',pais:'Argentina',rubro:'Aceitunas',contacto:'Fabián Ruiz',ultima:'2026-04-20',total:'$52,300',estado:'Activo'},
+  {empresa:'Conservas Sevilla',pais:'España',rubro:'Tomate',contacto:'Carmen López',ultima:'2026-04-01',total:'$11,700',estado:'Activo'},
+];
+const COTIZACIONES=[
+  {num:'COT-2026-042',fecha:'2026-04-20',cliente:'Olivetti SpA',pais:'ITA',incoterm:'FOB',moneda:'USD',estado:'pendiente'},
+  {num:'COT-2026-041',fecha:'2026-04-18',cliente:'Azeite Portugal Lda',pais:'POR',incoterm:'CIF',moneda:'USD',estado:'enviada'},
+  {num:'COT-2026-039',fecha:'2026-04-10',cliente:'Conservas Sevilla',pais:'ESP',incoterm:'EXW',moneda:'EUR',estado:'cobrada'},
+  {num:'COT-2026-037',fecha:'2026-03-28',cliente:'García & Hijos SRL',pais:'ARG',incoterm:'FOB',moneda:'USD',estado:'cobrada'},
+  {num:'COT-2026-035',fecha:'2026-03-15',cliente:'Mercado Central',pais:'CHI',incoterm:'FOB',moneda:'USD',estado:'vencida'},
+];
+const FACTURAS=[
+  {num:'FAC-2026-018',fecha:'2026-04-22',vence:'2026-05-22',cliente:'Olivetti SpA',monto:'$8,750',estado:'enviada'},
+  {num:'FAC-2026-017',fecha:'2026-04-18',vence:'2026-05-18',cliente:'Azeite Portugal Lda',monto:'$5,600',estado:'emitida'},
+  {num:'FAC-2026-015',fecha:'2026-04-01',vence:'2026-05-01',cliente:'García & Hijos SRL',monto:'$12,400',estado:'cobrada'},
+  {num:'FAC-2026-012',fecha:'2026-03-15',vence:'2026-04-14',cliente:'Mercado Central',monto:'$3,200',estado:'vencida',_overdue:true},
+  {num:'FAC-2026-010',fecha:'2026-03-01',vence:'2026-03-31',cliente:'Distribuciones Sur',monto:'$9,100',estado:'cobrada'},
+];
+const PIPELINE_STAGES=[
+  {id:'cotiz',label:'Cotización',count:8,usd:'$42,000',color:'#94a3b8'},
+  {id:'confirmada',label:'Confirmada',count:5,usd:'$28,500',color:'#a7001d'},
+  {id:'despachada',label:'Despachada',count:3,usd:'$18,200',color:'#b45309'},
+  {id:'cobrada',label:'Cobrada',count:12,usd:'$94,300',color:'#6b7215'},
+  {id:'cancelada',label:'Cancelada',count:2,usd:'$6,800',color:'#db473c'},
+];
+
+/* ── Dashboard ── */
+function DashboardScreen({theme}) {
+  const bg=theme==='dark'?'#191b0d':'#fff';
+  const border=theme==='dark'?'#2e3018':'#dad0be';
+  const textMuted=theme==='dark'?'#707558':'#6e5f4e';
+  const surface2=theme==='dark'?'#212410':'#f0ebe0';
+  return (
+    <div>
+      <PageHeader title="📊 Dashboard" subtitle="Grupo Cazorla · Resumen ejecutivo"/>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'14px',marginBottom:'24px'}}>
+        <StatCard label="Ventas del mes" value="$60,850" sub="▲ +8% vs mes anterior" barColor="#a7001d"/>
+        <StatCard label="Stock aceitunas" value="482 t" sub="▼ −18 t esta semana" barColor="#6b7215" subColor="#b45309"/>
+        <StatCard label="Facturas vencidas" value="3" sub="$9,200 pendiente" barColor="#b45309" subColor="#db473c"/>
+        <StatCard label="Clientes activos" value="28" sub="5 países" barColor="#722F37" subColor="#9e8e78"/>
+      </div>
+      <div style={{background:bg,border:`1px solid ${border}`,borderRadius:'12px',padding:'18px 20px',marginBottom:'24px',boxShadow:'0 1px 4px rgba(167,0,29,.06)'}}>
+        <h3 style={{fontSize:'13px',fontWeight:600,color:textMuted,marginBottom:'14px'}}>Stock aceitunas por tipo (ton)</h3>
+        {[['Aceituna Verde Comercial','218','#a7001d',45],['Aceituna Negra Natural','146','#722F37',30],['Aceituna Negra Acética','118','#6b7215',24]].map(([lbl,val,col,pct])=>(
+          <div key={lbl} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'8px'}}>
+            <div style={{fontSize:'12px',color:theme==='dark'?'#8a9060':'#5c4e3a',width:'190px',flexShrink:0}}>{lbl}</div>
+            <div style={{flex:1,height:'8px',background:surface2,borderRadius:'4px',overflow:'hidden'}}>
+              <div style={{width:`${pct}%`,height:'100%',background:col,borderRadius:'4px'}}></div>
+            </div>
+            <div style={{fontFamily:"'DM Mono',monospace",fontSize:'11px',color:textMuted,width:'42px',textAlign:'right'}}>{val} t</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1.5fr 1fr',gap:'16px'}}>
+        <div>
+          <TableHeader title="💰 Ventas recientes"><Btn variant="green" size="sm">⬇ Exportar</Btn></TableHeader>
+          <DataTable
+            columns={[
+              {key:'cliente',label:'Cliente',accent:true,first:true},
+              {key:'producto',label:'Producto'},
+              {key:'pais',label:'País',mono:true},
+              {key:'monto',label:'Monto',mono:true},
+              {key:'estado',label:'Estado',render:v=><Badge status={v}>{v}</Badge>},
+            ]}
+            rows={VENTAS_DASH}
+          />
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
+          <div style={{background:bg,border:`1px solid ${border}`,borderRadius:'12px',overflow:'hidden',boxShadow:'0 1px 4px rgba(167,0,29,.06)'}}>
+            <TableHeader title="⚠️ Alertas"/>
+            {[{i:'🔴',m:'FAC-2026-012 vencida · Mercado Central',s:'Hace 8 días'},{i:'🟡',m:'Stock Negra Acética bajo mínimo',s:'118 ton · mín. 150'},{i:'🟡',m:'COT-2026-035 sin respuesta',s:'Hace 20 días'}].map((a,i)=>(
+              <div key={i} style={{display:'flex',gap:'10px',padding:'10px 16px',borderTop:i>0?`1px solid ${border}`:'none',alignItems:'flex-start'}}>
+                <span style={{fontSize:'14px',flexShrink:0}}>{a.i}</span>
+                <div><div style={{fontSize:'12px',fontWeight:600,color:theme==='dark'?'#e5e0d0':'#1a0f09'}}>{a.m}</div><div style={{fontSize:'11px',color:textMuted,marginTop:'2px'}}>{a.s}</div></div>
+              </div>
+            ))}
+          </div>
+          <div style={{background:bg,border:`1px solid ${border}`,borderRadius:'12px',overflow:'hidden',boxShadow:'0 1px 4px rgba(167,0,29,.06)'}}>
+            <TableHeader title="🍅 Stock Tomate"/>
+            {[['Pasta de Tomate','320 u'],['Passata','145 u'],['Salsa','88 u']].map(([p,v],i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'9px 16px',borderTop:i>0?`1px solid ${border}`:'none',fontSize:'12px'}}>
+                <span style={{color:theme==='dark'?'#8a9060':'#5c4e3a'}}>{p}</span>
+                <span style={{fontFamily:"'DM Mono',monospace",color:theme==='dark'?'#e05040':'#a7001d',fontWeight:600}}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Clientes ── */
+function ClientesScreen({theme}) {
+  const [search,setSearch]=useState('');
+  const [modal,setModal]=useState(false);
+  const filtered=CLIENTES.filter(c=>c.empresa.toLowerCase().includes(search.toLowerCase()));
+  return (
+    <div>
+      <PageHeader title="👥 Clientes" subtitle="Directorio de clientes activos"
+        actions={<><SearchBar value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar empresa…"/><Btn onClick={()=>setModal(true)}>+ Nuevo cliente</Btn></>}
+      />
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',marginBottom:'20px'}}>
+        <StatCard label="Total clientes" value="34" barColor="#a7001d"/>
+        <StatCard label="Activos" value="28" barColor="#6b7215"/>
+        <StatCard label="Países" value="6" barColor="#722F37"/>
+        <StatCard label="Sin contacto >30d" value="4" barColor="#b45309" subColor="#db473c"/>
+      </div>
+      <TableHeader title="Todos los clientes"><Btn variant="green" size="sm">⬇ Exportar</Btn></TableHeader>
+      <DataTable
+        columns={[
+          {key:'empresa',label:'Empresa',accent:true,first:true},
+          {key:'pais',label:'País'},
+          {key:'rubro',label:'Rubro'},
+          {key:'contacto',label:'Contacto'},
+          {key:'ultima',label:'Últ. interacción',mono:true},
+          {key:'total',label:'Total YTD',mono:true},
+          {key:'estado',label:'Estado',render:v=><Badge status={v.toLowerCase()}>{v}</Badge>},
+        ]}
+        rows={filtered}
+        onEdit={()=>{}} onDelete={()=>{}}
+      />
+      <Modal open={modal} title="Nuevo Cliente" onClose={()=>setModal(false)}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+          <FormGroup label="Empresa"><Input placeholder="Nombre de empresa…"/></FormGroup>
+          <FormGroup label="País"><Select options={['Argentina','Chile','Italia','España','Portugal','Brasil']}/></FormGroup>
+          <FormGroup label="Contacto"><Input placeholder="Nombre del contacto…"/></FormGroup>
+          <FormGroup label="Rubro"><Select options={['Aceitunas','Tomate','Aceite','Otro']}/></FormGroup>
+        </div>
+        <FormGroup label="Email"><Input placeholder="email@empresa.com" type="email"/></FormGroup>
+        <div style={{display:'flex',gap:'8px',justifyContent:'flex-end',marginTop:'16px'}}>
+          <Btn variant="outline" onClick={()=>setModal(false)}>Cancelar</Btn>
+          <Btn onClick={()=>setModal(false)}>Guardar cliente</Btn>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+/* ── Cotizaciones ── */
+function CotizacionesScreen({theme}) {
+  const [filter,setFilter]=useState('todos');
+  const FILTERS=['todos','pendiente','enviada','cobrada','vencida'];
+  const filtered=filter==='todos'?COTIZACIONES:COTIZACIONES.filter(c=>c.estado===filter);
+  return (
+    <div>
+      <PageHeader title="📝 Cotizaciones" subtitle="Presupuestos y propuestas comerciales"
+        actions={<Btn>+ Nueva cotización</Btn>}
+      />
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',marginBottom:'20px'}}>
+        <StatCard label="Total cotiz." value="42" barColor="#a7001d"/>
+        <StatCard label="Pendientes" value="8" barColor="#b45309"/>
+        <StatCard label="Cerradas" value="29" sub="$183,400" barColor="#6b7215"/>
+        <StatCard label="Tasa conversión" value="69%" barColor="#722F37"/>
+      </div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'14px',flexWrap:'wrap'}}>
+        {FILTERS.map(f=><FilterPill key={f} label={f.charAt(0).toUpperCase()+f.slice(1)} active={filter===f} onClick={()=>setFilter(f)}/>)}
+      </div>
+      <DataTable
+        columns={[
+          {key:'num',label:'Nº Cotiz.',mono:true,accent:true},
+          {key:'fecha',label:'Fecha',mono:true},
+          {key:'cliente',label:'Cliente'},
+          {key:'pais',label:'País',mono:true},
+          {key:'incoterm',label:'Incoterm',mono:true},
+          {key:'moneda',label:'Moneda',mono:true},
+          {key:'estado',label:'Estado',render:v=><Badge status={v}>{v}</Badge>},
+        ]}
+        rows={filtered}
+        onEdit={()=>{}} onDelete={()=>{}}
+      />
+    </div>
+  );
+}
+
+/* ── Pipeline ── */
+function PipelineScreen({theme}) {
+  const border=theme==='dark'?'#2e3018':'#dad0be';
+  const bg=theme==='dark'?'#191b0d':'#fff';
+  return (
+    <div>
+      <PageHeader title="🔀 Pipeline de Ventas" subtitle="Embudo comercial · estado actual"/>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'12px',marginBottom:'20px'}}>
+        {PIPELINE_STAGES.map(s=>(
+          <div key={s.id} style={{background:bg,border:`1px solid ${border}`,borderRadius:'12px',padding:'16px',textAlign:'center',position:'relative',overflow:'hidden',boxShadow:'0 1px 4px rgba(167,0,29,.06)'}}>
+            <div style={{position:'absolute',top:0,left:0,right:0,height:'3px',background:s.color}}></div>
+            <div style={{fontSize:'10px',textTransform:'uppercase',letterSpacing:'.6px',color:'#9e8e78',marginBottom:'8px',fontFamily:"'DM Mono',monospace"}}>{s.label}</div>
+            <div style={{fontSize:'30px',fontWeight:800,color:s.color,lineHeight:1,marginBottom:'4px'}}>{s.count}</div>
+            <div style={{fontSize:'12px',fontFamily:"'DM Mono',monospace",color:'#6e5f4e'}}>{s.usd}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'flex',gap:'10px',marginBottom:'16px',alignItems:'center',flexWrap:'wrap'}}>
+        {[['Cotiz → Conf','62%','#94a3b8','#a7001d'],['Conf → Desp','60%','#a7001d','#b45309'],['Desp → Cobr','80%','#b45309','#6b7215']].map(([lbl,pct,c1,c2])=>(
+          <div key={lbl} style={{background:bg,border:`1px solid ${border}`,borderRadius:'8px',padding:'10px 16px',fontSize:'12px',display:'flex',alignItems:'center',gap:'8px'}}>
+            <span style={{width:'8px',height:'8px',borderRadius:'50%',background:c1,flexShrink:0}}></span>
+            <span style={{color:'#9e8e78'}}>{lbl}</span>
+            <span style={{fontSize:'16px',fontWeight:800,fontFamily:"'DM Mono',monospace",color:theme==='dark'?'#e05040':'#a7001d'}}>{pct}</span>
+            <span style={{width:'8px',height:'8px',borderRadius:'50%',background:c2,flexShrink:0}}></span>
+          </div>
+        ))}
+      </div>
+      <TableHeader title="Deals activos"/>
+      <DataTable
+        columns={[
+          {key:'num',label:'ID',mono:true,accent:true},
+          {key:'fecha',label:'Fecha',mono:true},
+          {key:'cliente',label:'Cliente'},
+          {key:'pais',label:'País',mono:true},
+          {key:'monto',label:'Monto',mono:true},
+          {key:'estado',label:'Etapa',render:v=><Badge status={v}>{v}</Badge>},
+        ]}
+        rows={[
+          {num:'COT-042',fecha:'2026-04-20',cliente:'Olivetti SpA',pais:'ITA',monto:'$8,750',estado:'pendiente'},
+          {num:'COT-039',fecha:'2026-04-10',cliente:'Conservas Sevilla',pais:'ESP',monto:'$11,700',estado:'enviada'},
+          {num:'COT-037',fecha:'2026-03-28',cliente:'García & Hijos SRL',pais:'ARG',monto:'$12,400',estado:'cobrada'},
+          {num:'COT-035',fecha:'2026-03-15',cliente:'Mercado Central',pais:'CHI',monto:'$3,200',estado:'vencida',_overdue:true},
+        ]}
+      />
+    </div>
+  );
+}
+
+/* ── Facturación ── */
+function FacturacionScreen({theme}) {
+  const [filter,setFilter]=useState('todos');
+  const FILTERS=['todos','emitida','enviada','cobrada','vencida'];
+  const filtered=filter==='todos'?FACTURAS:FACTURAS.filter(f=>f.estado===filter);
+  return (
+    <div>
+      <PageHeader title="🧾 Facturación" subtitle="Gestión de facturas emitidas"
+        actions={<Btn>+ Nueva factura</Btn>}
+      />
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',marginBottom:'20px'}}>
+        <StatCard label="Total emitido" value="$39,050" barColor="#a7001d"/>
+        <StatCard label="Cobrado" value="$21,500" barColor="#6b7215"/>
+        <StatCard label="Pendiente" value="$14,350" barColor="#b45309" subColor="#9e8e78"/>
+        <StatCard label="Vencidas" value="$3,200" barColor="#db473c" subColor="#db473c"/>
+      </div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'14px',flexWrap:'wrap'}}>
+        {FILTERS.map(f=><FilterPill key={f} label={f.charAt(0).toUpperCase()+f.slice(1)} active={filter===f} onClick={()=>setFilter(f)}/>)}
+      </div>
+      <DataTable
+        columns={[
+          {key:'num',label:'Nº Factura',mono:true,accent:true,first:true},
+          {key:'fecha',label:'Emisión',mono:true},
+          {key:'vence',label:'Vence',mono:true},
+          {key:'cliente',label:'Cliente'},
+          {key:'monto',label:'Monto',mono:true},
+          {key:'estado',label:'Estado',render:v=><Badge status={v}>{v}</Badge>},
+        ]}
+        rows={filtered}
+        onEdit={()=>{}} onDelete={()=>{}}
+      />
+    </div>
+  );
+}
+
+/* ── Placeholder ── */
+function PlaceholderScreen({title,subtitle,icon}) {
+  return (
+    <div>
+      <PageHeader title={`${icon} ${title}`} subtitle={subtitle}/>
+      <div style={{background:'var(--surface,#fff)',border:'1px solid var(--border,#dad0be)',borderRadius:'12px',padding:'64px 24px',textAlign:'center',boxShadow:'0 1px 4px rgba(167,0,29,.06)'}}>
+        <div style={{fontSize:'48px',marginBottom:'16px'}}>{icon}</div>
+        <p style={{fontSize:'14px',color:'#9e8e78'}}>Vista <strong style={{color:'var(--text2,#5c4e3a)'}}>{title}</strong> — en desarrollo</p>
+      </div>
+    </div>
+  );
+}
+
+/* ── App ── */
+function App() {
+  const [section,setSection]=useState(()=>localStorage.getItem('crm_section2')||'dashboard');
+  const [theme,setTheme]=useState(()=>localStorage.getItem('crm_theme')||'light');
+
+  useEffect(()=>{
+    document.body.className=theme==='dark'?'warm':'';
+    localStorage.setItem('crm_theme',theme);
+  },[theme]);
+
+  const navigate=(id)=>{setSection(id);localStorage.setItem('crm_section2',id);};
+  const toggleTheme=()=>setTheme(t=>t==='dark'?'light':'dark');
+
+  const screens={
+    dashboard:    <DashboardScreen theme={theme}/>,
+    clientes:     <ClientesScreen theme={theme}/>,
+    contactos:    <ContactosScreen theme={theme}/>,
+    cotizaciones: <CotizacionesScreen theme={theme}/>,
+    pipeline:     <PipelineScreen theme={theme}/>,
+    inventario:   <InventarioScreen theme={theme}/>,
+    ventas:       <VentasScreen theme={theme}/>,
+    prevision:    <PrevisionScreen theme={theme}/>,
+    proveedores:  <ProveedoresScreen theme={theme}/>,
+    reclamos:     <ReclamosScreen theme={theme}/>,
+    facturacion:  <FacturacionScreen theme={theme}/>,
+    cargas:       <CargasScreen theme={theme}/>,
+    proyectos:    <ProyectosScreen theme={theme}/>,
+    calendario:   <CalendarioScreen theme={theme}/>,
+  };
+
+  return (
+    <div>
+      <Sidebar active={section} onNav={navigate} theme={theme} onToggleTheme={toggleTheme}/>
+      <div className="main-content">
+        {screens[section]||screens.dashboard}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+<div id="root"></div>
+</body>
+</html>
