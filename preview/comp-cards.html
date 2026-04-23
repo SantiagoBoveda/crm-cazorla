@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f0e6;font-family:'Instrument Sans',sans-serif;padding:20px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.stat-card{background:#fff;border:1px solid #dad0be;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(167,0,29,.06);min-width:160px}
+.stat-card .label{font-size:12px;color:#6e5f4e;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:#a7001d;line-height:1}
+.stat-card .sub{font-size:12px;color:#6b7215;margin-top:4px}
+.stat-card.has-bar{position:relative;overflow:hidden}
+.stat-card.has-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#a7001d,transparent)}
+.stat-card.bar-green::before{background:linear-gradient(90deg,#6b7215,transparent)}
+.stat-card.bar-yellow::before{background:linear-gradient(90deg,#b45309,transparent)}
+.chart-card{background:#fff;border:1px solid #dad0be;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(167,0,29,.06);min-width:220px}
+.chart-card h3{font-size:13px;font-weight:600;color:#6e5f4e;margin-bottom:14px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.bar-label{font-size:11px;color:#5c4e3a;width:80px;flex-shrink:0}
+.bar-track{flex:1;height:8px;background:#f0ebe0;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-val{font-family:'DM Mono',monospace;font-size:10px;color:#6e5f4e;width:36px;text-align:right}
+</style></head><body>
+
+<!-- Stat cards -->
+<div class="stat-card has-bar">
+  <div class="label">Ventas del mes</div>
+  <div class="value">$48,200</div>
+  <div class="sub">▲ +12% vs mes anterior</div>
+</div>
+<div class="stat-card has-bar bar-green">
+  <div class="label">Stock aceitunas</div>
+  <div class="value" style="color:#6b7215">482 t</div>
+  <div class="sub" style="color:#b45309">▼ −18 t esta semana</div>
+</div>
+<div class="stat-card has-bar bar-yellow">
+  <div class="label">Facturas vencidas</div>
+  <div class="value" style="color:#b45309">7</div>
+  <div class="sub" style="color:#db473c">$12,400 pendiente</div>
+</div>
+<div class="stat-card">
+  <div class="label">Clientes activos</div>
+  <div class="value">34</div>
+  <div class="sub" style="color:#6e5f4e">3 países</div>
+</div>
+
+<!-- Chart-style card with bars -->
+<div class="chart-card">
+  <h3>Stock aceitunas por tipo</h3>
+  <div class="bar-row"><div class="bar-label">Verde Comer.</div><div class="bar-track"><div class="bar-fill" style="width:72%;background:#a7001d"></div></div><div class="bar-val">218 t</div></div>
+  <div class="bar-row"><div class="bar-label">Negra Natural</div><div class="bar-track"><div class="bar-fill" style="width:48%;background:#722F37"></div></div><div class="bar-val">146 t</div></div>
+  <div class="bar-row"><div class="bar-label">Negra Acética</div><div class="bar-track"><div class="bar-fill" style="width:38%;background:#6b7215"></div></div><div class="bar-val">118 t</div></div>
+</div>
+
+</body></html>

@@ -1,0 +1,333 @@
+/* ═══════════════════════════════════════════════
+   CAZORLA DESIGN SYSTEM — colors_and_type.css
+   Aceitunas Cazorla / Grupo Cazorla / Tomalar SA
+   ═══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+
+/* ── LIGHT THEME (default) ── */
+:root {
+  /* Backgrounds */
+  --bg:       #f5f0e6;   /* warm cream parchment — page background */
+  --surface:  #ffffff;   /* card / panel surface */
+  --surface2: #f0ebe0;   /* secondary surface (table headers, inputs) */
+  --surface3: #ebe4d8;   /* tertiary surface (deepest inset) */
+
+  /* Brand — Borravino / Crimson */
+  --accent:   #a7001d;   /* primary brand crimson */
+  --accent2:  #c8001f;   /* slightly brighter crimson (hover) */
+
+  /* Semantic */
+  --green:    #6b7215;   /* warm olive green (success / positive) */
+  --yellow:   #b45309;   /* amber ochre (warning / pending) */
+  --red:      #db473c;   /* danger / negative */
+  --purple:   #a7001d;   /* alias of accent in light mode */
+
+  /* Text */
+  --text:     #1a0f09;   /* near-black, warm undertone */
+  --text2:    #5c4e3a;   /* secondary text */
+  --text3:    #9e8e78;   /* tertiary / placeholder */
+  --muted:    #6e5f4e;   /* muted labels */
+
+  /* Borders */
+  --border:   #dad0be;   /* default border (warm beige) */
+  --border2:  #c4b8a5;   /* stronger border */
+
+  /* Sidebar */
+  --sidebar-bg:          #722F37;  /* wine / borravino */
+  --sidebar-text:        #ffffff;
+  --sidebar-muted:       #e8b4bc;  /* dusty pink */
+  --sidebar-border:      #5a1f28;
+  --sidebar-active-bg:   #5a1f28;
+  --sidebar-active-text: #ffffff;
+
+  /* Spacing */
+  --radius:   12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --gap:      16px;
+  --gap-sm:   12px;
+  --pad:      20px;
+
+  /* Typography */
+  --sans: 'Instrument Sans', 'Segoe UI', sans-serif;
+  --mono: 'DM Mono', monospace;
+
+  /* Shadows */
+  --shadow-card:  0 1px 4px rgba(167,0,29,.06);
+  --shadow-modal: 0 20px 60px rgba(44,13,28,.18);
+  --shadow-tooltip: 0 16px 48px rgba(44,13,28,.18);
+}
+
+/* ── DARK "WARM" THEME ── */
+body.warm, [data-theme="dark"] {
+  --bg:       #0f1008;   /* very dark olive-black */
+  --surface:  #191b0d;
+  --surface2: #212410;
+  --surface3: #1e210e;
+
+  --accent:   #e05040;   /* warmer crimson in dark mode */
+  --accent2:  #b83028;
+  --green:    #8a9830;
+  --yellow:   #f59e0b;
+  --red:      #ef5540;
+  --purple:   #e05040;
+
+  --text:     #e5e0d0;
+  --text2:    #8a9060;
+  --text3:    #4c5230;
+  --muted:    #707558;
+
+  --border:   #2e3018;
+  --border2:  #3a3e20;
+
+  --sidebar-bg:          #5a1228;
+  --sidebar-text:        #ffffff;
+  --sidebar-muted:       #dda0aa;
+  --sidebar-border:      #451020;
+  --sidebar-active-bg:   #451020;
+  --sidebar-active-text: #ffffff;
+
+  --shadow-card:  0 1px 4px rgba(0,0,0,.2);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,.5);
+}
+
+/* ── BASE RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.5;
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SEMANTIC TYPOGRAPHY ── */
+
+/* Display — large section titles */
+.display, h1 {
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+/* Section subtitle */
+.subtitle, h1 + p {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Card / panel heading */
+h2, .heading {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* Table / card label */
+h3, .label-heading {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Body text */
+p, .body {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* Small / caption */
+.caption, small {
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Micro label — uppercase, letter-spaced */
+.micro-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text3);
+}
+
+/* Table header */
+th, .th {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--accent);
+}
+
+/* Table cell */
+td, .td {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* Data / numeric — monospace */
+.data, .num, .mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.data-lg {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+  color: var(--accent);
+}
+
+/* KPI value */
+.kpi-value {
+  font-family: var(--sans);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+/* Code */
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--text2);
+}
+
+/* ── COLOR UTILITY CLASSES ── */
+.text-accent  { color: var(--accent); }
+.text-green   { color: var(--green); }
+.text-yellow  { color: var(--yellow); }
+.text-red     { color: var(--red); }
+.text-muted   { color: var(--muted); }
+.text-subtle  { color: var(--text3); }
+
+.bg-accent    { background: var(--accent); color: white; }
+.bg-surface   { background: var(--surface); }
+.bg-surface2  { background: var(--surface2); }
+
+/* ── COMPONENT BASE STYLES ── */
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--pad);
+  box-shadow: var(--shadow-card);
+}
+
+/* Stat card */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--pad);
+  box-shadow: var(--shadow-card);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all .18s ease;
+  white-space: nowrap;
+}
+
+.btn-primary  { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent2); }
+
+.btn-outline  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-green    { background: rgba(107,114,21,.12); border: 1px solid rgba(107,114,21,.3); color: var(--green); }
+.btn-green:hover { background: rgba(107,114,21,.22); border-color: var(--green); }
+
+.btn-yellow   { background: rgba(180,83,9,.10); border: 1px solid rgba(180,83,9,.3); color: var(--yellow); }
+.btn-yellow:hover { background: rgba(180,83,9,.20); border-color: var(--yellow); }
+
+.btn-sm       { padding: 5px 12px; font-size: 12px; }
+.btn-lg       { padding: 12px 24px; font-size: 15px; }
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--sans);
+}
+.badge-green   { background: rgba(107,114,21,.13);  color: #5a6012; }
+.badge-yellow  { background: rgba(180,83,9,.12);    color: #b45309; }
+.badge-red     { background: rgba(219,71,60,.14);   color: #c03828; }
+.badge-blue    { background: rgba(167,0,29,.10);    color: var(--accent2); }
+.badge-purple  { background: rgba(167,0,29,.12);    color: var(--accent); }
+.badge-muted   { background: rgba(100,116,139,.15); color: var(--muted); }
+
+/* Invoice status badges */
+.badge-cobrada  { background: rgba(16,185,129,.15);  color: var(--green); }
+.badge-pendiente{ background: rgba(167,0,29,.12);    color: var(--accent); }
+.badge-vencida  { background: rgba(239,68,68,.15);   color: var(--red); }
+.badge-enviada  { background: rgba(167,0,29,.15);    color: var(--accent); }
+.badge-anulada  { background: rgba(100,116,139,.1);  color: var(--muted); text-decoration: line-through; }
+
+/* Inputs */
+.input, .form-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+.input:focus, .form-input:focus { border-color: var(--accent); }
+
+/* Form label */
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}

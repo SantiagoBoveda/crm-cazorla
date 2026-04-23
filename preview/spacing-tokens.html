@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f0e6;font-family:'Instrument Sans',sans-serif;padding:24px;display:flex;flex-direction:column;gap:20px}
+.section-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#9e8e78;margin-bottom:8px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* Radius */
+.r-box{background:#fff;border:1px solid #dad0be;display:flex;align-items:center;justify-content:center;width:80px;height:48px;font-family:'DM Mono',monospace;font-size:10px;color:#6e5f4e}
+/* Spacing */
+.sp-track{height:20px;background:#a7001d;opacity:.12;border-radius:3px}
+.sp-label{font-family:'DM Mono',monospace;font-size:10px;color:#6e5f4e;margin-top:3px;text-align:center}
+/* Shadow */
+.sh-box{background:#fff;border:1px solid #dad0be;border-radius:12px;width:100px;height:56px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#9e8e78}
+</style></head><body>
+
+<div>
+  <div class="section-label">Border Radius</div>
+  <div class="row">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:4px">4px</div>
+      <div style="font-size:9px;color:#9e8e78">micro</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:6px">6px</div>
+      <div style="font-size:9px;color:#9e8e78">badge</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:8px">8px</div>
+      <div style="font-size:9px;color:#9e8e78">btn / input</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:12px">12px</div>
+      <div style="font-size:9px;color:#9e8e78">card</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:16px">16px</div>
+      <div style="font-size:9px;color:#9e8e78">modal</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:20px">20px</div>
+      <div style="font-size:9px;color:#9e8e78">lg modal</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:50%">50%</div>
+      <div style="font-size:9px;color:#9e8e78">avatar</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="r-box" style="border-radius:20px;width:60px;height:24px">pill</div>
+      <div style="font-size:9px;color:#9e8e78">badge pill</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="section-label">Spacing Scale</div>
+  <div style="display:flex;gap:10px;align-items:flex-end">
+    <div><div class="sp-track" style="width:4px"></div><div class="sp-label">4</div></div>
+    <div><div class="sp-track" style="width:6px"></div><div class="sp-label">6</div></div>
+    <div><div class="sp-track" style="width:8px"></div><div class="sp-label">8</div></div>
+    <div><div class="sp-track" style="width:10px"></div><div class="sp-label">10</div></div>
+    <div><div class="sp-track" style="width:12px"></div><div class="sp-label">12</div></div>
+    <div><div class="sp-track" style="width:14px"></div><div class="sp-label">14</div></div>
+    <div><div class="sp-track" style="width:16px"></div><div class="sp-label">16</div></div>
+    <div><div class="sp-track" style="width:20px"></div><div class="sp-label">20</div></div>
+    <div><div class="sp-track" style="width:24px"></div><div class="sp-label">24</div></div>
+    <div><div class="sp-track" style="width:28px"></div><div class="sp-label">28</div></div>
+    <div><div class="sp-track" style="width:40px"></div><div class="sp-label">40</div></div>
+    <div><div class="sp-track" style="width:48px"></div><div class="sp-label">48</div></div>
+  </div>
+</div>
+
+<div>
+  <div class="section-label">Shadow Tokens</div>
+  <div class="row">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div class="sh-box" style="box-shadow:0 1px 4px rgba(167,0,29,.06)">card</div>
+      <div style="font-size:9px;color:#9e8e78;font-family:'DM Mono',monospace">0 1px 4px · .06</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div class="sh-box" style="box-shadow:0 4px 16px rgba(167,0,29,.12)">hover</div>
+      <div style="font-size:9px;color:#9e8e78;font-family:'DM Mono',monospace">0 4px 16px · .12</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div class="sh-box" style="box-shadow:0 16px 48px rgba(44,13,28,.18)">tooltip</div>
+      <div style="font-size:9px;color:#9e8e78;font-family:'DM Mono',monospace">0 16px 48px · .18</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div class="sh-box" style="box-shadow:0 20px 60px rgba(44,13,28,.18)">modal</div>
+      <div style="font-size:9px;color:#9e8e78;font-family:'DM Mono',monospace">0 20px 60px · .18</div>
+    </div>
+  </div>
+</div>
+
+</body></html>
