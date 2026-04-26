@@ -1939,13 +1939,37 @@ function scheduleAutoBackup(){
 async function assertSheetsOk(res, label){
   if(!res || !res.ok){
     let detail = '';
-    try{ detail = await res.text(); }catch(e){}
-    throw new Error(`${label} falló (${res ? res.status : 'sin respuesta'}) ${detail}`.trim());
+    try{
+      const txt = await res.text();
+      try{
+        const json = JSON.parse(txt);
+        detail = json.error?.message || txt;
+      }catch(e){
+        detail = txt;
+      }
+    }catch(e){}
+    const msg = `${label} falló (${res ? res.status : 'sin respuesta'}) ${detail}`.trim();
+    throw new Error(msg);
   }
   return res;
 }
+function showBackupError(message){
+  const dot=document.getElementById('storage-dot');
+  const lbl=document.getElementById('storage-label');
+  const sync=document.getElementById('sync-status-text');
+  const short = (message||'Error backup').replace(/\s+/g,' ').slice(0,140);
+  if(dot)dot.className='storage-dot red';
+  if(lbl){
+    lbl.textContent='Error backup ⚠️';
+    lbl.title=short;
+  }
+  if(sync){
+    sync.textContent=short;
+    sync.title=message||short;
+  }
+}
 async function ensureSheetsExist(sheetNames){
-  if(!token || !spreadsheetId) return;
+  if(!token || !spreadsheetId) return new Set();
   const metaRes = await assertSheetsOk(
     await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties.title`, {
       headers:{Authorization:'Bearer '+token}
@@ -1955,37 +1979,66 @@ async function ensureSheetsExist(sheetNames){
   const meta = await metaRes.json();
   const existing = new Set((meta.sheets||[]).map(s=>s.properties?.title).filter(Boolean));
   const missing = [...new Set(sheetNames)].filter(name=>name && !existing.has(name));
-  if(!missing.length) return;
-  await assertSheetsOk(
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
-      method:'POST',
-      headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({requests:missing.map(title=>({addSheet:{properties:{title}}}))})
-    }),
-    'Crear pestañas faltantes'
-  );
+  if(!missing.length) return existing;
+  try{
+    await assertSheetsOk(
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
+        method:'POST',
+        headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+        body:JSON.stringify({requests:missing.map(title=>({addSheet:{properties:{title}}}))})
+      }),
+      'Crear pestañas faltantes'
+    );
+    missing.forEach(name=>existing.add(name));
+  }catch(e){
+    console.warn('No se pudieron crear pestañas faltantes:', missing, e);
+  }
+  return existing;
 }
 /* ── Backup silencioso (sin alertas, solo indicador) ── */
 async function silentSyncToSheets(){
   if(!_dirty || !token || !spreadsheetId) return;
   try{
-    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores'};
-    await ensureSheetsExist([...Object.values(sheetMap), 'Comisionistas']);
+    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores',cargas:'Cargas'};
+    const availableSheets = await ensureSheetsExist([...Object.values(sheetMap), 'Comisionistas']);
+    const errors = [];
     for(const [dbKey, sheetName] of Object.entries(sheetMap)){
-      const cols = HEADERS[sheetName];
-      if(!cols) continue;
-      await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:Z:clear`,
-        {method:'POST', headers:{Authorization:'Bearer '+token}}), `Limpiar ${sheetName}`);
-      const rows = Array.isArray(DB[dbKey]) ? DB[dbKey] : [];
-      const values = [cols, ...rows.map(row=>cols.map(c=>row[c]||''))];
-      await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A1?valueInputOption=RAW`,
-        {method:'PUT', headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-         body:JSON.stringify({values})}), `Escribir ${sheetName}`);
+      try{
+        const cols = HEADERS[sheetName];
+        if(!cols) continue;
+        const rows = Array.isArray(DB[dbKey]) ? DB[dbKey] : [];
+        if(availableSheets.size && !availableSheets.has(sheetName)){
+          if(rows.length) errors.push(`${sheetName}: falta la pestaña y tiene ${rows.length} registro(s) locales`);
+          continue;
+        }
+        await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName+'!A:ZZ')}:clear`,
+          {method:'POST', headers:{Authorization:'Bearer '+token}}), `Limpiar ${sheetName}`);
+        const values = [cols, ...rows.map(row=>cols.map(c=>row[c]??''))];
+        await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName+'!A1')}?valueInputOption=RAW`,
+          {method:'PUT', headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+           body:JSON.stringify({values})}), `Escribir ${sheetName}`);
+      }catch(sheetErr){
+        errors.push(`${sheetName}: ${sheetErr.message}`);
+        console.warn('Backup de pestaña falló:', sheetName, sheetErr);
+      }
     }
     // Comisionistas (array de strings)
-    await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Comisionistas!A:Z:clear`,{method:'POST',headers:{Authorization:'Bearer '+token}}), 'Limpiar Comisionistas');
-    const values=[['Nombre'],...(DB.comisionistas||[]).map(n=>[n])];
-    await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Comisionistas!A1?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})}), 'Escribir Comisionistas');
+    try{
+      const comisionistas = DB.comisionistas||[];
+      if(availableSheets.size && !availableSheets.has('Comisionistas')){
+        if(comisionistas.length) errors.push(`Comisionistas: falta la pestaña y tiene ${comisionistas.length} registro(s) locales`);
+      } else {
+      await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent('Comisionistas!A:ZZ')}:clear`,{method:'POST',headers:{Authorization:'Bearer '+token}}), 'Limpiar Comisionistas');
+      const values=[['Nombre'],...comisionistas.map(n=>[n])];
+      await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent('Comisionistas!A1')}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})}), 'Escribir Comisionistas');
+      }
+    }catch(sheetErr){
+      errors.push(`Comisionistas: ${sheetErr.message}`);
+      console.warn('Backup de pestaña falló: Comisionistas', sheetErr);
+    }
+    if(errors.length){
+      throw new Error(errors.join(' | '));
+    }
     _dirty = false;
     const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('storage-label').textContent = `Backup Sheets ${now} ✓`;
@@ -1993,10 +2046,7 @@ async function silentSyncToSheets(){
     document.getElementById('sync-status-text').textContent = `Sheets ${now} ✓`;
   }catch(e){
     console.warn('Auto-backup error:', e);
-    const dot=document.getElementById('storage-dot');
-    const lbl=document.getElementById('storage-label');
-    if(dot)dot.className='storage-dot red';
-    if(lbl)lbl.textContent='Error backup ⚠️';
+    showBackupError(e.message);
   }
 }
 /* ── Backup manual (con feedback visible) ── */
