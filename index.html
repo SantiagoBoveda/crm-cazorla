@@ -1968,6 +1968,17 @@ function showBackupError(message){
     sync.title=message||short;
   }
 }
+function sleep(ms){ return new Promise(resolve=>setTimeout(resolve, ms)); }
+async function fetchSheetsWithRetry(url, options, label){
+  let lastError = null;
+  for(let attempt=0; attempt<3; attempt++){
+    const res = await fetch(url, options);
+    if(res.status!==429 && res.status<500) return assertSheetsOk(res, label);
+    try{ await assertSheetsOk(res, label); }catch(e){ lastError = e; }
+    await sleep((attempt+1) * 1500);
+  }
+  throw lastError || new Error(`${label} falló`);
+}
 async function ensureSheetsExist(sheetNames){
   if(!token || !spreadsheetId) return new Set();
   const metaRes = await assertSheetsOk(
@@ -2002,6 +2013,8 @@ async function silentSyncToSheets(){
     const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores',cargas:'Cargas'};
     const availableSheets = await ensureSheetsExist([...Object.values(sheetMap), 'Comisionistas']);
     const errors = [];
+    const clearRanges = [];
+    const data = [];
     for(const [dbKey, sheetName] of Object.entries(sheetMap)){
       try{
         const cols = HEADERS[sheetName];
@@ -2011,12 +2024,9 @@ async function silentSyncToSheets(){
           if(rows.length) errors.push(`${sheetName}: falta la pestaña y tiene ${rows.length} registro(s) locales`);
           continue;
         }
-        await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName+'!A:ZZ')}:clear`,
-          {method:'POST', headers:{Authorization:'Bearer '+token}}), `Limpiar ${sheetName}`);
         const values = [cols, ...rows.map(row=>cols.map(c=>row[c]??''))];
-        await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName+'!A1')}?valueInputOption=RAW`,
-          {method:'PUT', headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-           body:JSON.stringify({values})}), `Escribir ${sheetName}`);
+        clearRanges.push(`${sheetName}!A:ZZ`);
+        data.push({range:`${sheetName}!A1`, values});
       }catch(sheetErr){
         errors.push(`${sheetName}: ${sheetErr.message}`);
         console.warn('Backup de pestaña falló:', sheetName, sheetErr);
@@ -2028,9 +2038,8 @@ async function silentSyncToSheets(){
       if(availableSheets.size && !availableSheets.has('Comisionistas')){
         if(comisionistas.length) errors.push(`Comisionistas: falta la pestaña y tiene ${comisionistas.length} registro(s) locales`);
       } else {
-      await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent('Comisionistas!A:ZZ')}:clear`,{method:'POST',headers:{Authorization:'Bearer '+token}}), 'Limpiar Comisionistas');
-      const values=[['Nombre'],...comisionistas.map(n=>[n])];
-      await assertSheetsOk(await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent('Comisionistas!A1')}?valueInputOption=RAW`,{method:'PUT',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({values})}), 'Escribir Comisionistas');
+        clearRanges.push('Comisionistas!A:ZZ');
+        data.push({range:'Comisionistas!A1', values:[['Nombre'],...comisionistas.map(n=>[n])]});
       }
     }catch(sheetErr){
       errors.push(`Comisionistas: ${sheetErr.message}`);
@@ -2038,6 +2047,20 @@ async function silentSyncToSheets(){
     }
     if(errors.length){
       throw new Error(errors.join(' | '));
+    }
+    if(clearRanges.length){
+      await fetchSheetsWithRetry(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchClear`,
+        {method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({ranges:clearRanges})},
+        'Limpiar pestañas'
+      );
+    }
+    if(data.length){
+      await fetchSheetsWithRetry(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`,
+        {method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data})},
+        'Escribir backup'
+      );
     }
     _dirty = false;
     const now = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
