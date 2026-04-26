@@ -1,0 +1,25 @@
+{
+  "name": "CRM Cazorla",
+  "short_name": "Cazorla",
+  "description": "CRM interno Grupo Cazorla / Tomalar SA",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#22080e",
+  "theme_color": "#a7001d",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "./logo-cazorla.png.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./logo-cazorla.png.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
