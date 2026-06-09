@@ -1831,9 +1831,10 @@ function toggleTheme() {
 ═══════════════════════════════════════ */
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar';
 const DEFAULT_CLIENT_ID = ''; // Ingresá tu propio Client ID
-// ── Hoja compartida: ID fijo opcional (se puede dejar vacío y se guarda automático) ──
+// ── Hoja compartida: ID fijo de la planilla CRM_Cazorla_DB usada por todo el equipo ──
+const SHARED_SHEET_ID = '1sXFgFAKeVJPOVKFgYxp7l-49_E468FKT';
 const LS_SHEET_ID_KEY = 'crm_shared_sheet_id';
-function getSavedSheetId(){ return localStorage.getItem(LS_SHEET_ID_KEY)||''; }
+function getSavedSheetId(){ return localStorage.getItem(LS_SHEET_ID_KEY)||SHARED_SHEET_ID; }
 function saveSheetId(id){ if(id) localStorage.setItem(LS_SHEET_ID_KEY, id); }
 function getActiveClientId(){
   // Prioridad: 1) guardado en localStorage, 2) input del auth-screen, 3) default
@@ -7165,6 +7166,10 @@ async function uploadFacturaFile(fileInputId,fileIdFieldId,fileNameFieldId,statu
     const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+token},body:form});
     const data=await res.json();
     if(data.id){
+      // Compartir el archivo para que cualquier usuario del CRM pueda abrirlo
+      try{
+        await fetch(`https://www.googleapis.com/drive/v3/files/${data.id}/permissions`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({type:'anyone',role:'reader'})});
+      }catch(e){console.warn('No se pudo compartir el archivo:',e);}
       const idEl=document.getElementById(fileIdFieldId);if(idEl)idEl.value=data.id;
       const nmEl=document.getElementById(fileNameFieldId);if(nmEl)nmEl.value=file.name;
       if(statusEl)statusEl.innerHTML=`<a href="${data.webViewLink||'https://drive.google.com/file/d/'+data.id+'/view'}" target="_blank" style="color:var(--green)">✅ ${file.name}</a>`;
