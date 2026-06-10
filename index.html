@@ -16,6 +16,7 @@
 <meta name="apple-mobile-web-app-title" content="CRM Cazorla">
 <link rel="apple-touch-icon" href="./logo-cazorla.png.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
@@ -1099,8 +1100,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <div class="backup-btns">
       <button class="btn-backup" onclick="exportBackup()" title="Descargar backup JSON">⬇ Export</button>
       <button class="btn-backup" onclick="document.getElementById('import-file').click()" title="Importar backup JSON">⬆ Import</button>
-      <button class="btn-backup sheets-btn" id="btn-sheets-sync" onclick="syncToSheets()" title="Sincronizar con Google Sheets">☁ Sync</button>
-      <button class="btn-backup sheets-btn" id="btn-sheets-open" onclick="openInSheets()" title="Abrir Google Sheet" style="display:none">↗ Ver</button>
+      <button class="btn-backup sheets-btn" id="btn-sheets-sync" onclick="manualSync()" title="Sincronizar ahora">☁ Sync</button>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(this)">
     </div>
   </div>
@@ -1839,6 +1839,7 @@ function saveLocal(){
     _dirty = true;
     updateStorageStatus();
     scheduleAutoBackup();
+    scheduleSupabasePush();
   }catch(e){ console.warn('localStorage write error', e); }
 }
 function loadLocal(){
@@ -1857,6 +1858,118 @@ function loadLocal(){
     }
   }catch(e){ console.warn('localStorage read error', e); }
   return false;
+}
+/* ═══════════════════════════════════════
+   SUPABASE — ALMACENAMIENTO COMPARTIDO ENTRE USUARIOS
+═══════════════════════════════════════ */
+const SUPABASE_URL = 'https://rotqawiyflzxyssubjnu.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvdHFhd2l5Zmx6eHlzc3Viam51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjYyODMsImV4cCI6MjA5NjcwMjI4M30.s05kSd2pcseuV57BO99UiMhqgiRJekpcGSFbSYDTEaI';
+const supa = (window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+function getClientInstanceId(){
+  let id = localStorage.getItem('crm_client_instance');
+  if(!id){ id = 'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,8); localStorage.setItem('crm_client_instance', id); }
+  return id;
+}
+const CLIENT_INSTANCE_ID = getClientInstanceId();
+let _supaPushTimer = null;
+let _applyingRemote = false;
+let _lastRemoteUpdatedAt = null;
+/* Programa un push a Supabase 1.5s después del último cambio (debounce) */
+function scheduleSupabasePush(){
+  if(!supa || _applyingRemote) return;
+  clearTimeout(_supaPushTimer);
+  _supaPushTimer = setTimeout(pushToSupabase, 1500);
+}
+/* Sube el estado completo de DB a Supabase */
+async function pushToSupabase(){
+  if(!supa) return;
+  try{
+    const nowIso = new Date().toISOString();
+    const { data, error } = await supa.from('crm_data')
+      .update({ data: DB, updated_at: nowIso, updated_by: CLIENT_INSTANCE_ID })
+      .eq('id','main')
+      .select('updated_at')
+      .single();
+    if(error) throw error;
+    _lastRemoteUpdatedAt = data.updated_at;
+    _dirty = false;
+    const lbl=document.getElementById('storage-label'), dot=document.getElementById('storage-dot');
+    if(lbl) lbl.textContent = 'Sincronizado ✓';
+    if(dot) dot.className = 'storage-dot';
+  }catch(e){
+    console.warn('Supabase push error:', e);
+    showBackupError('Supabase: '+(e.message||e));
+  }
+}
+/* Aplica un DB recibido de Supabase (carga inicial o realtime) y refresca la UI */
+function applyRemoteDB(remoteData){
+  if(!remoteData) return;
+  _applyingRemote = true;
+  try{
+    Object.keys(DB).forEach(k=>{
+      if(remoteData[k] === undefined) return;
+      DB[k] = remoteData[k];
+    });
+    migrateDB();
+    localStorage.setItem(LS_KEY, JSON.stringify(DB));
+    loadPrevisionFromDB();
+    loadPrevisionYears();
+    ensureDefaultProducts();
+    syncProductsFromInventory();
+    ensureDefaultInventory();
+    syncContactsFromClientes();
+    renderDashboard();
+    const active = document.querySelector('.section.active');
+    if(active) showSection(active.id.replace('section-',''), null);
+    updateStorageStatus();
+  } finally {
+    _applyingRemote = false;
+  }
+}
+/* Trae el estado compartido desde Supabase (al iniciar la app) */
+async function pullFromSupabase(){
+  if(!supa) return false;
+  try{
+    const { data, error } = await supa.from('crm_data').select('data, updated_at, updated_by').eq('id','main').single();
+    if(error) throw error;
+    if(!data) return false;
+    _lastRemoteUpdatedAt = data.updated_at;
+    applyRemoteDB(data.data);
+    const lbl=document.getElementById('storage-label');
+    if(lbl) lbl.textContent = 'Sincronizado ✓';
+    return true;
+  }catch(e){
+    console.warn('Supabase pull error:', e);
+    return false;
+  }
+}
+/* Botón "Sync" manual: sube cambios pendientes y trae los del otro usuario */
+async function manualSync(){
+  const btn = document.getElementById('btn-sheets-sync');
+  if(btn){ btn.textContent='↻'; btn.disabled=true; }
+  clearTimeout(_supaPushTimer);
+  if(_dirty) await pushToSupabase();
+  await pullFromSupabase();
+  if(btn){
+    btn.textContent='✅';
+    setTimeout(()=>{ btn.textContent='☁ Sync'; btn.disabled=false; }, 1500);
+  }
+}
+/* Escucha cambios en tiempo real hechos por el otro usuario */
+function subscribeSupabaseRealtime(){
+  if(!supa) return;
+  supa.channel('crm_data_changes')
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'crm_data', filter:'id=eq.main' }, (payload)=>{
+      const row = payload.new;
+      if(!row) return;
+      if(row.updated_by === CLIENT_INSTANCE_ID) return; // es mi propio cambio, ya lo tengo
+      if(_lastRemoteUpdatedAt && row.updated_at <= _lastRemoteUpdatedAt) return;
+      _lastRemoteUpdatedAt = row.updated_at;
+      applyRemoteDB(row.data);
+      const sync=document.getElementById('sync-status-text');
+      if(sync) sync.textContent = 'Actualizado por el otro usuario ✓';
+    })
+    .subscribe();
 }
 /* Migración: corregir registros de versiones anteriores con campos desalineados */
 function migrateDB(){
@@ -2180,6 +2293,7 @@ function continueOffline(){
   syncProductsFromInventory();
   renderDashboard();
   updateStorageStatus();
+  pullFromSupabase().then(()=>subscribeSupabaseRealtime());
 }
 const HEADERS={
   Clientes:['ID','Empresa','Contacto','Cargo','Telefono','Telefono2','Email','Email2','Pais','Direccion','DomicilioReal','DomicilioLegal','CUIT','Rubro','Estado','UltimaInteraccion','Notas'],
@@ -5528,9 +5642,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     syncContactsFromClientes();
     renderDashboard();
     updateStorageStatus();
+    // Traer la versión compartida más reciente desde Supabase
+    pullFromSupabase().then(()=>subscribeSupabaseRealtime());
   } else {
-    // Sin datos previos → mostrar auth normalmente
-    updateStorageStatus();
+    // Sin datos locales → intentar traer los datos compartidos de Supabase
+    pullFromSupabase().then(ok=>{
+      if(ok){
+        document.getElementById('auth-screen').style.display='none';
+        document.getElementById('user-name').textContent='Sin cuenta';
+        document.getElementById('user-avatar').textContent='👤';
+        subscribeSupabaseRealtime();
+      } else {
+        // Sin datos previos en ningún lado → mostrar auth normalmente
+        updateStorageStatus();
+      }
+    });
   }
 });
 /* Abrir el Google Sheet en una nueva pestaña */
