@@ -1075,13 +1075,11 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   <div class="nav-item active" onclick="showSection('dashboard',this)"><span class="icon">📊</span><span>Dashboard</span></div>
   <div class="nav-item" onclick="showSection('clientes',this)"><span class="icon">👥</span><span>Clientes</span></div>
   <div class="nav-item" onclick="showSection('contactos',this)"><span class="icon">📇</span><span>Contactos</span></div>
-  <div class="nav-item" onclick="showSection('proyectos',this)"><span class="icon">📁</span><span>Proyectos</span></div>
+  <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
   <div class="nav-item" onclick="showSection('cotizaciones',this)"><span class="icon">📝</span><span>Cotizaciones</span></div>
-  <div class="nav-item" onclick="showSection('pipeline',this)"><span class="icon">🔀</span><span>Pipeline</span></div>
   <div class="nav-item" onclick="showSection('inventario',this)"><span class="icon">📦</span><span>Inventario</span></div>
   <div class="nav-item" onclick="showSection('ventas',this)"><span class="icon">💰</span><span>Ventas</span></div>
   <div class="nav-item" onclick="showSection('cargas',this)"><span class="icon">🚛</span><span>Cargas</span></div>
-  <div class="nav-item" onclick="showSection('prevision',this)"><span class="icon">📈</span><span>Previsión</span></div>
   <div class="nav-item" onclick="showSection('proveedores',this)"><span class="icon">🚢</span><span>Proveedores</span></div>
   <div class="nav-item" onclick="showSection('reclamos',this)"><span class="icon">🚨</span><span>Reclamos</span></div>
   <div class="nav-item" onclick="showSection('facturacion',this)"><span class="icon">🧾</span><span>Facturación</span></div>
@@ -1177,6 +1175,31 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     </div>
     <div class="contacts-grid" id="contacts-grid">
       <div class="empty-state"><div class="icon">📇</div><p>Sin contactos aún</p></div>
+    </div>
+  </div>
+  <!-- TAREAS -->
+  <div class="section" id="section-tareas">
+    <div class="ph-row page-header">
+      <div><h1>✅ Tareas</h1><p>Seguimiento y pendientes por cliente</p></div>
+      <div class="ph-right">
+        <input type="text" placeholder="🔍 Buscar…" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;width:180px" oninput="renderTareas(this.value)">
+        <button class="btn btn-primary" onclick="openNuevaTarea()">＋ Nueva tarea</button>
+      </div>
+    </div>
+    <div id="tareas-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="tareas-filter-tabs">
+      <button class="btn btn-outline btn-sm tarea-tab active-tab" onclick="setTareaTab('todas',this)">Todas</button>
+      <button class="btn btn-outline btn-sm tarea-tab" onclick="setTareaTab('pendientes',this)">⏳ Pendientes</button>
+      <button class="btn btn-outline btn-sm tarea-tab" onclick="setTareaTab('vencidas',this)">⚠️ Vencidas</button>
+      <button class="btn btn-outline btn-sm tarea-tab" onclick="setTareaTab('Hecha',this)">✅ Hechas</button>
+    </div>
+    <div class="table-container">
+      <table class="data-table" id="tareas-table">
+        <thead><tr>
+          <th></th><th>Cliente</th><th>Descripción</th><th>Vencimiento</th><th>Responsable</th><th>Estado</th><th></th>
+        </tr></thead>
+        <tbody id="tareas-tbody"></tbody>
+      </table>
     </div>
   </div>
   <!-- PROYECTOS -->
@@ -2102,7 +2125,7 @@ async function ensureSheetsExist(sheetNames){
 async function silentSyncToSheets(){
   if(!_dirty || !token || !spreadsheetId) return;
   try{
-    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores',cargas:'Cargas'};
+    const sheetMap = {clientes:'Clientes',proyectos:'Proyectos',inventario:'Inventario',ventas:'Ventas',reclamos:'Reclamos',facturas:'Facturas',contactos:'Contactos',cotizaciones:'Cotizaciones',novedades:'Novedades',prevision:'Prevision',fermentadores:'Fermentadores',cargas:'Cargas',tareas:'Tareas'};
     const availableSheets = await ensureSheetsExist([...Object.values(sheetMap), 'Comisionistas']);
     const errors = [];
     const clearRanges = [];
@@ -2308,7 +2331,8 @@ const HEADERS={
   Prevision:['ID','ProductoId','Pais','Cliente','Comercial','FechaContacto','Proy0','Proy1','Proy2','Proy3','Proy4','Proy5','Proy6','Proy7','Proy8','Proy9','Proy10','Proy11'],
   Fermentadores:['id','nombre','variedad','calibre','kg','entamada','notas','tipo'],
   Comisionistas:['Nombre'],
-  Cargas:['ID','VentaID','NumOrden','Cliente','Categoria','FechaCarga','FechaEntrega','Transportista','Estado','Notas']
+  Cargas:['ID','VentaID','NumOrden','Cliente','Categoria','FechaCarga','FechaEntrega','Transportista','Estado','Notas'],
+  Tareas:['ID','ClienteID','Cliente','Descripcion','FechaVencimiento','Responsable','Estado','FechaCreacion']
 };
 function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
 async function findOrCreateSpreadsheet(skipLoad=false){
@@ -2449,6 +2473,7 @@ function showSection(id,el){
   if(id==='dashboard')renderDashboard();
   else if(id==='clientes')renderClientes();
   else if(id==='contactos')renderContactos();
+  else if(id==='tareas')renderTareas();
   else if(id==='proyectos')renderProyectos();
   else if(id==='inventario')renderInventario();
   else if(id==='pipeline')renderPipeline();
@@ -3415,6 +3440,17 @@ function openCRMModal(type){
       <div class="historial-empty">Guardá el registro primero para poder agregar novedades.</div>`;
     document.getElementById('modal-body').appendChild(panel);
   }
+  // Para nuevo cliente, mostrar panel de tareas vacío con aviso de guardar primero
+  if(type==='cliente'){
+    const panel = document.createElement('div');
+    panel.className = 'historial-panel';
+    panel.id = 'tareas-panel';
+    panel.dataset.clienteId = '';
+    panel.innerHTML = `
+      <h4>✅ Tareas / Seguimiento</h4>
+      <div class="historial-empty">Guardá el cliente primero para poder agregar tareas.</div>`;
+    document.getElementById('modal-body').appendChild(panel);
+  }
   if(type==='venta') setTimeout(()=>{initVentaLineas('');_vencimientos=[];onFormaPagoChange();populateComisionistas();const adqList=document.getElementById('adquirente-list');if(adqList)adqList.innerHTML=(DB.clientes||[]).map(c=>`<option value="${(c.Empresa||'').replace(/"/g,'&quot;')}">`).join('');}, 30);
   if(type==='producto') setTimeout(()=>{
     const dlProd=document.getElementById('inv-prod-dl');
@@ -3552,6 +3588,10 @@ function editRecord(type, id){
   // Mostrar historial de novedades para proyectos
   if(type==='proyecto'){
     renderHistorialPanel(type, id);
+  }
+  // Mostrar panel de tareas para clientes
+  if(type==='cliente'){
+    renderTareasPanel(id);
   }
   if(type==='venta') setTimeout(()=>{
     initVentaLineas(record?.Lineas||'');
@@ -5980,6 +6020,190 @@ function openVentaFromCarga(ventaId){
   if(!ventaId)return;
   showSection('ventas',document.querySelector('.nav-item[onclick*="ventas"]'));
   setTimeout(()=>openCRMModal('venta',ventaId),100);
+}
+/* ═══════════════════════════════════════
+   TAREAS / SEGUIMIENTO
+═══════════════════════════════════════ */
+let _tareaTab='todas';
+function setTareaTab(tab,el){
+  _tareaTab=tab;
+  document.querySelectorAll('.tarea-tab').forEach(b=>b.classList.remove('active-tab'));
+  if(el)el.classList.add('active-tab');
+  renderTareas();
+}
+function _tareaBadge(estado){
+  const map={'Pendiente':'background:#fef3c7;color:#92400e','Hecha':'background:#d1fae5;color:#065f46'};
+  const s=map[estado]||'background:var(--surface2);color:var(--muted)';
+  return `<span style="${s};padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${estado||'—'}</span>`;
+}
+function openNuevaTarea(clienteId){
+  const clientes=DB.clientes||[];
+  const opts=clientes.map(c=>`<option value="${c.ID}" ${c.ID===clienteId?'selected':''}>${(c.Empresa||'').replace(/"/g,'&quot;')}</option>`).join('');
+  const html=`
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-group"><label>Cliente</label>
+        <select id="nt-cliente">
+          <option value="">— Sin cliente —</option>${opts}
+        </select>
+      </div>
+      <div class="form-group"><label>Descripción</label><textarea id="nt-desc" rows="3" placeholder="¿Qué hay que hacer?"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha de vencimiento</label><input id="nt-fecha" type="date"></div>
+        <div class="form-group"><label>Responsable</label><input id="nt-responsable" placeholder="Nombre…"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="document.getElementById('modal-tarea').remove()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveNuevaTarea()">Guardar tarea</button>
+      </div>
+    </div>`;
+  let m=document.createElement('div');
+  m.id='modal-tarea';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML=`<div style="background:var(--surface);border-radius:14px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;border:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="margin:0;font-size:18px">✅ Nueva tarea</h2>
+      <button onclick="this.closest('#modal-tarea').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>${html}</div>`;
+  document.body.appendChild(m);
+}
+function saveNuevaTarea(){
+  const clienteId=document.getElementById('nt-cliente')?.value||'';
+  const desc=document.getElementById('nt-desc')?.value.trim();
+  if(!desc){alert('Escribí una descripción');return;}
+  const cliente=(DB.clientes||[]).find(c=>c.ID===clienteId);
+  if(!DB.tareas)DB.tareas=[];
+  DB.tareas.push({
+    ID:genId(),
+    ClienteID:clienteId,
+    Cliente:cliente?.Empresa||'',
+    Descripcion:desc,
+    FechaVencimiento:document.getElementById('nt-fecha')?.value||'',
+    Responsable:document.getElementById('nt-responsable')?.value||'',
+    Estado:'Pendiente',
+    FechaCreacion:new Date().toISOString().slice(0,10)
+  });
+  saveLocal();
+  document.getElementById('modal-tarea')?.remove();
+  renderTareas();
+}
+function tareaInlineEdit(id,field,value){
+  const t=(DB.tareas||[]).find(x=>x.ID===id);
+  if(!t)return;
+  t[field]=value;
+  saveLocal();
+}
+function toggleTareaEstado(id){
+  const t=(DB.tareas||[]).find(x=>x.ID===id);
+  if(!t)return;
+  t.Estado = t.Estado==='Hecha'?'Pendiente':'Hecha';
+  saveLocal();
+  const panel=document.getElementById('tareas-panel');
+  if(panel) renderTareasPanel(panel.dataset.clienteId);
+  if(document.getElementById('section-tareas')?.classList.contains('active')) renderTareas();
+}
+function deleteTarea(id){
+  if(!confirm('¿Eliminar esta tarea?'))return;
+  DB.tareas=(DB.tareas||[]).filter(t=>t.ID!==id);
+  saveLocal();
+  const panel=document.getElementById('tareas-panel');
+  if(panel) renderTareasPanel(panel.dataset.clienteId);
+  if(document.getElementById('section-tareas')?.classList.contains('active')) renderTareas();
+}
+function renderTareas(q){
+  if(!DB.tareas)DB.tareas=[];
+  const all=DB.tareas;
+  const hoy=new Date().toISOString().slice(0,10);
+  const statsEl=document.getElementById('tareas-stats');
+  if(statsEl){
+    const pend=all.filter(t=>t.Estado!=='Hecha').length;
+    const vencidas=all.filter(t=>t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy).length;
+    const hechas=all.filter(t=>t.Estado==='Hecha').length;
+    statsEl.innerHTML=`
+      <div class="stat-card"><div class="label">Total tareas</div><div class="value">${all.length}</div></div>
+      <div class="stat-card"><div class="label">Pendientes</div><div class="value" style="color:#92400e">${pend}</div></div>
+      ${vencidas?`<div class="stat-card" style="border-color:var(--red)"><div class="label">Vencidas</div><div class="value" style="color:var(--red)">${vencidas}</div></div>`:''}
+      <div class="stat-card"><div class="label">Hechas</div><div class="value" style="color:var(--green)">${hechas}</div></div>`;
+  }
+  let list=[...all];
+  if(_tareaTab==='pendientes') list=list.filter(t=>t.Estado!=='Hecha');
+  else if(_tareaTab==='vencidas') list=list.filter(t=>t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy);
+  else if(_tareaTab==='Hecha') list=list.filter(t=>t.Estado==='Hecha');
+  if(q) list=list.filter(t=>JSON.stringify(t).toLowerCase().includes(q.toLowerCase()));
+  list.sort((a,b)=>(a.FechaVencimiento||'9999').localeCompare(b.FechaVencimiento||'9999'));
+  const tbody=document.getElementById('tareas-tbody');
+  if(!tbody)return;
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Sin tareas registradas</td></tr>`;return;}
+  tbody.innerHTML=list.map(t=>{
+    const vencida=t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy;
+    return `<tr style="${vencida?'background:rgba(220,38,38,.06)':''}">
+      <td style="text-align:center"><input type="checkbox" ${t.Estado==='Hecha'?'checked':''} onchange="toggleTareaEstado('${t.ID}')"></td>
+      <td style="font-weight:600">${t.Cliente||'—'}</td>
+      <td style="${t.Estado==='Hecha'?'text-decoration:line-through;color:var(--muted)':''}"><input value="${(t.Descripcion||'').replace(/"/g,'&quot;')}" onchange="tareaInlineEdit('${t.ID}','Descripcion',this.value)" style="border:none;background:transparent;color:inherit;font-size:13px;width:100%"></td>
+      <td><input type="date" value="${t.FechaVencimiento||''}" onchange="tareaInlineEdit('${t.ID}','FechaVencimiento',this.value)" style="border:none;background:transparent;color:${vencida?'var(--red)':'var(--text)'};font-size:13px;cursor:pointer;width:130px"></td>
+      <td><input value="${(t.Responsable||'').replace(/"/g,'&quot;')}" onchange="tareaInlineEdit('${t.ID}','Responsable',this.value)" placeholder="—" style="border:none;background:transparent;color:var(--text);font-size:13px;width:120px"></td>
+      <td>${_tareaBadge(t.Estado)}</td>
+      <td><button onclick="deleteTarea('${t.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+/* ── Panel de tareas dentro de la ficha de cliente ── */
+function renderTareasPanel(clienteId){
+  const existing = document.getElementById('tareas-panel');
+  if(existing) existing.remove();
+  const panel = document.createElement('div');
+  panel.className = 'historial-panel';
+  panel.id = 'tareas-panel';
+  panel.dataset.clienteId = clienteId || '';
+  const hoy = new Date().toISOString().slice(0,10);
+  const tareas = (DB.tareas||[]).filter(t=>t.ClienteID===clienteId).sort((a,b)=>(a.FechaVencimiento||'9999').localeCompare(b.FechaVencimiento||'9999'));
+  const listaHTML = tareas.length
+    ? tareas.map(t=>{
+      const vencida = t.Estado!=='Hecha' && t.FechaVencimiento && t.FechaVencimiento<hoy;
+      return `<div class="historial-entry" data-id="${t.ID}">
+        <div class="historial-meta">
+          <input type="checkbox" ${t.Estado==='Hecha'?'checked':''} onchange="toggleTareaEstado('${t.ID}')">
+          <span class="historial-fecha" style="${vencida?'color:var(--red)':''}">${t.FechaVencimiento||'sin fecha'}</span>
+          ${t.Responsable?`<span class="historial-autor">· ${t.Responsable}</span>`:''}
+        </div>
+        <div class="historial-texto" style="${t.Estado==='Hecha'?'text-decoration:line-through;color:var(--muted)':''}">${escHtml(t.Descripcion)}</div>
+        <button class="historial-del" onclick="deleteTarea('${t.ID}')" title="Eliminar">🗑</button>
+      </div>`;
+    }).join('')
+    : '<div class="historial-empty">Sin tareas pendientes</div>';
+  panel.innerHTML = `
+    <h4>✅ Tareas / Seguimiento</h4>
+    <div class="historial-add">
+      <textarea id="tarea-new-desc" placeholder="Nueva tarea…" rows="2"></textarea>
+      <input type="date" id="tarea-new-fecha" style="max-width:140px;flex:none">
+      <button onclick="addTareaFromPanel()">+ Agregar</button>
+    </div>
+    <div class="historial-list" id="tareas-panel-list">${listaHTML}</div>`;
+  document.getElementById('modal-body').appendChild(panel);
+}
+function addTareaFromPanel(){
+  const panel=document.getElementById('tareas-panel');
+  if(!panel)return;
+  const clienteId=panel.dataset.clienteId;
+  if(!clienteId){alert('Guardá el cliente primero antes de agregar tareas.');return;}
+  const desc=document.getElementById('tarea-new-desc').value.trim();
+  if(!desc)return;
+  const fecha=document.getElementById('tarea-new-fecha').value||'';
+  const cliente=(DB.clientes||[]).find(c=>c.ID===clienteId);
+  if(!DB.tareas)DB.tareas=[];
+  DB.tareas.push({
+    ID:genId(),
+    ClienteID:clienteId,
+    Cliente:cliente?.Empresa||'',
+    Descripcion:desc,
+    FechaVencimiento:fecha,
+    Responsable:'',
+    Estado:'Pendiente',
+    FechaCreacion:new Date().toISOString().slice(0,10)
+  });
+  saveLocal();
+  document.getElementById('tarea-new-desc').value='';
+  document.getElementById('tarea-new-fecha').value='';
+  renderTareasPanel(clienteId);
 }
 const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CAL_COLORS = {venta:'#96983e',cliente:'#404626',reclamo:'#db473c',factura:'#b45309',vencimiento:'#c8001f',carga:'#0369a1'};
