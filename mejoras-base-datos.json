@@ -1,0 +1,136 @@
+{
+  "proyecto": "CRM Cazorla — Plan de mejoras de base de datos",
+  "fecha": "2026-06-10",
+  "estado_actual": {
+    "arquitectura": "Tabla única 'crm_data' en Supabase con una sola fila (id='main') que guarda TODO el CRM como un blob JSON. localStorage como cache local. Google Sheets como backup secundario.",
+    "sincronizacion": "Push completo del blob con debounce de 1.5s + realtime por websocket. Estrategia last-write-wins (el último que guarda pisa todo).",
+    "seguridad": "Clave anon embebida en el HTML público y tabla sin Row Level Security efectivo: cualquiera con la URL puede leer y modificar toda la base. Verificado en la revisión del 2026-06-10.",
+    "riesgo_global": "CRÍTICO: datos comerciales (clientes, ventas, facturas, precios) expuestos a lectura y escritura anónima."
+  },
+  "mejoras": [
+    {
+      "id": "DB-01",
+      "titulo": "Activar Row Level Security con autenticación",
+      "prioridad": "P0 - crítica",
+      "categoria": "seguridad",
+      "problema": "La tabla crm_data acepta SELECT y UPDATE anónimos. La anon key es pública por diseño (está en el HTML), así que la única barrera posible es RLS.",
+      "solucion": "Habilitar RLS en crm_data y crear políticas que solo permitan acceso a usuarios autenticados. Activar Supabase Auth (magic link por email o Google OAuth, que ya usan para Sheets) y dar de alta solo las cuentas del equipo (Santiago y Alfonso).",
+      "pasos": [
+        "En Supabase: Authentication → habilitar proveedor (email magic link o Google)",
+        "Crear los 2-3 usuarios del equipo",
+        "SQL: ALTER TABLE crm_data ENABLE ROW LEVEL SECURITY;",
+        "SQL: CREATE POLICY crm_rw ON crm_data FOR ALL TO authenticated USING (true) WITH CHECK (true);",
+        "En index.html: agregar flujo de login con supabase.auth.signInWithOtp() o signInWithOAuth() antes del primer pull",
+        "Verificar que un navegador sin sesión NO pueda leer la tabla"
+      ],
+      "esfuerzo": "medio (1 sesión)",
+      "requiere_cambios_en": ["supabase", "index.html"],
+      "nota": "Rotar la anon key NO soluciona nada por sí solo: la clave nueva también queda en el HTML. RLS es la solución real."
+    },
+    {
+      "id": "DB-02",
+      "titulo": "Bloqueo optimista para evitar pisadas entre usuarios",
+      "prioridad": "P1 - alta",
+      "categoria": "integridad",
+      "problema": "Si Santiago y Alfonso editan al mismo tiempo, el push del segundo pisa el blob completo del primero (last-write-wins). El realtime mitiga pero no elimina la ventana de conflicto.",
+      "solucion": "Antes de subir, verificar que el updated_at remoto coincida con el último conocido. Si no coincide, traer lo remoto, re-aplicar el cambio local y reintentar.",
+      "pasos": [
+        "En pushToSupabase: agregar .eq('updated_at', _lastRemoteUpdatedAt) al update",
+        "Si el update afecta 0 filas → hay conflicto → pullFromSupabase() + reintentar el push",
+        "Mostrar toast 'Sincronizado con cambios del otro usuario' cuando ocurra"
+      ],
+      "esfuerzo": "bajo (cambio puntual en index.html)",
+      "requiere_cambios_en": ["index.html"]
+    },
+    {
+      "id": "DB-03",
+      "titulo": "Historial de versiones automático (recuperación ante borrados)",
+      "prioridad": "P1 - alta",
+      "categoria": "respaldo",
+      "problema": "Un borrado accidental (o malicioso, mientras no esté DB-01) se propaga a todos los dispositivos por realtime y no hay forma de volver atrás. El único respaldo es el export manual a JSON o Sheets.",
+      "solucion": "Tabla crm_data_history que guarde un snapshot en cada UPDATE mediante trigger, con retención de los últimos N cambios.",
+      "pasos": [
+        "SQL: CREATE TABLE crm_data_history (id bigserial PRIMARY KEY, snapshot jsonb, updated_by text, created_at timestamptz DEFAULT now());",
+        "SQL: trigger BEFORE UPDATE ON crm_data que inserte OLD.data en el historial",
+        "SQL: job o trigger que conserve solo los últimos 200 snapshots",
+        "Opcional en index.html: botón 'Restaurar versión anterior' que liste los snapshots"
+      ],
+      "esfuerzo": "bajo-medio",
+      "requiere_cambios_en": ["supabase"]
+    },
+    {
+      "id": "DB-04",
+      "titulo": "Sacar los logos en base64 del blob de datos",
+      "prioridad": "P2 - media",
+      "categoria": "rendimiento",
+      "problema": "Los logos (propio y de clientes en cotizaciones) se guardan en base64 dentro del JSON. Cada cambio mínimo (tildar una tarea) sube el blob completo con las imágenes incluidas: pushes lentos y pesados, y riesgo de superar el límite de localStorage (~5 MB).",
+      "solucion": "Subir las imágenes a Supabase Storage (o Google Drive, que ya usan para facturas) y guardar solo la URL en el JSON.",
+      "pasos": [
+        "Crear bucket 'logos' en Supabase Storage con política de lectura autenticada",
+        "En handleLogoPropio/handleLogoCliente: subir el archivo y guardar la URL en vez del base64",
+        "Migración única: detectar base64 existentes, subirlos y reemplazarlos por URL"
+      ],
+      "esfuerzo": "medio",
+      "requiere_cambios_en": ["supabase", "index.html"]
+    },
+    {
+      "id": "DB-05",
+      "titulo": "Backup externo automático programado",
+      "prioridad": "P2 - media",
+      "categoria": "respaldo",
+      "problema": "El backup a Google Sheets depende de que alguien tenga la pestaña abierta con sesión de Google activa. Si nadie entra por días, no hay respaldo fresco fuera de Supabase.",
+      "solucion": "Backup diario del blob a un destino externo, independiente del navegador.",
+      "pasos": [
+        "Opción simple: Supabase Edge Function + pg_cron que exporte crm_data a un bucket de Storage cada noche",
+        "Opción alternativa: tarea programada local (PC de Santi) que baje el JSON vía REST y lo guarde en Dropbox",
+        "Retención: 30 copias diarias + 12 mensuales"
+      ],
+      "esfuerzo": "medio",
+      "requiere_cambios_en": ["supabase"]
+    },
+    {
+      "id": "DB-06",
+      "titulo": "Migrar del blob único a tablas relacionales",
+      "prioridad": "P3 - estructural (largo plazo)",
+      "categoria": "arquitectura",
+      "problema": "Todo el CRM vive en una sola celda JSON: los conflictos son de todo-o-nada, el realtime notifica el blob entero, no se pueden hacer consultas SQL (ej. 'facturas vencidas por cliente') y el payload crece sin límite.",
+      "solucion": "Tablas reales: clientes, ventas, facturas, cotizaciones, reclamos, cargas, tareas, prevision, inventario. Sincronización por registro (insert/update/delete granular) y realtime por tabla.",
+      "pasos": [
+        "Diseñar esquema espejo de los HEADERS actuales (las columnas ya están definidas en el código)",
+        "Script de migración: explotar el blob actual en filas",
+        "Reescribir la capa de sync de index.html (es el cambio grande)",
+        "Mantener el blob como fallback durante la transición"
+      ],
+      "esfuerzo": "alto (proyecto en sí mismo, varias sesiones)",
+      "requiere_cambios_en": ["supabase", "index.html"],
+      "nota": "Resuelve de raíz DB-02 y reduce DB-04. Encarar solo después de DB-01 y DB-03."
+    },
+    {
+      "id": "DB-07",
+      "titulo": "Definir jerarquía única de fuentes de datos",
+      "prioridad": "P3 - baja",
+      "categoria": "consistencia",
+      "problema": "Hoy conviven 3 almacenes con reglas distintas: localStorage, Supabase (compara por fecha) y Google Sheets (compara por CANTIDAD de registros, con confirm manual). La comparación por cantidad puede sugerir restaurar datos viejos.",
+      "solucion": "Supabase = fuente de verdad única. localStorage = solo cache offline. Google Sheets = export de solo lectura para análisis (nunca origen de restauración, salvo recuperación de emergencia explícita).",
+      "pasos": [
+        "Quitar el flujo de 'importar desde Sheets si tiene más registros' (syncFromSheetsIfNewer)",
+        "Dejar el sync a Sheets como export unidireccional",
+        "Documentar el procedimiento de recuperación de emergencia desde Sheets/JSON"
+      ],
+      "esfuerzo": "bajo",
+      "requiere_cambios_en": ["index.html"]
+    },
+    {
+      "id": "DB-08",
+      "titulo": "Migrar cache local de localStorage a IndexedDB",
+      "prioridad": "P3 - baja",
+      "categoria": "rendimiento",
+      "problema": "localStorage tiene límite de ~5 MB y es síncrono (bloquea la UI al guardar). Con 75+ facturas, 55 ventas y logos en base64, el blob ya ronda los 500 KB y crece.",
+      "solucion": "IndexedDB (o la librería idb-keyval, 1 KB) para el cache local. Solo urgente si DB-04 no se hace y el tamaño sigue creciendo.",
+      "esfuerzo": "bajo-medio",
+      "requiere_cambios_en": ["index.html"]
+    }
+  ],
+  "orden_recomendado": ["DB-01", "DB-02", "DB-03", "DB-04", "DB-05", "DB-07", "DB-06", "DB-08"],
+  "nota_final": "DB-01 es urgente e independiente del resto: mientras no esté, cualquier persona que descubra la URL de la app puede leer y modificar todos los datos comerciales del grupo."
+}
