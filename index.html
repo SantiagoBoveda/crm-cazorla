@@ -765,6 +765,7 @@ body.warm .bomb-grand-total{color:#fc8181;background:rgba(192,0,0,.12)!important
 .btn-backup.sheets-btn:hover{background:rgba(22,163,74,.1);border-color:#16a34a}
 .row-actions{white-space:nowrap;text-align:right;padding-right:12px!important}
 .btn-row-edit,.btn-row-del{width:28px;height:28px;border-radius:6px;border:1px solid transparent;background:transparent;font-size:13px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.fact-echeq-select{height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);font-size:11px;cursor:pointer;padding:0 4px;color:var(--text);max-width:118px}
 .btn-row-edit:hover{background:rgba(167,0,29,.08);border-color:var(--border);color:var(--accent)}
 .btn-row-del:hover{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:var(--red)}
 tr:not(:hover) .btn-row-edit, tr:not(:hover) .btn-row-del{opacity:0}
@@ -836,7 +837,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 .aging-bucket.dias90 .ab-count{color:var(--red)}
 .aging-bucket.dias90plus .ab-count{color:var(--red);animation:pulse-dot 1.5s infinite}
 /* ══ FACTURA CARDS ══ */
-.fact-card{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:8px;display:flex;overflow:hidden;transition:box-shadow .15s,border-color .15s}
+.fact-card{background:var(--surface);border-radius:14px;border:1px solid var(--border);margin-bottom:8px;display:flex;overflow:hidden;transition:box-shadow .15s,border-color .15s}
 .fact-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.09);border-color:var(--border2)}
 .fact-bar{width:5px;flex-shrink:0}
 .fact-bar-default{background:var(--border2)}
@@ -871,7 +872,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 /* ══ AUDITORÍA FACTURAS ══ */
 .audit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .audit-overlay.open{opacity:1;pointer-events:all}
-.audit-modal{background:var(--card);border-radius:20px;width:min(900px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s}
+.audit-modal{background:var(--surface);border-radius:20px;width:min(900px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s}
 .audit-overlay.open .audit-modal{transform:translateY(0)}
 .audit-head{display:flex;align-items:center;gap:12px;padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
 .audit-title{font-size:17px;font-weight:800;color:var(--text);flex:1}
@@ -892,12 +893,12 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 .audit-tag-red{background:rgba(219,71,60,.15);color:var(--red)}
 .audit-tag-green{background:rgba(16,185,129,.15);color:var(--green)}
 .audit-tag-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
-.audit-footer{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0;background:var(--card)}
+.audit-footer{display:flex;align-items:center;gap:10px;padding:16px 24px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface)}
 .audit-sel-all{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600;background:none;border:none;padding:0;text-decoration:underline}
 /* ══ FICHA 360° ══ */
 .ficha360-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .ficha360-overlay.open{opacity:1;pointer-events:all}
-.ficha360{background:var(--card);border-radius:20px;width:min(780px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s}
+.ficha360{background:var(--surface);border-radius:20px;width:min(780px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s}
 .ficha360-overlay.open .ficha360{transform:translateY(0)}
 .ficha360-head{display:flex;align-items:center;gap:16px;padding:24px 28px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
 .ficha360-avatar{width:52px;height:52px;border-radius:14px;background:var(--accent);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -5171,6 +5172,13 @@ function renderReclamos(){
    FACTURACIÓN
 ═══════════════════════════════════════ */
 function facturaBadge(e){const m={Emitida:'badge-emitida',Enviada:'badge-enviada',Vencida:'badge-vencida',Cobrada:'badge-cobrada',Anulada:'badge-anulada'};return m[e]||'badge-emitida';}
+function facturaEcheqInlineEdit(id,value){
+  const f=(DB.facturas||[]).find(x=>x.ID===id);
+  if(!f)return;
+  f.EstadoEcheq=value;
+  saveLocal();
+  renderFacturacion();
+}
 function renderFacturacion(){
   const today=new Date(),hoy=today.toISOString().slice(0,10);
   const filter=_sectionFilters.facturacion;
@@ -5223,7 +5231,7 @@ function renderFacturacion(){
     if(f.NotaDebito)  chips.push(`<span class="fact-chip" style="color:var(--red)">ND <strong>${escHtml(f.NotaDebito)}</strong></span>`);
     if(f.EstadoEcheq){
       const echeqIcon={Recibido:'📥',Pagado:'✅','No pagado':'⏳',Rechazado:'❌'}[f.EstadoEcheq]||'🏦';
-      const echeqColor={Recibido:'var(--blue)',Pagado:'var(--green)','No pagado':'var(--yellow)',Rechazado:'var(--red)'}[f.EstadoEcheq]||'var(--muted)';
+      const echeqColor={Recibido:'var(--accent)',Pagado:'var(--green)','No pagado':'var(--yellow)',Rechazado:'var(--red)'}[f.EstadoEcheq]||'var(--muted)';
       chips.push(`<span class="fact-chip" style="color:${echeqColor}">${echeqIcon} Echeq <strong>${escHtml(f.EstadoEcheq)}</strong></span>`);
     }
     const docs=[];
@@ -5241,6 +5249,13 @@ function renderFacturacion(){
           <div class="fact-spacer"></div>
           <span class="fact-monto ${montoClass}">${f.Monto?fmt(f.Monto):'—'}</span>
           <div class="fact-row-actions">
+            <select class="fact-echeq-select" onchange="facturaEcheqInlineEdit(${idJs},this.value)" title="Estado del echeq">
+              <option value="" ${!f.EstadoEcheq?'selected':''}>🏦 Echeq —</option>
+              <option value="Recibido" ${f.EstadoEcheq==='Recibido'?'selected':''}>📥 Recibido</option>
+              <option value="Pagado" ${f.EstadoEcheq==='Pagado'?'selected':''}>✅ Pagado</option>
+              <option value="No pagado" ${f.EstadoEcheq==='No pagado'?'selected':''}>⏳ No pagado</option>
+              <option value="Rechazado" ${f.EstadoEcheq==='Rechazado'?'selected':''}>❌ Rechazado</option>
+            </select>
             <button class="btn-row-edit" onclick="editRecord('factura',${idJs})" title="Editar">✏️</button>
             <button class="btn-row-del" onclick="deleteRecord('factura',${idJs})" title="Eliminar">🗑</button>
           </div>
