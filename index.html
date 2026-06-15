@@ -953,25 +953,44 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 <!-- AUTH SCREEN -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="brand">CRM Interno</div>
+    <div class="brand">CRM Cazorla</div>
     <div class="subtitle">Plataforma de gestión comercial · Grupo Cazorla</div>
-    <div class="features">
-      <div class="feature"><span>👥</span><span>Gestión de clientes</span></div>
-      <div class="feature"><span>📁</span><span>Proyectos y pipeline</span></div>
-      <div class="feature"><span>📦</span><span>Inventario</span></div>
-      <div class="feature"><span>💰</span><span>Ventas y métricas</span></div>
+    <!-- PASO 1: pedir email -->
+    <div id="login-step-email">
+      <div class="features">
+        <div class="feature"><span>👥</span><span>Gestión de clientes</span></div>
+        <div class="feature"><span>💰</span><span>Ventas, facturas y previsión</span></div>
+        <div class="feature"><span>📦</span><span>Inventario y cargas</span></div>
+        <div class="feature"><span>🔒</span><span>Acceso seguro solo para el equipo</span></div>
+      </div>
+      <div class="client-id-section">
+        <label for="login-email">Tu email</label>
+        <input type="email" id="login-email" placeholder="vos@email.com" autocomplete="email"
+          onkeydown="if(event.key==='Enter')sendMagicLink()"/>
+      </div>
+      <button class="btn-google" id="btn-magiclink" onclick="sendMagicLink()" style="background:var(--accent);color:#fff">
+        <span style="font-size:17px">✉️</span> Enviarme el enlace de acceso
+      </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">
+        Te llega un enlace al correo. Tocalo y entrás — sin contraseña. La sesión queda guardada en este dispositivo.
+      </div>
+      <button onclick="continueOffline()" style="margin-top:16px;width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        Trabajar sin conexión (solo este dispositivo)
+      </button>
     </div>
-    <div class="client-id-section">
-      <label>Google OAuth Client ID</label>
-      <input type="text" id="client-id-input" placeholder="xxxx.apps.googleusercontent.com" value=""/>
+    <!-- PASO 2: enlace enviado -->
+    <div id="login-step-sent" style="display:none">
+      <div style="font-size:48px;margin-bottom:16px">📬</div>
+      <div style="font-size:16px;font-weight:700;color:var(--accent);margin-bottom:8px">Revisá tu correo</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px">
+        Enviamos un enlace de acceso a<br><strong id="login-sent-email" style="color:var(--text)"></strong>.<br>
+        Abrilo desde este mismo dispositivo para entrar.<br>
+        <span style="font-size:11px">Si no aparece, revisá la carpeta de spam.</span>
+      </div>
+      <button onclick="resetLogin()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer">
+        ← Usar otro email
+      </button>
     </div>
-    <button class="btn-google" onclick="initGoogleAuth()">
-      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      Iniciar sesión con Google
-    </button>
-    <button onclick="continueOffline()" style="margin-top:10px;width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-      Continuar sin Google (solo local)
-    </button>
   </div>
 </div>
 <!-- AUDITORÍA FACTURAS vs VENTAS -->
@@ -1138,6 +1157,12 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       onmouseout="this.style.borderColor='var(--sidebar-border)';this.style.color='var(--sidebar-muted)'">
       <svg width="13" height="13" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       Conectar Google
+    </button>
+    <button id="btn-logout" onclick="logout()" title="Cerrar sesión en este dispositivo"
+      style="margin-top:8px;width:100%;padding:7px;background:transparent;border:1px solid var(--sidebar-border);border-radius:8px;color:var(--sidebar-muted);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s"
+      onmouseover="this.style.borderColor='#db473c';this.style.color='#f8ccc0'"
+      onmouseout="this.style.borderColor='var(--sidebar-border)';this.style.color='var(--sidebar-muted)'">
+      ⎋ Cerrar sesión
     </button>
   </div>
 </div>
@@ -1930,29 +1955,49 @@ const CLIENT_INSTANCE_ID = getClientInstanceId();
 let _supaPushTimer = null;
 let _applyingRemote = false;
 let _lastRemoteUpdatedAt = null;
-/* Programa un push a Supabase 1.5s después del último cambio (debounce) */
+/* Sesión de Supabase Auth: null = sin login (modo offline). Se setea en initSupabaseAuth. */
+let _supaSession = null;
+/* Optimistic locking (DB-02): reintenta el push si otro usuario escribió mientras tanto */
+let _pushRetried = false;
+/* Programa un push a Supabase 1.5s después del último cambio (debounce).
+   Sin sesión activa no se sube nada (RLS lo rechazaría igual) → evita errores en modo offline. */
 function scheduleSupabasePush(){
-  if(!supa || _applyingRemote) return;
+  if(!supa || _applyingRemote || !_supaSession) return;
   clearTimeout(_supaPushTimer);
   _supaPushTimer = setTimeout(pushToSupabase, 1500);
 }
-/* Sube el estado completo de DB a Supabase */
+/* Sube el estado completo de DB a Supabase.
+   DB-02 (bloqueo optimista): solo escribe si el updated_at remoto sigue siendo el que conozco.
+   Si otro usuario escribió mientras tanto, traigo lo suyo, re-aplico mi cambio y reintento una vez. */
 async function pushToSupabase(){
-  if(!supa) return;
+  if(!supa || !_supaSession) return;
   try{
     const nowIso = new Date().toISOString();
-    const { data, error } = await supa.from('crm_data')
+    let q = supa.from('crm_data')
       .update({ data: DB, updated_at: nowIso, updated_by: CLIENT_INSTANCE_ID })
-      .eq('id','main')
-      .select('updated_at')
-      .single();
+      .eq('id','main');
+    // Solo aplicar la guarda de concurrencia si ya conozco el estado remoto
+    if(_lastRemoteUpdatedAt) q = q.eq('updated_at', _lastRemoteUpdatedAt);
+    const { data, error } = await q.select('updated_at');
     if(error) throw error;
-    _lastRemoteUpdatedAt = data.updated_at;
+    if(!data || !data.length){
+      // 0 filas afectadas → otro usuario escribió primero (conflicto de versión)
+      if(_pushRetried){ _pushRetried=false; throw new Error('conflicto de sincronización persistente'); }
+      _pushRetried = true;
+      console.warn('Push en conflicto: el otro usuario escribió primero. Reconciliando…');
+      await pullFromSupabase();        // trae lo remoto y re-renderiza
+      const sync=document.getElementById('sync-status-text');
+      if(sync) sync.textContent='Reconciliado con el otro usuario ✓';
+      return pushToSupabase();         // reintenta con el updated_at actualizado
+    }
+    _pushRetried = false;
+    _lastRemoteUpdatedAt = data[0].updated_at;
     _dirty = false;
     const lbl=document.getElementById('storage-label'), dot=document.getElementById('storage-dot');
     if(lbl) lbl.textContent = 'Sincronizado ✓';
     if(dot) dot.className = 'storage-dot';
   }catch(e){
+    _pushRetried = false;
     console.warn('Supabase push error:', e);
     showBackupError('Supabase: '+(e.message||e));
   }
@@ -2337,19 +2382,109 @@ function handleTokenResponse(resp){
     document.getElementById('sync-status-text').textContent='Conectado';
   });
 }
-/* Opción "Continuar sin Google" — usa solo localStorage */
-function continueOffline(){
-  document.getElementById('auth-screen').style.display='none';
-  document.getElementById('user-name').textContent='Sin cuenta';
-  document.getElementById('sync-status-text').textContent='Solo local';
-  document.getElementById('user-avatar').textContent='👤';
+/* ═══════════════════════════════════════
+   SUPABASE AUTH — LOGIN POR MAGIC LINK (DB-01)
+   La protección real es RLS en Supabase; este login obtiene la sesión
+   que habilita pull/push contra la base compartida.
+═══════════════════════════════════════ */
+let _appStarted = false;   // evita doble inicialización (onAuthStateChange puede disparar varias veces)
+/* Arranca el flujo de auth al cargar la app */
+async function initSupabaseAuth(){
+  if(!supa){ continueOffline(); return; }   // sin librería de Supabase → modo local
+  try{
+    const { data:{ session } } = await supa.auth.getSession();
+    _supaSession = session || null;
+    const tokenInUrl = location.hash.includes('access_token');
+    if(session){ onSupabaseAuthed(session); }
+    else if(!tokenInUrl){ showLoginScreen(); }
+    // onAuthStateChange cubre el regreso desde el magic link (#access_token en la URL)
+    supa.auth.onAuthStateChange((_event, sess)=>{
+      _supaSession = sess || null;
+      if(sess) onSupabaseAuthed(sess);
+    });
+  }catch(e){
+    console.warn('Supabase auth init error:', e);
+    showLoginScreen();
+  }
+}
+function showLoginScreen(){
+  const a=document.getElementById('auth-screen');
+  if(a) a.style.display='flex';
+  resetLogin();
+}
+function resetLogin(){
+  const e=document.getElementById('login-step-email'), s=document.getElementById('login-step-sent');
+  if(e)e.style.display=''; if(s)s.style.display='none';
+}
+async function sendMagicLink(){
+  const inp=document.getElementById('login-email');
+  const email=(inp?.value||'').trim().toLowerCase();
+  if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    if(inp){inp.style.borderColor='var(--red)';inp.focus();setTimeout(()=>inp.style.borderColor='',1500);}
+    return;
+  }
+  if(!supa){ alert('No se pudo conectar con el servidor.'); return; }
+  const btn=document.getElementById('btn-magiclink');
+  const orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='Enviando…';
+  try{
+    const { error } = await supa.auth.signInWithOtp({
+      email,
+      options:{ emailRedirectTo: location.href.split('#')[0] }
+    });
+    if(error) throw error;
+    document.getElementById('login-sent-email').textContent=email;
+    document.getElementById('login-step-email').style.display='none';
+    document.getElementById('login-step-sent').style.display='';
+  }catch(e){
+    alert('No se pudo enviar el enlace: '+(e.message||e));
+  }finally{
+    btn.disabled=false; btn.innerHTML=orig;
+  }
+}
+/* Cerrar sesión (botón en el sidebar) */
+async function logout(){
+  if(!confirm('¿Cerrar sesión en este dispositivo?')) return;
+  try{ if(supa) await supa.auth.signOut(); }catch(e){}
+  _supaSession=null;
+  location.reload();
+}
+/* Llamado cuando hay sesión válida de Supabase → arranca la app con datos compartidos */
+function onSupabaseAuthed(session){
+  const a=document.getElementById('auth-screen'); if(a) a.style.display='none';
+  const email=session.user?.email||'Usuario';
+  document.getElementById('user-name').textContent=email.split('@')[0];
+  document.getElementById('user-avatar').textContent=email.charAt(0).toUpperCase();
+  document.getElementById('sync-status-text').textContent='Sesión activa ✓';
+  if(_appStarted){ return; }
+  _appStarted=true;
   loadLocal();
   loadPrevisionFromDB();
   loadPrevisionYears();
+  ensureDefaultProducts();
   syncProductsFromInventory();
+  ensureDefaultInventory();
+  syncContactsFromClientes(true);
   renderDashboard();
   updateStorageStatus();
   pullFromSupabase().then(()=>subscribeSupabaseRealtime());
+}
+/* Modo offline — solo localStorage, sin tocar Supabase (no hay sesión) */
+function continueOffline(){
+  const a=document.getElementById('auth-screen'); if(a) a.style.display='none';
+  document.getElementById('user-name').textContent='Sin conexión';
+  document.getElementById('sync-status-text').textContent='Solo este dispositivo';
+  document.getElementById('user-avatar').textContent='📴';
+  if(_appStarted){ return; }
+  _appStarted=true;
+  loadLocal();
+  loadPrevisionFromDB();
+  loadPrevisionYears();
+  ensureDefaultProducts();
+  syncProductsFromInventory();
+  ensureDefaultInventory();
+  syncContactsFromClientes(true);
+  renderDashboard();
+  updateStorageStatus();
 }
 const HEADERS={
   Clientes:['ID','Empresa','Contacto','Cargo','Telefono','Telefono2','Email','Email2','Pais','Direccion','DomicilioReal','DomicilioLegal','CUIT','Rubro','Estado','UltimaInteraccion','Notas'],
@@ -5626,43 +5761,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(localStorage.getItem('crm_client_id') === OLD_CLIENT_ID){
     localStorage.removeItem('crm_client_id');
   }
-  // Pre-llenar Client ID guardado en el auth-screen
-  const savedId = localStorage.getItem('crm_client_id');
-  if(savedId){
-    const inp = document.getElementById('client-id-input');
-    if(inp) inp.value = savedId;
-  }
-  // Si hay datos en localStorage → entrar directo sin pedir login
-  const hadData = loadLocal();
-  if(hadData){
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('user-name').textContent='Sin cuenta';
-    document.getElementById('sync-status-text').textContent='Datos locales ✓';
-    document.getElementById('user-avatar').textContent='👤';
-    loadPrevisionFromDB();
-    loadPrevisionYears(); // ← restaurar snapshots por año
-    ensureDefaultProducts();
-    syncProductsFromInventory();
-    ensureDefaultInventory();
-    syncContactsFromClientes(true);
-    renderDashboard();
-    updateStorageStatus();
-    // Traer la versión compartida más reciente desde Supabase
-    pullFromSupabase().then(()=>subscribeSupabaseRealtime());
-  } else {
-    // Sin datos locales → intentar traer los datos compartidos de Supabase
-    pullFromSupabase().then(ok=>{
-      if(ok){
-        document.getElementById('auth-screen').style.display='none';
-        document.getElementById('user-name').textContent='Sin cuenta';
-        document.getElementById('user-avatar').textContent='👤';
-        subscribeSupabaseRealtime();
-      } else {
-        // Sin datos previos en ningún lado → mostrar auth normalmente
-        updateStorageStatus();
-      }
-    });
-  }
+  // DB-01: el acceso a los datos compartidos pasa por login de Supabase (magic link).
+  // initSupabaseAuth decide: si hay sesión → entra; si no → muestra la pantalla de login.
+  // El modo offline (botón en el login) sigue disponible para trabajar solo con este dispositivo.
+  updateStorageStatus();
+  initSupabaseAuth();
 });
 /* Abrir el Google Sheet en una nueva pestaña */
 function openInSheets(){
