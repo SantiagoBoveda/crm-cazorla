@@ -1432,7 +1432,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <div class="form-row">
           <div class="form-group"><label>Moneda</label><select id="cz-moneda"><option value="USD">USD – Dólar</option><option value="EUR">EUR – Euro</option></select></div>
           <div class="form-group"><label>Idioma del PDF</label><select id="cz-idioma"><option value="es">🇦🇷 Español</option><option value="en">🇬🇧 Inglés</option><option value="pt">🇧🇷 Portugués</option></select></div>
-          <div class="form-group"><label>Responsable</label><input id="cz-responsable" list="cz-resp-list" autocomplete="off"><datalist id="cz-resp-list"><option value="Santiago"><option value="Alfonso"></datalist></div>
+          <div class="form-group"><label>Responsable</label><input id="cz-responsable" list="cz-resp-list" autocomplete="off"><datalist id="cz-resp-list"><option value="Santiago"><option value="Hebe"></datalist></div>
         </div>
         <div style="margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -1689,7 +1689,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       <select class="filter-select" id="comercial-filter" onchange="renderTable()">
         <option value="all">Todos</option>
         <option value="Santiago">Santiago</option>
-        <option value="Alfonso">Alfonso</option>
+        <option value="Hebe">Hebe</option>
       </select>
       <button class="toggle-btn" id="hide-empty-btn" onclick="toggleEmpty()">
         <span class="toggle-dot"></span>
@@ -2429,9 +2429,14 @@ async function sendMagicLink(){
   try{
     const { error } = await supa.auth.signInWithOtp({
       email,
-      options:{ emailRedirectTo: location.href.split('#')[0] }
+      options:{ emailRedirectTo: location.href.split('#')[0], shouldCreateUser: false }
     });
-    if(error) throw error;
+    if(error){
+      if(/signup|not allowed|not found|disabled/i.test(error.message||'')){
+        throw new Error('Este email no tiene acceso al CRM. Pedile a Santiago que te dé de alta.');
+      }
+      throw error;
+    }
     document.getElementById('login-sent-email').textContent=email;
     document.getElementById('login-step-email').style.display='none';
     document.getElementById('login-step-sent').style.display='';
@@ -4126,8 +4131,8 @@ const SMART_LISTS = {
   Producto: ['Aceituna Verde Comercial','Aceituna Negra Natural','Aceituna Negra Acética','Pasta de Tomate','Passata','Salsas','Triturado','Otros'],
   Rubro: [],   // se puebla dinámicamente desde PRODUCTS
   Categoría: ['Aceitunas','Tomate','Aceite','Granos','Frutas','Conservas','Logística','Otro'],
-  Responsable: ['Santiago','Alfonso'],
-  Persona: ['Santiago','Alfonso'],
+  Responsable: ['Santiago','Hebe'],
+  Persona: ['Santiago','Hebe'],
 };
 /* ── Pobla un <select> con items + opción "Agregar nuevo" ── */
 function populateSmartSelect(sel, listKey, currentVal=''){
