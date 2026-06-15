@@ -13,6 +13,7 @@
       "titulo": "Activar Row Level Security con autenticación",
       "prioridad": "P0 - crítica",
       "categoria": "seguridad",
+      "estado": "CÓDIGO LISTO (2026-06-10) — login magic link implementado en index.html. PENDIENTE: config en panel Supabase (ver setup-seguridad-supabase.md). Método elegido: magic link por email.",
       "problema": "La tabla crm_data acepta SELECT y UPDATE anónimos. La anon key es pública por diseño (está en el HTML), así que la única barrera posible es RLS.",
       "solucion": "Habilitar RLS en crm_data y crear políticas que solo permitan acceso a usuarios autenticados. Activar Supabase Auth (magic link por email o Google OAuth, que ya usan para Sheets) y dar de alta solo las cuentas del equipo (Santiago y Alfonso).",
       "pasos": [
@@ -32,6 +33,7 @@
       "titulo": "Bloqueo optimista para evitar pisadas entre usuarios",
       "prioridad": "P1 - alta",
       "categoria": "integridad",
+      "estado": "IMPLEMENTADO (2026-06-10) — pushToSupabase ahora usa guarda .eq('updated_at') y reintenta una vez tras reconciliar. Activo en cuanto haya sesión.",
       "problema": "Si Santiago y Alfonso editan al mismo tiempo, el push del segundo pisa el blob completo del primero (last-write-wins). El realtime mitiga pero no elimina la ventana de conflicto.",
       "solucion": "Antes de subir, verificar que el updated_at remoto coincida con el último conocido. Si no coincide, traer lo remoto, re-aplicar el cambio local y reintentar.",
       "pasos": [
@@ -47,6 +49,7 @@
       "titulo": "Historial de versiones automático (recuperación ante borrados)",
       "prioridad": "P1 - alta",
       "categoria": "respaldo",
+      "estado": "SQL LISTO (2026-06-10) — ver setup-historial-supabase.md. PENDIENTE: ejecutar en el SQL Editor de Supabase (se puede en la misma sesión que DB-01). Botón de restaurar in-app queda como opcional.",
       "problema": "Un borrado accidental (o malicioso, mientras no esté DB-01) se propaga a todos los dispositivos por realtime y no hay forma de volver atrás. El único respaldo es el export manual a JSON o Sheets.",
       "solucion": "Tabla crm_data_history que guarde un snapshot en cada UPDATE mediante trigger, con retención de los últimos N cambios.",
       "pasos": [
