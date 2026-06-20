@@ -2294,10 +2294,17 @@ window.addEventListener('beforeunload', e => {
     // No bloquear cierre — solo intentamos
   }
 });
-/* ── visibilitychange: backup cuando el usuario sale de la pestaña ── */
+/* ── visibilitychange: backup cuando el usuario sale de la pestaña,
+     y re-sync forzado al volver (el navegador throttlea el websocket en
+     pestañas en segundo plano, así que el realtime puede tardar minutos
+     en procesarse — al volver, pedimos el estado actual directamente) ── */
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'hidden' && _dirty && token && spreadsheetId){
     silentSyncToSheets();
+  }
+  if(document.visibilityState === 'visible' && supa && _supaSession){
+    if(_dirty) pushToSupabase().then(pullFromSupabase);
+    else pullFromSupabase();
   }
 });
 /* ── Export backup JSON ── */
@@ -2471,7 +2478,7 @@ function onSupabaseAuthed(session){
   syncContactsFromClientes(true);
   renderDashboard();
   updateStorageStatus();
-  pullFromSupabase().then(()=>subscribeSupabaseRealtime());
+  pullFromSupabase().then(()=>{subscribeSupabaseRealtime();migrateLogosToStorage();});
 }
 /* Modo offline — solo localStorage, sin tocar Supabase (no hay sesión) */
 function continueOffline(){
@@ -2769,16 +2776,32 @@ function renderCotizLineas(){
 ═══════════════════════════════════════ */
 let _calcMode='envasado';
 let _logoCliente=null;
-function handleLogoPropio(input){
+/* DB-04: sube un File o data-URL al bucket 'logos' y devuelve la URL pública */
+async function uploadLogoStorage(src, path){
+  if(!supa||!_supaSession) return null;
+  try{
+    let blob;
+    if(typeof src==='string'){
+      const res=await fetch(src);
+      blob=await res.blob();
+    }else{ blob=src; }
+    const {error}=await supa.storage.from('logos').upload(path,blob,{upsert:true,contentType:blob.type||'image/png'});
+    if(error){console.warn('Logo upload:',error);return null;}
+    return supa.storage.from('logos').getPublicUrl(path).data.publicUrl;
+  }catch(e){console.warn('uploadLogoStorage:',e);return null;}
+}
+async function handleLogoPropio(input){
   const file=input.files[0];if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    const b=e.target.result;
-    DB.config=DB.config||{};DB.config.logoPropio=b;saveLocal();
+  const setImg=(src)=>{
     const img=document.getElementById('cz-logo-propio-preview');
-    img.src=b;img.style.display='';
+    img.src=src;img.style.display='';
     document.getElementById('cz-logo-propio-clear').style.display='';
-  };r.readAsDataURL(file);
+  };
+  const url=await uploadLogoStorage(file,'propio');
+  if(url){DB.config=DB.config||{};DB.config.logoPropio=url;saveLocal();setImg(url);return;}
+  const r=new FileReader();
+  r.onload=e=>{const b=e.target.result;DB.config=DB.config||{};DB.config.logoPropio=b;saveLocal();setImg(b);};
+  r.readAsDataURL(file);
 }
 function clearLogoPropio(){
   DB.config=DB.config||{};DB.config.logoPropio=null;saveLocal();
@@ -2787,15 +2810,19 @@ function clearLogoPropio(){
   document.getElementById('cz-logo-propio-clear').style.display='none';
   document.getElementById('cz-logo-propio-input').value='';
 }
-function handleLogoCliente(input){
+async function handleLogoCliente(input){
   const file=input.files[0];if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    _logoCliente=e.target.result;
+  const setImg=(src)=>{
+    _logoCliente=src;
     const img=document.getElementById('cz-logo-cliente-preview');
-    img.src=_logoCliente;img.style.display='';
+    img.src=src;img.style.display='';
     document.getElementById('cz-logo-cliente-clear').style.display='';
-  };r.readAsDataURL(file);
+  };
+  const url=await uploadLogoStorage(file,`clientes/logo-${Date.now()}`);
+  if(url){setImg(url);return;}
+  const r=new FileReader();
+  r.onload=e=>setImg(e.target.result);
+  r.readAsDataURL(file);
 }
 function clearLogoCliente(){
   _logoCliente=null;
@@ -2803,6 +2830,23 @@ function clearLogoCliente(){
   img.src='';img.style.display='none';
   document.getElementById('cz-logo-cliente-clear').style.display='none';
   document.getElementById('cz-logo-cliente-input').value='';
+}
+/* DB-04: migra base64 existentes en DB a Supabase Storage (corre una vez al iniciar sesión) */
+async function migrateLogosToStorage(){
+  if(!supa||!_supaSession) return;
+  let n=0;
+  if(DB.config?.logoPropio?.startsWith('data:')){
+    const url=await uploadLogoStorage(DB.config.logoPropio,'propio');
+    if(url){DB.config.logoPropio=url;n++;}
+  }
+  for(const c of (DB.cotizaciones||[])){
+    if(c.LogoCliente?.startsWith('data:')){
+      const path=`clientes/cotiz-${(c.NroCotizacion||Date.now()).toString().replace(/[^\w]/g,'-')}`;
+      const url=await uploadLogoStorage(c.LogoCliente,path);
+      if(url){c.LogoCliente=url;n++;}
+    }
+  }
+  if(n>0){saveLocal();console.log(`DB-04: ${n} logo(s) migrados a Storage`);}
 }
 function toggleCalcEXW(){
   const body=document.getElementById('calc-exw-body');
