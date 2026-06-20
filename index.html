@@ -1268,7 +1268,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <div class="table-container" id="tareas-vista-tabla">
       <table class="data-table" id="tareas-table">
         <thead><tr>
-          <th></th><th>Cliente</th><th>Descripción</th><th>Vencimiento</th><th>Responsable</th><th>Estado</th><th></th>
+          <th></th><th>Cliente</th><th>Descripción</th><th>Vencimiento</th><th>Responsable</th><th>Prioridad</th><th>Estado</th><th></th>
         </tr></thead>
         <tbody id="tareas-tbody"></tbody>
       </table>
@@ -6257,6 +6257,19 @@ function setTareaTab(tab,el){
   if(el)el.classList.add('active-tab');
   renderTareas();
 }
+const TAREA_PRIORIDADES = [
+  {key:'Baja',color:'#6b7280'},
+  {key:'Media',color:'#b45309'},
+  {key:'Alta',color:'#db473c'},
+  {key:'Urgente',color:'#a7001d'},
+];
+function _tareaPrioridadColor(p){ return (TAREA_PRIORIDADES.find(x=>x.key===p)||TAREA_PRIORIDADES[1]).color; }
+function _tareaPrioridadSelect(t){
+  const col=_tareaPrioridadColor(t.Prioridad||'Media');
+  return `<select onchange="tareaInlineEdit('${t.ID}','Prioridad',this.value)" style="border:1px solid ${col};border-radius:6px;background:transparent;color:${col};font-size:11px;font-weight:700;padding:3px 6px;cursor:pointer">
+    ${TAREA_PRIORIDADES.map(p=>`<option value="${p.key}" ${ (t.Prioridad||'Media')===p.key?'selected':''}>${p.key}</option>`).join('')}
+  </select>`;
+}
 function _tareaBadge(estado){
   const map={'Pendiente':'background:#fef3c7;color:#92400e','En curso':'background:#dbeafe;color:#1e40af','Hecha':'background:#d1fae5;color:#065f46'};
   const s=map[estado]||'background:var(--surface2);color:var(--muted)';
@@ -6282,12 +6295,16 @@ function renderTareasKanban(list){
       <h4><span>${col.label}</span><span>${items.length}</span></h4>
       ${items.length?items.map(t=>{
         const vencida=t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy;
+        const prioCol=_tareaPrioridadColor(t.Prioridad||'Media');
         return `<div class="kanban-card" draggable="true" data-id="${t.ID}"
-          ondragstart="_tkDragStart(event,'${t.ID}')" ondragend="_tkDragEnd(event)" style="cursor:grab">
+          ondragstart="_tkDragStart(event,'${t.ID}')" ondragend="_tkDragEnd(event)" style="cursor:grab;border-left:3px solid ${prioCol}">
           <div class="task-title" style="${t.Estado==='Hecha'?'text-decoration:line-through;color:var(--muted)':''}">${escHtml(t.Descripcion||'Sin descripción')}</div>
-          <div class="task-meta">${t.Cliente?`<span>👤 ${escHtml(t.Cliente)}</span>`:''}</div>
+          <div class="task-meta">${t.Cliente?`<span>👤 ${escHtml(t.Cliente)}</span>`:''}<span style="color:${prioCol};font-weight:700">● ${t.Prioridad||'Media'}</span></div>
           <div class="task-meta" style="${vencida?'color:var(--red);font-weight:700':''}">${t.FechaVencimiento?(vencida?'⚠️ ':'📅 ')+t.FechaVencimiento:''}${t.Responsable?' · '+escHtml(t.Responsable):''}</div>
-          <button onclick="event.stopPropagation();deleteTarea('${t.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px;margin-top:4px">🗑</button>
+          <div style="margin-top:4px">
+            <button onclick="event.stopPropagation();openNuevaTarea(null,'${t.ID}')" title="Editar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px">✏️</button>
+            <button onclick="event.stopPropagation();deleteTarea('${t.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px">🗑</button>
+          </div>
         </div>`;
       }).join(''):'<div class="historial-empty" style="font-size:11px">Sin tareas</div>'}
     </div>`;
@@ -6310,9 +6327,13 @@ function _tkDrop(e,nuevoEstado){
   renderTareas();
   showToast(`Tarea movida a "${nuevoEstado}"`);
 }
-function openNuevaTarea(clienteId){
+function openNuevaTarea(clienteId,tareaId){
+  const editing = tareaId ? (DB.tareas||[]).find(x=>x.ID===tareaId) : null;
+  if(tareaId && !editing) return;
   const clientes=DB.clientes||[];
-  const opts=clientes.map(c=>`<option value="${c.ID}" ${c.ID===clienteId?'selected':''}>${(c.Empresa||'').replace(/"/g,'&quot;')}</option>`).join('');
+  const selClienteId = editing ? editing.ClienteID : clienteId;
+  const opts=clientes.map(c=>`<option value="${c.ID}" ${c.ID===selClienteId?'selected':''}>${(c.Empresa||'').replace(/"/g,'&quot;')}</option>`).join('');
+  const prioridadOpts=TAREA_PRIORIDADES.map(p=>`<option value="${p.key}" ${(editing?.Prioridad||'Media')===p.key?'selected':''}>${p.key}</option>`).join('');
   const html=`
     <div style="display:flex;flex-direction:column;gap:14px">
       <div class="form-group"><label>Cliente</label>
@@ -6320,14 +6341,17 @@ function openNuevaTarea(clienteId){
           <option value="">— Sin cliente —</option>${opts}
         </select>
       </div>
-      <div class="form-group"><label>Descripción</label><textarea id="nt-desc" rows="3" placeholder="¿Qué hay que hacer?"></textarea></div>
+      <div class="form-group"><label>Descripción</label><textarea id="nt-desc" rows="3" placeholder="¿Qué hay que hacer?">${editing?escHtml(editing.Descripcion):''}</textarea></div>
       <div class="form-row">
-        <div class="form-group"><label>Fecha de vencimiento</label><input id="nt-fecha" type="date"></div>
-        <div class="form-group"><label>Responsable</label><input id="nt-responsable" placeholder="Nombre…"></div>
+        <div class="form-group"><label>Fecha de vencimiento</label><input id="nt-fecha" type="date" value="${editing?.FechaVencimiento||''}"></div>
+        <div class="form-group"><label>Responsable</label><input id="nt-responsable" placeholder="Nombre…" value="${editing?(editing.Responsable||'').replace(/"/g,'&quot;'):''}"></div>
+      </div>
+      <div class="form-group"><label>Prioridad</label>
+        <select id="nt-prioridad">${prioridadOpts}</select>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="btn btn-outline" onclick="document.getElementById('modal-tarea').remove()">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveNuevaTarea()">Guardar tarea</button>
+        <button class="btn btn-primary" onclick="saveNuevaTarea('${tareaId||''}')">Guardar tarea</button>
       </div>
     </div>`;
   let m=document.createElement('div');
@@ -6335,27 +6359,40 @@ function openNuevaTarea(clienteId){
   m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
   m.innerHTML=`<div style="background:var(--surface);border-radius:14px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;border:1px solid var(--border)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-      <h2 style="margin:0;font-size:18px">✅ Nueva tarea</h2>
+      <h2 style="margin:0;font-size:18px">${editing?'✏️ Editar tarea':'✅ Nueva tarea'}</h2>
       <button onclick="this.closest('#modal-tarea').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">✕</button>
     </div>${html}</div>`;
   document.body.appendChild(m);
+  if(editing) document.getElementById('nt-cliente').value=selClienteId||'';
 }
-function saveNuevaTarea(){
+function saveNuevaTarea(tareaId){
   const clienteId=document.getElementById('nt-cliente')?.value||'';
   const desc=document.getElementById('nt-desc')?.value.trim();
   if(!desc){alert('Escribí una descripción');return;}
   const cliente=(DB.clientes||[]).find(c=>c.ID===clienteId);
   if(!DB.tareas)DB.tareas=[];
-  DB.tareas.push({
-    ID:genId(),
-    ClienteID:clienteId,
-    Cliente:cliente?.Empresa||'',
-    Descripcion:desc,
-    FechaVencimiento:document.getElementById('nt-fecha')?.value||'',
-    Responsable:document.getElementById('nt-responsable')?.value||'',
-    Estado:'Pendiente',
-    FechaCreacion:localToday()
-  });
+  const prioridad=document.getElementById('nt-prioridad')?.value||'Media';
+  const fecha=document.getElementById('nt-fecha')?.value||'';
+  const responsable=document.getElementById('nt-responsable')?.value||'';
+  if(tareaId){
+    const t=DB.tareas.find(x=>x.ID===tareaId);
+    if(t){
+      t.ClienteID=clienteId; t.Cliente=cliente?.Empresa||''; t.Descripcion=desc;
+      t.FechaVencimiento=fecha; t.Responsable=responsable; t.Prioridad=prioridad;
+    }
+  } else {
+    DB.tareas.push({
+      ID:genId(),
+      ClienteID:clienteId,
+      Cliente:cliente?.Empresa||'',
+      Descripcion:desc,
+      FechaVencimiento:fecha,
+      Responsable:responsable,
+      Prioridad:prioridad,
+      Estado:'Pendiente',
+      FechaCreacion:localToday()
+    });
+  }
   saveLocal();
   document.getElementById('modal-tarea')?.remove();
   renderTareas();
@@ -6412,17 +6449,21 @@ function renderTareas(q){
   if(_tareaView==='kanban'){ renderTareasKanban(list); return; }
   const tbody=document.getElementById('tareas-tbody');
   if(!tbody)return;
-  if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Sin tareas registradas</td></tr>`;return;}
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">Sin tareas registradas</td></tr>`;return;}
   tbody.innerHTML=list.map(t=>{
     const vencida=t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy;
-    return `<tr style="${vencida?'background:rgba(220,38,38,.06)':''}">
+    return `<tr style="${vencida?'background:rgba(220,38,38,.06)':''};border-left:3px solid ${_tareaPrioridadColor(t.Prioridad||'Media')}">
       <td style="text-align:center"><input type="checkbox" ${t.Estado==='Hecha'?'checked':''} onchange="toggleTareaEstado('${t.ID}')"></td>
       <td style="font-weight:600">${t.Cliente||'—'}</td>
       <td style="${t.Estado==='Hecha'?'text-decoration:line-through;color:var(--muted)':''}"><input value="${(t.Descripcion||'').replace(/"/g,'&quot;')}" onchange="tareaInlineEdit('${t.ID}','Descripcion',this.value)" style="border:none;background:transparent;color:inherit;font-size:13px;width:100%"></td>
       <td><input type="date" value="${t.FechaVencimiento||''}" onchange="tareaInlineEdit('${t.ID}','FechaVencimiento',this.value)" style="border:none;background:transparent;color:${vencida?'var(--red)':'var(--text)'};font-size:13px;cursor:pointer;width:130px"></td>
       <td><input value="${(t.Responsable||'').replace(/"/g,'&quot;')}" onchange="tareaInlineEdit('${t.ID}','Responsable',this.value)" placeholder="—" style="border:none;background:transparent;color:var(--text);font-size:13px;width:120px"></td>
+      <td>${_tareaPrioridadSelect(t)}</td>
       <td>${_tareaBadge(t.Estado)}</td>
-      <td><button onclick="deleteTarea('${t.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px">🗑</button></td>
+      <td style="white-space:nowrap">
+        <button onclick="openNuevaTarea(null,'${t.ID}')" title="Editar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:4px">✏️</button>
+        <button onclick="deleteTarea('${t.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px">🗑</button>
+      </td>
     </tr>`;
   }).join('');
 }
