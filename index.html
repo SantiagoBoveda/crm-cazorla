@@ -43,7 +43,7 @@
 body.warm{
   --bg:#0f1008;--surface:#191b0d;--surface2:#212410;--surface3:#1e210e;
   --accent:#e05040;--accent2:#b83028;--green:#8a9830;--yellow:#f59e0b;
-  --red:#ef5540;--text:#e5e0d0;--muted:#707558;--border:#2e3018;
+  --red:#ef5540;--text:#e5e0d0;--muted:#868c68;--border:#2e3018;
   --border2:#3a3e20;--text2:#8a9060;--text3:#4c5230;
   --purple:#e05040;--sidebar-bg:#5a1228;
   --sidebar-text:#ffffff;--sidebar-muted:#dda0aa;--sidebar-border:#451020;
@@ -75,6 +75,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 body.warm .theme-track{background:var(--accent)}
 .theme-thumb{width:11px;height:11px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
 body.warm .theme-thumb{left:15px}
+.theme-track.on{background:var(--accent)}
+.theme-track.on .theme-thumb{left:15px}
 .user-chip{display:flex;align-items:center;gap:8px}
 .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
 #user-name{color:var(--sidebar-text);font-weight:600}
@@ -109,6 +111,12 @@ body.warm .theme-thumb{left:15px}
 .stat-card .label{font-size:12px;color:var(--muted);margin-bottom:8px}
 .stat-card .value{font-size:28px;font-weight:700;color:var(--accent)}
 .stat-card .sub{font-size:12px;color:var(--green);margin-top:4px}
+/* Variante para el KPI principal de cada sección: ocupa más espacio y resalta con el color de marca */
+.stat-card.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;grid-column:span 2}
+.stat-card.primary .label{color:rgba(255,255,255,.75)}
+.stat-card.primary .value{color:#fff;font-size:34px}
+.stat-card.primary .sub{color:rgba(255,255,255,.85)!important}
+@media (max-width:640px){.stat-card.primary{grid-column:span 1}}
 .table-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow-card)}
 #section-facturacion .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 #section-ventas .table-container{overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -138,6 +146,9 @@ table{width:100%;border-collapse:collapse}
 th{background:var(--surface2);padding:10px 16px;text-align:left;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
 td{padding:12px 16px;font-size:13px;border-top:1px solid var(--border);color:var(--text)}
 tr:hover td{background:rgba(167,0,29,.04)}
+/* Vista compacta: tablas con menos aire entre filas, para listas largas (facturas, ventas) */
+body.compact-rows th{padding:6px 12px}
+body.compact-rows td{padding:6px 12px;font-size:12px}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--sans)}
 .badge-green{background:rgba(107,114,21,.13);color:#5a6012}
 .badge-yellow{background:rgba(180,83,9,.12);color:#b45309}
@@ -946,6 +957,13 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
 /* Buscador global en móvil: resultados a lo ancho de la pantalla */
 @media (max-width:768px){
   .gs-results{left:12px;right:12px;width:auto;max-width:none}
+  /* Ficha 360 en mobile: menos padding lateral y modal pegado al borde inferior */
+  .ficha360-overlay{align-items:flex-end}
+  .ficha360{width:100%;max-width:100%;max-height:94vh;border-radius:16px 16px 0 0}
+  .ficha360-head{padding:18px 16px 12px}
+  .ficha360-kpis{padding:12px 16px}
+  .ficha360-tabs{padding:10px 16px 0}
+  .ficha360-body{padding:14px 16px}
 }
 </style>
 </head>
@@ -1130,6 +1148,11 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
     <div class="theme-track"><div class="theme-thumb"></div></div>
     <span id="theme-label">Modo oscuro</span>
   </div>
+  <!-- DENSIDAD DE TABLAS -->
+  <div class="theme-toggle" onclick="toggleCompactRows()" title="Filas más finas en todas las tablas">
+    <div class="theme-track" id="compact-track"><div class="theme-thumb" id="compact-thumb"></div></div>
+    <span id="compact-label">Filas compactas</span>
+  </div>
   <!-- STORAGE STATUS + BACKUP -->
   <div class="storage-bar">
     <div class="storage-status">
@@ -1234,13 +1257,15 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
       </div>
     </div>
     <div id="tareas-stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px"></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="tareas-filter-tabs">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center" id="tareas-filter-tabs">
       <button class="btn btn-outline btn-sm tarea-tab active-tab" onclick="setTareaTab('todas',this)">Todas</button>
       <button class="btn btn-outline btn-sm tarea-tab" onclick="setTareaTab('pendientes',this)">⏳ Pendientes</button>
       <button class="btn btn-outline btn-sm tarea-tab" onclick="setTareaTab('vencidas',this)">⚠️ Vencidas</button>
       <button class="btn btn-outline btn-sm tarea-tab" onclick="setTareaTab('Hecha',this)">✅ Hechas</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-outline btn-sm" id="btn-tareas-view" onclick="toggleTareaView()">🗂 Tablero</button>
     </div>
-    <div class="table-container">
+    <div class="table-container" id="tareas-vista-tabla">
       <table class="data-table" id="tareas-table">
         <thead><tr>
           <th></th><th>Cliente</th><th>Descripción</th><th>Vencimiento</th><th>Responsable</th><th>Estado</th><th></th>
@@ -1248,6 +1273,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         <tbody id="tareas-tbody"></tbody>
       </table>
     </div>
+    <div id="tareas-vista-kanban" style="display:none"></div>
   </div>
   <!-- PROYECTOS -->
   <div class="section" id="section-proyectos">
@@ -1883,6 +1909,18 @@ function toggleTheme() {
   if (saved === 'warm') {
     document.body.classList.add('warm');
     // label will be set after DOM ready via DOMContentLoaded or inline
+  }
+})();
+function toggleCompactRows(){
+  const on = document.body.classList.toggle('compact-rows');
+  localStorage.setItem('crm-compact-rows', on ? '1' : '0');
+  document.getElementById('compact-track')?.classList.toggle('on', on);
+  document.getElementById('compact-label').textContent = on ? 'Filas normales' : 'Filas compactas';
+}
+// Restore saved densidad de tablas
+(function(){
+  if (localStorage.getItem('crm-compact-rows') === '1') {
+    document.body.classList.add('compact-rows');
   }
 })();
 /* ═══════════════════════════════════════
@@ -3202,7 +3240,7 @@ function renderDashboard(){
   const kpiAlertVencidos=ventasVencidas.length?'border-color:var(--red)':'';
   const kpiAlertReclamos=reclamosAbiertos.length?'border-color:var(--red)':'';
   document.getElementById('dash-kpis').innerHTML=`
-    <div class="stat-card"><div class="label">Total ventas (USD) ${_yoyBadge}</div><div class="value">${fmtUSD(totalVentasUSD)}</div><div class="sub" style="color:var(--muted)">${_ventas.filter(v=>v.Etapa!=='Cancelada').length} órdenes activas · ${_anoActual}</div></div>
+    <div class="stat-card primary"><div class="label">Total ventas (USD) ${_yoyBadge}</div><div class="value">${fmtUSD(totalVentasUSD)}</div><div class="sub">${_ventas.filter(v=>v.Etapa!=='Cancelada').length} órdenes activas · ${_anoActual}</div></div>
     <div class="stat-card"><div class="label">Ventas confirmadas</div><div class="value">${ventasConfirmadas.length}</div><div class="sub" style="color:var(--accent)">${fmtUSD(ventasConfirmadas.reduce((s,v)=>s+(parseFloat(v.ValorUSD)||0),0))}</div></div>
     <div class="stat-card"><div class="label">Clientes</div><div class="value">${_clientes.length}</div><div class="sub" style="color:var(--green)">${clientesActivos} activos · ${clientesProspecto} prospectos</div></div>
     <div class="stat-card" style="${kpiAlertVencidos}"><div class="label">Cobros vencidos</div><div class="value" style="${ventasVencidas.length?'color:var(--red)':''}">${ventasVencidas.length}</div><div class="sub" style="color:var(--muted)">${ventasVencen30.length} vencen en 30 días</div></div>
@@ -5847,6 +5885,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Tema
   if(document.body.classList.contains('warm'))
     document.getElementById('theme-label').textContent='Modo claro';
+  // Densidad de tablas
+  if(document.body.classList.contains('compact-rows')){
+    document.getElementById('compact-track')?.classList.add('on');
+    document.getElementById('compact-label').textContent='Filas normales';
+  }
   // Limpiar Client ID eliminado si quedó guardado
   const OLD_CLIENT_ID = '678286127164-4mir5gteeapelsv0e8h0vrtgr4jgqt25.apps.googleusercontent.com';
   if(localStorage.getItem('crm_client_id') === OLD_CLIENT_ID){
@@ -6215,9 +6258,57 @@ function setTareaTab(tab,el){
   renderTareas();
 }
 function _tareaBadge(estado){
-  const map={'Pendiente':'background:#fef3c7;color:#92400e','Hecha':'background:#d1fae5;color:#065f46'};
+  const map={'Pendiente':'background:#fef3c7;color:#92400e','En curso':'background:#dbeafe;color:#1e40af','Hecha':'background:#d1fae5;color:#065f46'};
   const s=map[estado]||'background:var(--surface2);color:var(--muted)';
   return `<span style="${s};padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${estado||'—'}</span>`;
+}
+/* ── Vista Tablero (estilo Trello): Pendiente / En curso / Hecha ── */
+let _tareaView = localStorage.getItem('tareas_view') || 'tabla';
+function toggleTareaView(){
+  _tareaView = _tareaView==='tabla' ? 'kanban' : 'tabla';
+  localStorage.setItem('tareas_view', _tareaView);
+  renderTareas();
+}
+function renderTareasKanban(list){
+  const cont=document.getElementById('tareas-vista-kanban');
+  if(!cont)return;
+  const hoy=localToday();
+  const cols=[{key:'Pendiente',label:'⏳ Pendiente'},{key:'En curso',label:'🔵 En curso'},{key:'Hecha',label:'✅ Hecha'}];
+  let html=`<div class="kanban" style="grid-template-columns:repeat(3,1fr)">`;
+  cols.forEach(col=>{
+    const items=list.filter(t=>(t.Estado||'Pendiente')===col.key)
+      .sort((a,b)=>(a.FechaVencimiento||'9999').localeCompare(b.FechaVencimiento||'9999'));
+    html+=`<div class="kanban-col" ondragover="_tkDragOver(event)" ondrop="_tkDrop(event,'${col.key}')">
+      <h4><span>${col.label}</span><span>${items.length}</span></h4>
+      ${items.length?items.map(t=>{
+        const vencida=t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy;
+        return `<div class="kanban-card" draggable="true" data-id="${t.ID}"
+          ondragstart="_tkDragStart(event,'${t.ID}')" ondragend="_tkDragEnd(event)" style="cursor:grab">
+          <div class="task-title" style="${t.Estado==='Hecha'?'text-decoration:line-through;color:var(--muted)':''}">${escHtml(t.Descripcion||'Sin descripción')}</div>
+          <div class="task-meta">${t.Cliente?`<span>👤 ${escHtml(t.Cliente)}</span>`:''}</div>
+          <div class="task-meta" style="${vencida?'color:var(--red);font-weight:700':''}">${t.FechaVencimiento?(vencida?'⚠️ ':'📅 ')+t.FechaVencimiento:''}${t.Responsable?' · '+escHtml(t.Responsable):''}</div>
+          <button onclick="event.stopPropagation();deleteTarea('${t.ID}')" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px;margin-top:4px">🗑</button>
+        </div>`;
+      }).join(''):'<div class="historial-empty" style="font-size:11px">Sin tareas</div>'}
+    </div>`;
+  });
+  html+='</div>';
+  cont.innerHTML=html;
+}
+let _tkDragId=null;
+function _tkDragStart(e,id){_tkDragId=id;e.currentTarget.style.opacity='.4';e.dataTransfer.effectAllowed='move';}
+function _tkDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function _tkDragEnd(e){e.currentTarget.style.opacity='1';}
+function _tkDrop(e,nuevoEstado){
+  e.preventDefault();
+  if(!_tkDragId)return;
+  const t=(DB.tareas||[]).find(x=>x.ID===_tkDragId);
+  _tkDragId=null;
+  if(!t||t.Estado===nuevoEstado)return;
+  t.Estado=nuevoEstado;
+  saveLocal();
+  renderTareas();
+  showToast(`Tarea movida a "${nuevoEstado}"`);
 }
 function openNuevaTarea(clienteId){
   const clientes=DB.clientes||[];
@@ -6313,6 +6404,12 @@ function renderTareas(q){
   else if(_tareaTab==='Hecha') list=list.filter(t=>t.Estado==='Hecha');
   if(q) list=list.filter(t=>JSON.stringify(t).toLowerCase().includes(q.toLowerCase()));
   list.sort((a,b)=>(a.FechaVencimiento||'9999').localeCompare(b.FechaVencimiento||'9999'));
+  const btnView=document.getElementById('btn-tareas-view');
+  const tablaEl=document.getElementById('tareas-vista-tabla'), kanbanEl=document.getElementById('tareas-vista-kanban');
+  if(btnView){btnView.textContent=_tareaView==='tabla'?'🗂 Tablero':'📋 Tabla';}
+  if(tablaEl) tablaEl.style.display = _tareaView==='tabla'?'':'none';
+  if(kanbanEl) kanbanEl.style.display = _tareaView==='tabla'?'none':'';
+  if(_tareaView==='kanban'){ renderTareasKanban(list); return; }
   const tbody=document.getElementById('tareas-tbody');
   if(!tbody)return;
   if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Sin tareas registradas</td></tr>`;return;}
