@@ -1,4 +1,4 @@
-const CACHE = 'cazorla-crm-v6';
+const CACHE = 'cazorla-crm-v8';
 const ASSETS = [
   './index.html',
   './manifest.json',
