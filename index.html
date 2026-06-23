@@ -1132,6 +1132,7 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
   </div>
   <div class="gs-results" id="gs-results"></div>
   <div class="nav-item active" onclick="showSection('dashboard',this)"><span class="icon">📊</span><span>Dashboard</span></div>
+  <div class="nav-item" onclick="showSection('indicadores',this)"><span class="icon">📈</span><span>Indicadores</span></div>
   <div class="nav-item" onclick="showSection('clientes',this)"><span class="icon">👥</span><span>Clientes</span></div>
   <div class="nav-item" onclick="showSection('contactos',this)"><span class="icon">📇</span><span>Contactos</span></div>
   <div class="nav-item" onclick="showSection('tareas',this)"><span class="icon">✅</span><span>Tareas</span></div>
@@ -1216,6 +1217,11 @@ tr:hover .btn-row-edit, tr:hover .btn-row-del{opacity:1}
         </div>
       </div>
     </div>
+  </div>
+  <!-- INDICADORES -->
+  <div class="section" id="section-indicadores">
+    <div class="page-header"><h1>📈 Indicadores</h1><p>KPIs de rendimiento comercial y operativo</p></div>
+    <div class="cards-grid" id="indicadores-kpis"></div>
   </div>
   <!-- CLIENTES -->
   <div class="section" id="section-clientes">
@@ -2556,6 +2562,14 @@ function genId(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2
 /* BUG-FIX: fecha local (no UTC). Con toISOString() en Argentina (UTC-3), desde las 21:00
    el "hoy" pasaba a ser mañana → alertas de vencimiento y calendario corridos un día. */
 function toLocalISO(d){const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
+/* Fecha de alta de un cliente: usa FechaAlta si existe; si no (clientes viejos),
+   extrae el timestamp embebido en el ID (genId = 'id_<ms>_...') como aproximación. */
+function _clienteFechaAlta(c){
+  if(c.FechaAlta) return c.FechaAlta;
+  const m=/^id_(\d+)_/.exec(c.ID||'');
+  if(m) return toLocalISO(new Date(parseInt(m[1],10)));
+  return '0000-00-00';
+}
 function localToday(){return toLocalISO(new Date());}
 /* Total de una cotización calculado desde sus líneas (no existe campo TotalUSD guardado) */
 function cotizTotal(c){let ls=[];try{ls=JSON.parse(c.Lineas||'[]');}catch{}return ls.reduce((s,l)=>s+(parseFloat(l.cantidad)||0)*(parseFloat(l.precio)||0),0);}
@@ -2697,6 +2711,7 @@ function showSection(id,el){
   if(sec)sec.classList.add('active');
   if(el)el.classList.add('active');
   if(id==='dashboard')renderDashboard();
+  else if(id==='indicadores')renderIndicadores();
   else if(id==='clientes')renderClientes();
   else if(id==='contactos')renderContactos();
   else if(id==='tareas')renderTareas();
@@ -3098,7 +3113,7 @@ function saveCotizacion(){
     DB.cotizaciones.push(row);
     // Auto-crear cliente si no existe
     if(!(DB.clientes||[]).find(c=>(c.Empresa||'').toLowerCase()===cliente.toLowerCase())){
-      DB.clientes.push({ID:genId(),Empresa:cliente,Pais:row.Pais||'',Estado:'Prospecto',UltimaInteraccion:row.Fecha||''});
+      DB.clientes.push({ID:genId(),Empresa:cliente,Pais:row.Pais||'',Estado:'Prospecto',UltimaInteraccion:row.Fecha||'',FechaAlta:row.Fecha||localToday()});
     }
   }
   _saveProductosMemoria(_cotizLineas);
@@ -3196,6 +3211,44 @@ ${c.NotaExtra?`<div class="notes-box" style="font-style:italic">${c.NotaExtra}</
 <div class="footer">${t.footer}</div>
 </div><script>window.onload=()=>window.print();<\/script></body></html>`;
   const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}
+}
+/* ═══════════════════════════════════════
+   INDICADORES (KPIs de rendimiento)
+═══════════════════════════════════════ */
+function renderIndicadores(){
+  const hoy=localToday();
+  const _ventas=DB.ventas||[];
+  const _clientes=DB.clientes||[];
+  const _cotiz=DB.cotizaciones||[];
+  const _facturas=DB.facturas||[];
+  const cotizCerradas=_cotiz.filter(q=>['Aceptada','Rechazada'].includes(q.Estado));
+  const tasaConversion = cotizCerradas.length ? Math.round(_cotiz.filter(q=>q.Estado==='Aceptada').length/cotizCerradas.length*100) : null;
+  const facturasConPlazo=_facturas.filter(f=>f.FechaEmision&&f.FechaVencimiento);
+  const plazoPromedio = facturasConPlazo.length ? Math.round(facturasConPlazo.reduce((s,f)=>s+( (new Date(f.FechaVencimiento)-new Date(f.FechaEmision))/86400000 ),0)/facturasConPlazo.length) : null;
+  const facturasVencidasNoCobradas=_facturas.filter(f=>f.Estado!=='Cobrada'&&f.Estado!=='Anulada'&&f.FechaVencimiento&&f.FechaVencimiento<hoy);
+  const atrasoPromedio = facturasVencidasNoCobradas.length ? Math.round(facturasVencidasNoCobradas.reduce((s,f)=>s+((new Date(hoy)-new Date(f.FechaVencimiento))/86400000),0)/facturasVencidasNoCobradas.length) : null;
+  const facturasActivas=_facturas.filter(f=>f.Estado!=='Anulada');
+  const pctVencidas = facturasActivas.length ? Math.round(facturasVencidasNoCobradas.length/facturasActivas.length*100) : null;
+  const tareasAll=DB.tareas||[];
+  const tareasVencidasPct = tareasAll.length ? Math.round(tareasAll.filter(t=>t.Estado!=='Hecha'&&t.FechaVencimiento&&t.FechaVencimiento<hoy).length/tareasAll.length*100) : null;
+  const hace30=toLocalISO(new Date(Date.now()-30*86400000));
+  const nuevosClientes30=_clientes.filter(c=>_clienteFechaAlta(c)>=hace30).length;
+  const hace90=toLocalISO(new Date(Date.now()-90*86400000));
+  const clientesInactivos90=_clientes.filter(c=>c.Estado==='Activo'&&(!c.UltimaInteraccion||c.UltimaInteraccion<hace90)).length;
+  const ventasPorResponsable={};
+  _ventas.filter(v=>v.Etapa!=='Cancelada'&&v.Responsable).forEach(v=>{
+    ventasPorResponsable[v.Responsable]=(ventasPorResponsable[v.Responsable]||0)+(parseFloat(v.ValorUSD)||0);
+  });
+  const topResponsable=Object.entries(ventasPorResponsable).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('indicadores-kpis').innerHTML=`
+    <div class="stat-card"><div class="label">Conversión cotiz. → venta</div><div class="value">${tasaConversion===null?'—':tasaConversion+'%'}</div><div class="sub" style="color:var(--muted)">${cotizCerradas.length} cotizaciones cerradas</div></div>
+    <div class="stat-card"><div class="label">Plazo de cobro pactado</div><div class="value">${plazoPromedio===null?'—':plazoPromedio+'d'}</div><div class="sub" style="color:var(--muted)">promedio FechaEmisión → Vencimiento</div></div>
+    <div class="stat-card" style="${atrasoPromedio?'border-color:var(--red)':''}"><div class="label">Atraso promedio de cobro</div><div class="value" style="${atrasoPromedio?'color:var(--red)':''}">${atrasoPromedio===null?'—':atrasoPromedio+'d'}</div><div class="sub" style="color:var(--muted)">sobre facturas vencidas no cobradas</div></div>
+    <div class="stat-card"><div class="label">% cartera vencida</div><div class="value" style="${pctVencidas?'color:var(--yellow)':''}">${pctVencidas===null?'—':pctVencidas+'%'}</div><div class="sub" style="color:var(--muted)">${facturasVencidasNoCobradas.length} de ${facturasActivas.length} facturas</div></div>
+    <div class="stat-card"><div class="label">Tareas vencidas</div><div class="value" style="${tareasVencidasPct?'color:var(--red)':''}">${tareasVencidasPct===null?'—':tareasVencidasPct+'%'}</div><div class="sub" style="color:var(--muted)">del total de seguimiento</div></div>
+    <div class="stat-card"><div class="label">Nuevos clientes (30d)</div><div class="value" style="color:var(--green)">${nuevosClientes30}</div><div class="sub" style="color:var(--muted)">altas en los últimos 30 días</div></div>
+    <div class="stat-card" style="${clientesInactivos90?'border-color:var(--yellow)':''}"><div class="label">Clientes inactivos +90d</div><div class="value" style="${clientesInactivos90?'color:var(--yellow)':''}">${clientesInactivos90}</div><div class="sub" style="color:var(--muted)">activos sin interacción reciente</div></div>
+    <div class="stat-card"><div class="label">Top responsable</div><div class="value" style="font-size:18px">${topResponsable?topResponsable[0]:'—'}</div><div class="sub" style="color:var(--accent)">${topResponsable?fmtUSD(topResponsable[1]):'sin datos'}</div></div>`;
 }
 function renderDashboard(){
   const hoy=localToday();
@@ -3948,6 +4001,8 @@ async function saveModal(){
     if(!DB[dbKey]){ console.error('saveModal: dbKey not found', dbKey); closeCRMModal(); return; }
     const idx = DB[dbKey].findIndex(r=>r.ID===_editingId);
     const oldRecord = idx>=0 ? {...DB[dbKey][idx]} : null; // copia del registro anterior
+    // BUG-FIX: preservar campos que no tienen input en el modal (ej. FechaAlta) — si no, se pierden al editar
+    if(currentCRMModal==='cliente' && oldRecord?.FechaAlta) row.FechaAlta = oldRecord.FechaAlta;
     if(idx>=0) DB[dbKey][idx] = row;
     // Hook: si es cliente, sincronizar cambios en Previsión
     if(currentCRMModal==='cliente' && oldRecord){
@@ -3956,6 +4011,7 @@ async function saveModal(){
   } else {
     // INSERT new record
     if(!DB[dbKey]){ console.error('saveModal: dbKey not found for insert', dbKey); closeCRMModal(); return; }
+    if(currentCRMModal==='cliente' && !row.FechaAlta) row.FechaAlta = localToday();
     DB[dbKey].push(row);
     // ── POST-SAVE HOOKS ──
     if(currentCRMModal==='cliente'){
@@ -4008,6 +4064,7 @@ function autoEnsureCliente(empresa, pais, source){
     Rubro: '',
     Estado: 'Activo',
     UltimaInteraccion: localToday(),
+    FechaAlta: localToday(),
     Notas: `Creado automáticamente desde ${sourceLabels[source]||source||'sistema'}`
   };
   DB.clientes.push(nuevo);
