@@ -3040,6 +3040,7 @@ ${c.NotaExtra?`<div class="notes-box" style="font-style:italic">${c.NotaExtra}</
 ═══════════════════════════════════════ */
 function renderIndicadores(){
   const hoy=localToday();
+  const fmtUSD=n=>'$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
   const _ventas=DB.ventas||[];
   const _clientes=DB.clientes||[];
   const _cotiz=DB.cotizaciones||[];
